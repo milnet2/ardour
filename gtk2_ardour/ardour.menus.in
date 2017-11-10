@@ -172,6 +172,7 @@
       <menuitem action='editor-copy'/>
       <menuitem action='editor-paste'/>
       <separator/>
+      <menuitem action='solo-selection'/>
       <menu action="SelectMenu">
         <menuitem action='select-all-objects'/>
         <menuitem action='select-all-tracks'/>
