@@ -2541,6 +2541,17 @@ Editor::escape ()
 		_drags->abort ();
 	} else {
 		selection->clear ();
+		
+		//if session is playing a range, cancel that
+		if (_session->get_play_range()) {
+			_session->request_cancel_play_range();
+		}
+
+		if ( _session->solo_selection_active() ) {
+			StripableList sl;
+			_session->solo_selection( sl, false );
+		}
+		
 	}
 
 	ARDOUR_UI::instance()->reset_focus (&contents());

@@ -1241,6 +1241,8 @@ private:
 	void toggle_mute ();
 	void toggle_region_lock_style ();
 
+	void play_solo_selection( bool restart );
+
 	enum LayerOperation {
 		Raise,
 		RaiseToTop,
@@ -1868,6 +1870,7 @@ private:
 	SelectionMemento* _selection_memento;
 
 	void time_selection_changed ();
+	void track_selection_changed ();
 	void update_time_selection_display ();
 	void presentation_info_changed (PBD::PropertyChange const &);
 	void region_selection_changed ();

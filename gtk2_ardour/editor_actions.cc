@@ -258,6 +258,8 @@ Editor::register_actions ()
 	act = reg_sens (editor_actions, "track-solo-isolate-toggle", _("Toggle Solo Isolate"), sigc::mem_fun(*this, &Editor::toggle_solo_isolate));
 	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 
+	act = reg_sens (editor_actions, "solo-selection", _("Solo Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::play_solo_selection), true));
+
 	for (int i = 1; i <= 12; ++i) {
 		string const a = string_compose (X_("save-visual-state-%1"), i);
 		string const n = string_compose (_("Save View %1"), i);
