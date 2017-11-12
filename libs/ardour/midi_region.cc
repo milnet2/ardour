@@ -417,13 +417,6 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 	if (muted()) {
 		return 0; /* read nothing */
 	}
-
-	boost::shared_ptr<Playlist> pl (playlist());
-	if (pl){
-		if ( _session.solo_selection_active() && pl->SoloSelectedActive() && !pl->SoloSelectedListIncludes(this) ) {
-			return 0; //a solo-select is active, and some regions are soloed, but it's not me; so read nothing
-		}
-	}
 	
 	if (position < _position) {
 		/* we are starting the read from before the start of the region */
