@@ -1032,6 +1032,8 @@ private:
 
 	friend class EditorCursor;
 
+	EditorCursor* snapped_cursor;
+
 	EditorCursor* playhead_cursor;
 	samplepos_t playhead_cursor_sample () const;
 
