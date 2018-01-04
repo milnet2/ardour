@@ -335,6 +335,7 @@ Editor::Editor ()
 	, cd_mark_label (_("CD Markers"))
 	, videotl_label (_("Video Timeline"))
 	, videotl_group (0)
+	, snapped_cursor (0)
 	, playhead_cursor (0)
 	, edit_packer (4, 4, true)
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
@@ -1406,7 +1407,13 @@ Editor::set_session (Session *t)
 	_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
 
+	playhead_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
 	playhead_cursor->show ();
+
+	snapped_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
+//	snapped_cursor->set_color (UIConfiguration::instance().color ("edit accent"));  //ToDo
+	snapped_cursor->set_color ( Color (0xff0000ff) );
+	snapped_cursor->show ();
 
 	boost::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));
 	Config->map_parameters (pc);
@@ -2287,6 +2294,7 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 
 	switch (_edit_point) {
 	case EditAtPlayhead:
+//ToDo:  hide or show mouse_cursor
 		action = "edit-at-playhead";
 		break;
 	case EditAtSelectedMarker:
@@ -5797,27 +5805,6 @@ Editor::super_rapid_screen_update ()
 		current_mixer_strip->fast_update ();
 	}
 
-	/* PLAYHEAD AND VIEWPORT */
-
-	/* There are a few reasons why we might not update the playhead / viewport stuff:
-	 *
-	 * 1.  we don't update things when there's a pending locate request, otherwise
-	 *     when the editor requests a locate there is a chance that this method
-	 *     will move the playhead before the locate request is processed, causing
-	 *     a visual glitch.
-	 * 2.  if we're not rolling, there's nothing to do here (locates are handled elsewhere).
-	 * 3.  if we're still at the same sample that we were last time, there's nothing to do.
-	 */
-	if (_pending_locate_request || !_session->transport_rolling ()) {
-		_last_update_time = 0;
-		return;
-	}
-
-	if (_dragging_playhead) {
-		_last_update_time = 0;
-		return;
-	}
-
 	bool latent_locate = false;
 	samplepos_t sample = _session->audible_sample (&latent_locate);
 	const int64_t now = g_get_monotonic_time ();
@@ -5856,6 +5843,45 @@ Editor::super_rapid_screen_update ()
 		sample = _session->audible_sample ();
 	} else {
 		_last_update_time = now;
+	}
+
+	//snapped cursor stuff ( the snapped_cursor shows where an operation is going to occur.  see scissor/cut tool. )
+	bool ignored;
+	MusicSample where (sample, 0);
+	if ( _edit_point == EditAtPlayhead ) {
+		snap_to (where);  // should use snap_to_with_modifier?
+		snapped_cursor->set_position (where.sample);
+		snapped_cursor->show ();
+	} else if ( _edit_point == EditAtSelectedMarker ) {
+		//ToDo
+	//	snapped_cursor->set_position (where.frame);
+	} else if (mouse_sample (where.sample, ignored)) {
+		snap_to (where);  // should use snap_to_with_modifier?
+		snapped_cursor->set_position (where.sample);
+		snapped_cursor->show ();
+	} else {
+		//hide cursor
+		snapped_cursor->hide ();
+	}
+	
+
+	/* There are a few reasons why we might not update the playhead / viewport stuff:
+	 *
+	 * 1.  we don't update things when there's a pending locate request, otherwise
+	 *     when the editor requests a locate there is a chance that this method
+	 *     will move the playhead before the locate request is processed, causing
+	 *     a visual glitch.
+	 * 2.  if we're not rolling, there's nothing to do here (locates are handled elsewhere).
+	 * 3.  if we're still at the same frame that we were last time, there's nothing to do.
+	 */
+	if (_pending_locate_request) {
+		_last_update_time = 0;
+		return;
+	}
+
+	if (_dragging_playhead) {
+		_last_update_time = 0;
+		return;
 	}
 
 	if (playhead_cursor->current_sample () == sample) {
