@@ -368,7 +368,7 @@ Editor::Editor ()
 	, pending_keyboard_selection_start (0)
 	, _snap_type (SnapToBeat)
 	, _snap_mode (SnapOff)
-	, snap_threshold (5.0)
+	, snap_threshold (25.0)
 	, ignore_gui_changes (false)
 	, _drags (new DragManager (this))
 	, lock_dialog (0)
@@ -2763,168 +2763,130 @@ Editor::timecode_snap_to_internal (MusicSample& pos, RoundMode direction, bool /
 	pos.set (start, 0);
 }
 
+samplepos_t
+Editor::marker_snap_to_internal (samplepos_t presnap, RoundMode direction)
+{
+	samplepos_t before;
+	samplepos_t after;
+	samplepos_t test;
+
+	_session->locations()->marks_either_side (presnap, before, after);
+
+	if (before == max_samplepos && after == max_samplepos) {
+		/* No marks to snap to, so just don't snap */
+		return presnap;
+	} else if (before == max_samplepos) {
+		test = after;
+	} else if (after == max_samplepos) {
+		test = before;
+	} else  {
+		if ((direction == RoundUpMaybe || direction == RoundUpAlways))
+			test = after;
+		else if ((direction == RoundDownMaybe || direction == RoundDownAlways))
+			test = before;
+		else if (direction ==  0 ) {
+			if ((presnap - before) < (after - presnap)) {
+				test = before;
+			} else {
+				test = after;
+			}
+		}
+	}
+	
+	return test;
+}
+
+void
+check_best_snap ( samplepos_t presnap, samplepos_t &test, samplepos_t &dist, samplepos_t &best  )
+{
+	samplepos_t diff = abs( test - presnap );
+	if ( diff < dist ) {
+		dist = diff;
+		best = test;
+	}
+	
+	test = max_samplepos; //reset this so it doesn't get accidentally reused
+}
+
 void
 Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark, bool ensure_snap)
 {
 	const samplepos_t one_second = _session->sample_rate();
 	const samplepos_t one_minute = _session->sample_rate() * 60;
-	samplepos_t presnap = start.sample;
-	samplepos_t before;
-	samplepos_t after;
+	const samplepos_t presnap = start.sample;
 
-	switch (_snap_type) {
-	case SnapToTimecodeFrame:
-	case SnapToTimecodeSeconds:
-	case SnapToTimecodeMinutes:
-		return timecode_snap_to_internal (start, direction, for_mark);
-
-	case SnapToCDFrame:
-		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    start.sample % (one_second/75) == 0) {
-			/* start is already on a whole CD sample, do nothing */
-		} else if (((direction == 0) && (start.sample % (one_second/75) > (one_second/75) / 2)) || (direction > 0)) {
-			start.sample = (samplepos_t) ceil ((double) start.sample / (one_second / 75)) * (one_second / 75);
-		} else {
-			start.sample = (samplepos_t) floor ((double) start.sample / (one_second / 75)) * (one_second / 75);
-		}
-
-		start.set (start.sample, 0);
-
-		break;
-
-	case SnapToSeconds:
-		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    start.sample % one_second == 0) {
-			/* start is already on a whole second, do nothing */
-		} else if (((direction == 0) && (start.sample % one_second > one_second / 2)) || (direction > 0)) {
-			start.sample = (samplepos_t) ceil ((double) start.sample / one_second) * one_second;
-		} else {
-			start.sample = (samplepos_t) floor ((double) start.sample / one_second) * one_second;
-		}
-
-		start.set (start.sample, 0);
-
-		break;
-
-	case SnapToMinutes:
-		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    start.sample % one_minute == 0) {
-			/* start is already on a whole minute, do nothing */
-		} else if (((direction == 0) && (start.sample % one_minute > one_minute / 2)) || (direction > 0)) {
-			start.sample = (samplepos_t) ceil ((double) start.sample / one_minute) * one_minute;
-		} else {
-			start.sample = (samplepos_t) floor ((double) start.sample / one_minute) * one_minute;
-		}
-
-		start.set (start.sample, 0);
-
-		break;
-
-	case SnapToBar:
-		start = _session->tempo_map().round_to_bar (start.sample, direction);
-		break;
-
-	case SnapToBeat:
-		start = _session->tempo_map().round_to_beat (start.sample, direction);
-		break;
-
-	case SnapToBeatDiv128:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 128, direction);
-		break;
-	case SnapToBeatDiv64:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 64, direction);
-		break;
-	case SnapToBeatDiv32:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 32, direction);
-		break;
-	case SnapToBeatDiv28:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 28, direction);
-		break;
-	case SnapToBeatDiv24:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 24, direction);
-		break;
-	case SnapToBeatDiv20:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 20, direction);
-		break;
-	case SnapToBeatDiv16:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 16, direction);
-		break;
-	case SnapToBeatDiv14:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 14, direction);
-		break;
-	case SnapToBeatDiv12:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 12, direction);
-		break;
-	case SnapToBeatDiv10:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 10, direction);
-		break;
-	case SnapToBeatDiv8:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 8, direction);
-		break;
-	case SnapToBeatDiv7:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 7, direction);
-		break;
-	case SnapToBeatDiv6:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 6, direction);
-		break;
-	case SnapToBeatDiv5:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 5, direction);
-		break;
-	case SnapToBeatDiv4:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 4, direction);
-		break;
-	case SnapToBeatDiv3:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 3, direction);
-		break;
-	case SnapToBeatDiv2:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 2, direction);
-		break;
-
-	case SnapToMark:
+	samplepos_t test = max_samplepos;  //for each snap, we'll use this value
+	samplepos_t dist = max_samplepos;  //this records the distance of the best snap result we've found so far
+	samplepos_t best = max_samplepos;  //this records the best snap-result we've found so far
+	
+	if ( false ) {  //timecode snap
+		MusicSample t = start;
+		timecode_snap_to_internal (t, direction, for_mark);
+		test = t.sample;
+		check_best_snap(presnap, test, dist, best);
+	}
+	
+	if ( false ) {  //marker snap
 		if (for_mark) {
 			return;
 		}
 
-		_session->locations()->marks_either_side (start.sample, before, after);
+		test = marker_snap_to_internal ( presnap, direction );
+		check_best_snap(presnap, test, dist, best);
+	}
 
-		if (before == max_samplepos && after == max_samplepos) {
-			/* No marks to snap to, so just don't snap */
-			return;
-		} else if (before == max_samplepos) {
-			start.sample = after;
-		} else if (after == max_samplepos) {
-			start.sample = before;
-		} else if (before != max_samplepos && after != max_samplepos) {
-			if ((direction == RoundUpMaybe || direction == RoundUpAlways))
-				start.sample = after;
-			else if ((direction == RoundDownMaybe || direction == RoundDownAlways))
-				start.sample = before;
-			else if (direction ==  0 ) {
-				if ((start.sample - before) < (after - start.sample)) {
-					start.sample = before;
-				} else {
-					start.sample = after;
-				}
-			}
+	if ( false ) {  // SnapToCDFrame
+		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
+		    test % (one_second/75) == 0) {
+			/* start is already on a whole CD sample, do nothing */
+		} else if (((direction == 0) && (presnap % (one_second/75) > (one_second/75) / 2)) || (direction > 0)) {
+			test = (samplepos_t) ceil ((double) presnap/ (one_second / 75)) * (one_second / 75);
+		} else {
+			test = (samplepos_t) floor ((double) presnap / (one_second / 75)) * (one_second / 75);
 		}
+		check_best_snap(presnap, test, dist, best);
+	}
 
-		start.set (start.sample, 0);
+	if ( false ) {  // SnapToSeconds
+		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
+		    presnap % one_second == 0) {
+			/* start is already on a whole second, do nothing */
+		} else if (((direction == 0) && (presnap % one_second > one_second / 2)) || (direction > 0)) {
+			test = (samplepos_t) ceil ((double) presnap / one_second) * one_second;
+			check_best_snap(presnap, test, dist, best);
+		} else {
+			test = (samplepos_t) floor ((double)presnap / one_second) * one_second;
+			check_best_snap(presnap, test, dist, best);
+		}
+	}
 
-		break;
+	if ( false ) {  // SnapToMinutes
+		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
+		    start.sample % one_minute == 0) {
+			/* start is already on a whole minute, do nothing */
+		} else if (((direction == 0) && (presnap % one_minute > one_minute / 2)) || (direction > 0)) {
+			test = (samplepos_t) ceil ((double) presnap / one_minute) * one_minute;
+			check_best_snap(presnap, test, dist, best);
+		} else {
+			test = (samplepos_t) floor ((double) presnap / one_minute) * one_minute;
+			check_best_snap(presnap, test, dist, best);
+		}
+	}
 
-	case SnapToRegionStart:
-	case SnapToRegionEnd:
-	case SnapToRegionSync:
-	case SnapToRegionBoundary:
+//	case SnapToRegionStart:
+//	case SnapToRegionEnd:
+//	case SnapToRegionSync:
+//	case SnapToRegionBoundary:
+	if ( true ) {
 		if (!region_boundary_cache.empty()) {
 
 			vector<samplepos_t>::iterator prev = region_boundary_cache.end ();
 			vector<samplepos_t>::iterator next = region_boundary_cache.end ();
 
 			if (direction > 0) {
-				next = std::upper_bound (region_boundary_cache.begin(), region_boundary_cache.end(), start.sample);
+				next = std::upper_bound (region_boundary_cache.begin(), region_boundary_cache.end(), presnap);
 			} else {
-				next = std::lower_bound (region_boundary_cache.begin(), region_boundary_cache.end(), start.sample);
+				next = std::lower_bound (region_boundary_cache.begin(), region_boundary_cache.end(), presnap);
 			}
 
 			if (next != region_boundary_cache.begin ()) {
@@ -2935,43 +2897,94 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 			samplepos_t const p = (prev == region_boundary_cache.end()) ? region_boundary_cache.front () : *prev;
 			samplepos_t const n = (next == region_boundary_cache.end()) ? region_boundary_cache.back () : *next;
 
-			if (start.sample > (p + n) / 2) {
-				start.sample = n;
+			if (presnap > (p + n) / 2) {
+				test = n;
 			} else {
-				start.sample = p;
+				test = p;
 			}
 		}
 
-		start.set (start.sample, 0);
-
-		break;
+		check_best_snap(presnap, test, dist, best);
 	}
 
-	switch (_snap_mode) {
-	case SnapNormal:
-		return;
+	switch (_snap_type) {
 
-	case SnapMagnetic:
+		case SnapToBar:
+			start = _session->tempo_map().round_to_bar (start.sample, direction);
+			break;
 
-		if (ensure_snap) {
-			return;
-		}
+		case SnapToBeat:
+			start = _session->tempo_map().round_to_beat (start.sample, direction);
+			break;
 
-		if (presnap > start.sample) {
-			if (presnap > (start.sample + pixel_to_sample(snap_threshold))) {
-				start.set (presnap, 0);
-			}
-
-		} else if (presnap < start.sample) {
-			if (presnap < (start.sample - pixel_to_sample(snap_threshold))) {
-				start.set (presnap, 0);
-			}
-		}
-
-	default:
-		/* handled at entry */
-		return;
+		case SnapToBeatDiv128:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 128, direction);
+			break;
+		case SnapToBeatDiv64:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 64, direction);
+			break;
+		case SnapToBeatDiv32:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 32, direction);
+			break;
+		case SnapToBeatDiv28:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 28, direction);
+			break;
+		case SnapToBeatDiv24:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 24, direction);
+			break;
+		case SnapToBeatDiv20:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 20, direction);
+			break;
+		case SnapToBeatDiv16:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 16, direction);
+			break;
+		case SnapToBeatDiv14:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 14, direction);
+			break;
+		case SnapToBeatDiv12:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 12, direction);
+			break;
+		case SnapToBeatDiv10:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 10, direction);
+			break;
+		case SnapToBeatDiv8:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 8, direction);
+			break;
+		case SnapToBeatDiv7:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 7, direction);
+			break;
+		case SnapToBeatDiv6:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 6, direction);
+			break;
+		case SnapToBeatDiv5:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 5, direction);
+			break;
+		case SnapToBeatDiv4:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 4, direction);
+			break;
+		case SnapToBeatDiv3:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 3, direction);
+			break;
+		case SnapToBeatDiv2:
+			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 2, direction);
+			break;
 	}
+
+	//now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
+	if (ensure_snap) {
+		start.set (best, 0);
+		return;
+	} else if (presnap > best) {
+		if (presnap > (best+ pixel_to_sample(snap_threshold))) {
+			best = presnap;
+		}
+	} else if (presnap < best) {
+		if (presnap < (best - pixel_to_sample(snap_threshold))) {
+			 best = presnap;
+		}
+	}
+	
+	start.set (best, 0);
 }
 
 

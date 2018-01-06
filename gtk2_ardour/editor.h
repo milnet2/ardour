@@ -2200,6 +2200,9 @@ private:
 	                                ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
 	                                bool                for_mark  = false);
 
+	samplepos_t marker_snap_to_internal (samplepos_t        presnap,
+	                                	ARDOUR::RoundMode   direction = ARDOUR::RoundNearest);
+
 	RhythmFerret* rhythm_ferret;
 
 	void fit_tracks (TrackViewList &);
