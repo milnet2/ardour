@@ -5844,8 +5844,10 @@ Editor::super_rapid_screen_update ()
 	} else {
 		_last_update_time = now;
 	}
+	
+	//ToDo:  we should probably use snap_to_with_modifer.  problem is:  there is no current action here.
 
-	//snapped cursor stuff ( the snapped_cursor shows where an operation is going to occur.  see scissor/cut tool. )
+	//snapped cursor stuff ( the snapped_cursor shows where an operation is going to occur )
 	bool ignored;
 	MusicSample where (sample, 0);
 	if ( _edit_point == EditAtPlayhead ) {
@@ -5853,14 +5855,17 @@ Editor::super_rapid_screen_update ()
 		snapped_cursor->set_position (where.sample);
 		snapped_cursor->show ();
 	} else if ( _edit_point == EditAtSelectedMarker ) {
-		//ToDo
-	//	snapped_cursor->set_position (where.frame);
+		//NOTE:  I don't think EditAtSelectedMarker should snap.  they are what they are.
+		//however, the current editing code -does- snap so I'll draw it that way for now.
+		MusicSample ms (selection->markers.front()->position(), 0);
+		snap_to (ms);  // should use snap_to_with_modifier?
+		snapped_cursor->set_position ( ms.sample );
+		snapped_cursor->show ();
 	} else if (mouse_sample (where.sample, ignored)) {
 		snap_to (where);  // should use snap_to_with_modifier?
 		snapped_cursor->set_position (where.sample);
 		snapped_cursor->show ();
-	} else {
-		//hide cursor
+	} else { //mouse is out of the editing canvas.  hide the snapped_cursor
 		snapped_cursor->hide ();
 	}
 	
