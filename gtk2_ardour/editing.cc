@@ -44,7 +44,7 @@ SnapType
 str2snaptype (const string & str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
-	return SnapToBar;
+	return QuantizeToBar;
 }
 
 #undef SNAPTYPE
