@@ -2708,7 +2708,7 @@ Editor::timecode_snap_to_internal ( samplepos_t presnap, RoundMode direction )
 	samplepos_t dist = max_samplepos;  //this records the distance of the best snap result we've found so far
 	samplepos_t best = max_samplepos;  //this records the best snap-result we've found so far
 
-	if (false) { //QuantizeToTimecodeFrame:
+	if (UIConfiguration::instance().get_snap_to_tc_frames()) {
 		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
 		    fmod((double)start, (double)_session->samples_per_timecode_frame()) == 0) {
 			/* start is already on a whole timecode frame, do nothing */
@@ -2721,7 +2721,7 @@ Editor::timecode_snap_to_internal ( samplepos_t presnap, RoundMode direction )
 		}
 	}
 
-	if (true) { //case QuantizeToTimecodeSeconds:
+	if (UIConfiguration::instance().get_snap_to_tc_seconds()) {
 		if (_session->config.get_timecode_offset_negative()) {
 			start += _session->config.get_timecode_offset ();
 		} else {
@@ -2744,7 +2744,7 @@ Editor::timecode_snap_to_internal ( samplepos_t presnap, RoundMode direction )
 		}
 	}
 
-	if (true ) {// QuantizeToTimecodeMinutes:
+	if ( UIConfiguration::instance().get_snap_to_tc_minutes() ) {
 		if (_session->config.get_timecode_offset_negative()) {
 			start += _session->config.get_timecode_offset ();
 		} else {
@@ -2815,12 +2815,12 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 	samplepos_t dist = max_samplepos;  //this records the distance of the best snap result we've found so far
 	samplepos_t best = max_samplepos;  //this records the best snap-result we've found so far
 	
-	if ( false ) {  //timecode snap
+	if ( UIConfiguration::instance().get_snap_to_tc_frames() || UIConfiguration::instance().get_snap_to_tc_seconds() || UIConfiguration::instance().get_snap_to_tc_minutes() ) {
 		test = timecode_snap_to_internal (presnap, direction);
 		check_best_snap(presnap, test, dist, best);
 	}
 	
-	if ( false ) {  //marker snap
+	if ( UIConfiguration::instance().get_snap_to_marks() ) {  //marker snap
 		if (for_mark) {
 			return;
 		}
@@ -2829,7 +2829,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		check_best_snap(presnap, test, dist, best);
 	}
 
-	if ( false ) {  // QuantizeToCDFrame
+	if ( UIConfiguration::instance().get_snap_to_cd_frames() ) {  // QuantizeToCDFrame
 		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
 		    test % (one_second/75) == 0) {
 			/* start is already on a whole CD sample, do nothing */
@@ -2841,7 +2841,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		check_best_snap(presnap, test, dist, best);
 	}
 
-	if ( false ) {  // QuantizeToSeconds
+	if ( UIConfiguration::instance().get_snap_to_seconds() ) {  // QuantizeToSeconds
 		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
 		    presnap % one_second == 0) {
 			/* start is already on a whole second, do nothing */
@@ -2854,7 +2854,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		}
 	}
 
-	if ( false ) {  // QuantizeToMinutes
+	if ( UIConfiguration::instance().get_snap_to_minutes() ) {  // QuantizeToMinutes
 		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
 		    start.sample % one_minute == 0) {
 			/* start is already on a whole minute, do nothing */
@@ -2867,11 +2867,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		}
 	}
 
-//	case QuantizeToRegionStart:
-//	case QuantizeToRegionEnd:
-//	case QuantizeToRegionSync:
-//	case QuantizeToRegionBoundary:
-	if ( false ) {
+	if ( UIConfiguration::instance().get_snap_to_region_start() || UIConfiguration::instance().get_snap_to_region_end() || UIConfiguration::instance().get_snap_to_region_sync() ) {
 		if (!region_boundary_cache.empty()) {
 
 			vector<samplepos_t>::iterator prev = region_boundary_cache.end ();
