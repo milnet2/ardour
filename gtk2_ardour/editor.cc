@@ -161,12 +161,6 @@ using Gtkmm2ext::Keyboard;
 double Editor::timebar_height = 15.0;
 
 static const gchar *_snap_type_strings[] = {
-	N_("CD Samples"),
-	N_("TC Frames"),
-	N_("TC Seconds"),
-	N_("TC Minutes"),
-	N_("Seconds"),
-	N_("Minutes"),
 	N_("Beats/128"),
 	N_("Beats/64"),
 	N_("Beats/32"),
@@ -186,11 +180,7 @@ static const gchar *_snap_type_strings[] = {
 	N_("Beats/2"),
 	N_("Beats"),
 	N_("Bars"),
-	N_("Marks"),
-	N_("Region starts"),
-	N_("Region ends"),
-	N_("Region syncs"),
-	N_("Region bounds"),
+	N_("None"),
 	0
 };
 
@@ -252,9 +242,9 @@ Editor::Editor ()
 	, samples_per_pixel (2048)
 	, zoom_focus (ZoomFocusPlayhead)
 	, mouse_mode (MouseObject)
-	, pre_internal_snap_type (SnapToBeat)
+	, pre_internal_snap_type (QuantizeToBeat)
 	, pre_internal_snap_mode (SnapOff)
-	, internal_snap_type (SnapToBeat)
+	, internal_snap_type (QuantizeToBeat)
 	, internal_snap_mode (SnapOff)
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
 	, _notebook_shrunk (false)
@@ -366,7 +356,7 @@ Editor::Editor ()
 	, scrub_reverse_distance (0)
 	, have_pending_keyboard_selection (false)
 	, pending_keyboard_selection_start (0)
-	, _snap_type (SnapToBeat)
+	, _snap_type (QuantizeToBeat)
 	, _snap_mode (SnapOff)
 	, snap_threshold (25.0)
 	, ignore_gui_changes (false)
@@ -1430,17 +1420,17 @@ Editor::set_session (Session *t)
 		sigc::mem_fun (*this, &Editor::super_rapid_screen_update)
 		);
 
-	switch (_snap_type) {
-	case SnapToRegionStart:
-	case SnapToRegionEnd:
-	case SnapToRegionSync:
-	case SnapToRegionBoundary:
+//	switch (_snap_type) {
+//	case QuantizeToRegionStart:
+//	case QuantizeToRegionEnd:
+//	case QuantizeToRegionSync:
+//	case QuantizeToRegionBoundary:
 		build_region_boundary_cache ();
-		break;
+//		break;
 
-	default:
-		break;
-	}
+//	default:
+//		break;
+//	}
 
 	/* register for undo history */
 	_session->register_with_memento_command_factory(id(), this);
@@ -2149,25 +2139,25 @@ bool
 Editor::snap_musical() const
 {
 	switch (_snap_type) {
-	case SnapToBeatDiv128:
-	case SnapToBeatDiv64:
-	case SnapToBeatDiv32:
-	case SnapToBeatDiv28:
-	case SnapToBeatDiv24:
-	case SnapToBeatDiv20:
-	case SnapToBeatDiv16:
-	case SnapToBeatDiv14:
-	case SnapToBeatDiv12:
-	case SnapToBeatDiv10:
-	case SnapToBeatDiv8:
-	case SnapToBeatDiv7:
-	case SnapToBeatDiv6:
-	case SnapToBeatDiv5:
-	case SnapToBeatDiv4:
-	case SnapToBeatDiv3:
-	case SnapToBeatDiv2:
-	case SnapToBeat:
-	case SnapToBar:
+	case QuantizeToBeatDiv128:
+	case QuantizeToBeatDiv64:
+	case QuantizeToBeatDiv32:
+	case QuantizeToBeatDiv28:
+	case QuantizeToBeatDiv24:
+	case QuantizeToBeatDiv20:
+	case QuantizeToBeatDiv16:
+	case QuantizeToBeatDiv14:
+	case QuantizeToBeatDiv12:
+	case QuantizeToBeatDiv10:
+	case QuantizeToBeatDiv8:
+	case QuantizeToBeatDiv7:
+	case QuantizeToBeatDiv6:
+	case QuantizeToBeatDiv5:
+	case QuantizeToBeatDiv4:
+	case QuantizeToBeatDiv3:
+	case QuantizeToBeatDiv2:
+	case QuantizeToBeat:
+	case QuantizeToBar:
 		return true;
 	default:
 		break;
@@ -2209,39 +2199,39 @@ Editor::set_snap_to (SnapType st)
 	instant_save ();
 
 	switch (_snap_type) {
-	case SnapToBeatDiv128:
-	case SnapToBeatDiv64:
-	case SnapToBeatDiv32:
-	case SnapToBeatDiv28:
-	case SnapToBeatDiv24:
-	case SnapToBeatDiv20:
-	case SnapToBeatDiv16:
-	case SnapToBeatDiv14:
-	case SnapToBeatDiv12:
-	case SnapToBeatDiv10:
-	case SnapToBeatDiv8:
-	case SnapToBeatDiv7:
-	case SnapToBeatDiv6:
-	case SnapToBeatDiv5:
-	case SnapToBeatDiv4:
-	case SnapToBeatDiv3:
-	case SnapToBeatDiv2: {
+	case QuantizeToNone:
+	case QuantizeToBeatDiv128:
+	case QuantizeToBeatDiv64:
+	case QuantizeToBeatDiv32:
+	case QuantizeToBeatDiv28:
+	case QuantizeToBeatDiv24:
+	case QuantizeToBeatDiv20:
+	case QuantizeToBeatDiv16:
+	case QuantizeToBeatDiv14:
+	case QuantizeToBeatDiv12:
+	case QuantizeToBeatDiv10:
+	case QuantizeToBeatDiv8:
+	case QuantizeToBeatDiv7:
+	case QuantizeToBeatDiv6:
+	case QuantizeToBeatDiv5:
+	case QuantizeToBeatDiv4:
+	case QuantizeToBeatDiv3:
+	case QuantizeToBeatDiv2: {
 		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 		update_tempo_based_rulers ();
 		break;
 	}
 
-	case SnapToRegionStart:
-	case SnapToRegionEnd:
-	case SnapToRegionSync:
-	case SnapToRegionBoundary:
-		build_region_boundary_cache ();
-		break;
-
 	default:
 		/* relax */
 		break;
 	}
+
+//	case QuantizeToRegionStart:  //ToDo
+//	case QuantizeToRegionEnd:
+//	case QuantizeToRegionSync:
+//	case QuantizeToRegionBoundary:
+//		build_region_boundary_cache ();
 
 	redisplay_tempo (false);
 
@@ -2362,7 +2352,7 @@ Editor::set_state (const XMLNode& node, int version)
 	}
 
 	SnapType snap_type;
-	if (!node.get_property ("snap-to", snap_type)) {
+	if (!node.get_property ("quantize-to", snap_type)) {
 		snap_type = _snap_type;
 	}
 	set_snap_to (snap_type);
@@ -2379,9 +2369,9 @@ Editor::set_state (const XMLNode& node, int version)
 		set_snap_mode (_snap_mode);
 	}
 
-	node.get_property ("internal-snap-to", internal_snap_type);
+	node.get_property ("internal-quantize-to", internal_snap_type);
 	node.get_property ("internal-snap-mode", internal_snap_mode);
-	node.get_property ("pre-internal-snap-to", pre_internal_snap_type);
+	node.get_property ("pre-internal-quantize-to", pre_internal_snap_type);
 	node.get_property ("pre-internal-snap-mode", pre_internal_snap_mode);
 
 	std::string mm_str;
@@ -2560,9 +2550,9 @@ Editor::get_state ()
 	node->set_property ("zoom", samples_per_pixel);
 	node->set_property ("snap-to", _snap_type);
 	node->set_property ("snap-mode", _snap_mode);
-	node->set_property ("internal-snap-to", internal_snap_type);
+	node->set_property ("internal-quantize-to", internal_snap_type);
 	node->set_property ("internal-snap-mode", internal_snap_mode);
-	node->set_property ("pre-internal-snap-to", pre_internal_snap_type);
+	node->set_property ("pre-internal-quantize-to", pre_internal_snap_type);
 	node->set_property ("pre-internal-snap-mode", pre_internal_snap_mode);
 	node->set_property ("edit-point", _edit_point);
 	node->set_property ("visible-track-count", _visible_track_count);
@@ -2695,25 +2685,43 @@ Editor::snap_to (MusicSample& start, RoundMode direction, bool for_mark, bool en
 }
 
 void
-Editor::timecode_snap_to_internal (MusicSample& pos, RoundMode direction, bool /*for_mark*/)
+check_best_snap ( samplepos_t presnap, samplepos_t &test, samplepos_t &dist, samplepos_t &best  )
 {
-	samplepos_t start = pos.sample;
+	samplepos_t diff = abs( test - presnap );
+	if ( diff < dist ) {
+		dist = diff;
+		best = test;
+	}
+	
+	test = max_samplepos; //reset this so it doesn't get accidentally reused
+}
+
+
+samplepos_t
+Editor::timecode_snap_to_internal ( samplepos_t presnap, RoundMode direction )
+{
+	samplepos_t start = presnap;
 	const samplepos_t one_timecode_second = (samplepos_t)(rint(_session->timecode_frames_per_second()) * _session->samples_per_timecode_frame());
 	samplepos_t one_timecode_minute = (samplepos_t)(rint(_session->timecode_frames_per_second()) * _session->samples_per_timecode_frame() * 60);
 
-	switch (_snap_type) {
-	case SnapToTimecodeFrame:
+	samplepos_t test = max_samplepos;  //for each snap, we'll use this value
+	samplepos_t dist = max_samplepos;  //this records the distance of the best snap result we've found so far
+	samplepos_t best = max_samplepos;  //this records the best snap-result we've found so far
+
+	if (false) { //QuantizeToTimecodeFrame:
 		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
 		    fmod((double)start, (double)_session->samples_per_timecode_frame()) == 0) {
 			/* start is already on a whole timecode frame, do nothing */
 		} else if (((direction == 0) && (fmod((double)start, (double)_session->samples_per_timecode_frame()) > (_session->samples_per_timecode_frame() / 2))) || (direction > 0)) {
-			start = (samplepos_t) (ceil ((double) start / _session->samples_per_timecode_frame()) * _session->samples_per_timecode_frame());
+			test = (samplepos_t) (ceil ((double) start / _session->samples_per_timecode_frame()) * _session->samples_per_timecode_frame());
+			check_best_snap(presnap, test, dist, best);
 		} else {
-			start = (samplepos_t) (floor ((double) start / _session->samples_per_timecode_frame()) *  _session->samples_per_timecode_frame());
+			test = (samplepos_t) (floor ((double) start / _session->samples_per_timecode_frame()) *  _session->samples_per_timecode_frame());
+			check_best_snap(presnap, test, dist, best);
 		}
-		break;
+	}
 
-	case SnapToTimecodeSeconds:
+	if (true) { //case QuantizeToTimecodeSeconds:
 		if (_session->config.get_timecode_offset_negative()) {
 			start += _session->config.get_timecode_offset ();
 		} else {
@@ -2723,19 +2731,20 @@ Editor::timecode_snap_to_internal (MusicSample& pos, RoundMode direction, bool /
 		    (start % one_timecode_second == 0)) {
 			/* start is already on a whole second, do nothing */
 		} else if (((direction == 0) && (start % one_timecode_second > one_timecode_second / 2)) || direction > 0) {
-			start = (samplepos_t) ceil ((double) start / one_timecode_second) * one_timecode_second;
+			test = (samplepos_t) ceil ((double) start / one_timecode_second) * one_timecode_second;
+			check_best_snap(presnap, test, dist, best);
 		} else {
-			start = (samplepos_t) floor ((double) start / one_timecode_second) * one_timecode_second;
+			test = (samplepos_t) floor ((double) start / one_timecode_second) * one_timecode_second;
+			check_best_snap(presnap, test, dist, best);
 		}
-
 		if (_session->config.get_timecode_offset_negative()) {
-			start -= _session->config.get_timecode_offset ();
+			best -= _session->config.get_timecode_offset ();
 		} else {
-			start += _session->config.get_timecode_offset ();
+			best += _session->config.get_timecode_offset ();
 		}
-		break;
+	}
 
-	case SnapToTimecodeMinutes:
+	if (true ) {// QuantizeToTimecodeMinutes:
 		if (_session->config.get_timecode_offset_negative()) {
 			start += _session->config.get_timecode_offset ();
 		} else {
@@ -2745,22 +2754,21 @@ Editor::timecode_snap_to_internal (MusicSample& pos, RoundMode direction, bool /
 		    (start % one_timecode_minute == 0)) {
 			/* start is already on a whole minute, do nothing */
 		} else if (((direction == 0) && (start % one_timecode_minute > one_timecode_minute / 2)) || direction > 0) {
-			start = (samplepos_t) ceil ((double) start / one_timecode_minute) * one_timecode_minute;
+			test = (samplepos_t) ceil ((double) start / one_timecode_minute) * one_timecode_minute;
+			check_best_snap(presnap, test, dist, best);
 		} else {
-			start = (samplepos_t) floor ((double) start / one_timecode_minute) * one_timecode_minute;
+			test = (samplepos_t) floor ((double) start / one_timecode_minute) * one_timecode_minute;
+			check_best_snap(presnap, test, dist, best);
 		}
 		if (_session->config.get_timecode_offset_negative()) {
-			start -= _session->config.get_timecode_offset ();
+			best -= _session->config.get_timecode_offset ();
 		} else {
-			start += _session->config.get_timecode_offset ();
+			best += _session->config.get_timecode_offset ();
 		}
-		break;
-	default:
-		fatal << "Editor::smpte_snap_to_internal() called with non-timecode snap type!" << endmsg;
-		abort(); /*NOTREACHED*/
 	}
 
-	pos.set (start, 0);
+
+	return best;
 }
 
 samplepos_t
@@ -2797,18 +2805,6 @@ Editor::marker_snap_to_internal (samplepos_t presnap, RoundMode direction)
 }
 
 void
-check_best_snap ( samplepos_t presnap, samplepos_t &test, samplepos_t &dist, samplepos_t &best  )
-{
-	samplepos_t diff = abs( test - presnap );
-	if ( diff < dist ) {
-		dist = diff;
-		best = test;
-	}
-	
-	test = max_samplepos; //reset this so it doesn't get accidentally reused
-}
-
-void
 Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark, bool ensure_snap)
 {
 	const samplepos_t one_second = _session->sample_rate();
@@ -2820,9 +2816,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 	samplepos_t best = max_samplepos;  //this records the best snap-result we've found so far
 	
 	if ( false ) {  //timecode snap
-		MusicSample t = start;
-		timecode_snap_to_internal (t, direction, for_mark);
-		test = t.sample;
+		test = timecode_snap_to_internal (presnap, direction);
 		check_best_snap(presnap, test, dist, best);
 	}
 	
@@ -2835,7 +2829,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		check_best_snap(presnap, test, dist, best);
 	}
 
-	if ( false ) {  // SnapToCDFrame
+	if ( false ) {  // QuantizeToCDFrame
 		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
 		    test % (one_second/75) == 0) {
 			/* start is already on a whole CD sample, do nothing */
@@ -2847,7 +2841,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		check_best_snap(presnap, test, dist, best);
 	}
 
-	if ( false ) {  // SnapToSeconds
+	if ( false ) {  // QuantizeToSeconds
 		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
 		    presnap % one_second == 0) {
 			/* start is already on a whole second, do nothing */
@@ -2860,7 +2854,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		}
 	}
 
-	if ( false ) {  // SnapToMinutes
+	if ( false ) {  // QuantizeToMinutes
 		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
 		    start.sample % one_minute == 0) {
 			/* start is already on a whole minute, do nothing */
@@ -2873,11 +2867,11 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		}
 	}
 
-//	case SnapToRegionStart:
-//	case SnapToRegionEnd:
-//	case SnapToRegionSync:
-//	case SnapToRegionBoundary:
-	if ( true ) {
+//	case QuantizeToRegionStart:
+//	case QuantizeToRegionEnd:
+//	case QuantizeToRegionSync:
+//	case QuantizeToRegionBoundary:
+	if ( false ) {
 		if (!region_boundary_cache.empty()) {
 
 			vector<samplepos_t>::iterator prev = region_boundary_cache.end ();
@@ -2907,68 +2901,70 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		check_best_snap(presnap, test, dist, best);
 	}
 
+	MusicSample tst(presnap,0);
 	switch (_snap_type) {
 
-		case SnapToBar:
-			start = _session->tempo_map().round_to_bar (start.sample, direction);
+		case QuantizeToBar:
+			tst = _session->tempo_map().round_to_bar (presnap, direction);
 			break;
-
-		case SnapToBeat:
-			start = _session->tempo_map().round_to_beat (start.sample, direction);
+		case QuantizeToBeat:
+			tst = _session->tempo_map().round_to_beat (presnap, direction);
 			break;
-
-		case SnapToBeatDiv128:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 128, direction);
+		case QuantizeToBeatDiv128:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 128, direction);
 			break;
-		case SnapToBeatDiv64:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 64, direction);
+		case QuantizeToBeatDiv64:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 64, direction);
 			break;
-		case SnapToBeatDiv32:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 32, direction);
+		case QuantizeToBeatDiv32:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 32, direction);
 			break;
-		case SnapToBeatDiv28:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 28, direction);
+		case QuantizeToBeatDiv28:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 28, direction);
 			break;
-		case SnapToBeatDiv24:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 24, direction);
+		case QuantizeToBeatDiv24:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 24, direction);
 			break;
-		case SnapToBeatDiv20:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 20, direction);
+		case QuantizeToBeatDiv20:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 20, direction);
 			break;
-		case SnapToBeatDiv16:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 16, direction);
+		case QuantizeToBeatDiv16:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 16, direction);
 			break;
-		case SnapToBeatDiv14:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 14, direction);
+		case QuantizeToBeatDiv14:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 14, direction);
 			break;
-		case SnapToBeatDiv12:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 12, direction);
+		case QuantizeToBeatDiv12:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 12, direction);
 			break;
-		case SnapToBeatDiv10:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 10, direction);
+		case QuantizeToBeatDiv10:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 10, direction);
 			break;
-		case SnapToBeatDiv8:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 8, direction);
+		case QuantizeToBeatDiv8:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 8, direction);
 			break;
-		case SnapToBeatDiv7:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 7, direction);
+		case QuantizeToBeatDiv7:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 7, direction);
 			break;
-		case SnapToBeatDiv6:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 6, direction);
+		case QuantizeToBeatDiv6:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 6, direction);
 			break;
-		case SnapToBeatDiv5:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 5, direction);
+		case QuantizeToBeatDiv5:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 5, direction);
 			break;
-		case SnapToBeatDiv4:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 4, direction);
+		case QuantizeToBeatDiv4:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 4, direction);
 			break;
-		case SnapToBeatDiv3:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 3, direction);
+		case QuantizeToBeatDiv3:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 3, direction);
 			break;
-		case SnapToBeatDiv2:
-			start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 2, direction);
+		case QuantizeToBeatDiv2:
+			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 2, direction);
+			break;
+		case QuantizeToNone:
 			break;
 	}
+	check_best_snap(presnap, tst.sample, dist, best);
 
 	//now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
 	if (ensure_snap) {
@@ -3247,36 +3243,26 @@ Editor::build_snap_type_menu ()
 {
 	using namespace Menu_Helpers;
 
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToCDFrame], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToCDFrame)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToTimecodeFrame], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToTimecodeFrame)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToTimecodeSeconds], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToTimecodeSeconds)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToTimecodeMinutes], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToTimecodeMinutes)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToSeconds], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToSeconds)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToMinutes], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToMinutes)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv128)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv64], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv64)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv32], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv32)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv28], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv28)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv24], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv24)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv20], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv20)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv16], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv16)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv14], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv14)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv12], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv12)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv10], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv10)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv8], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv8)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv7], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv7)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv6], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv6)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv5], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv5)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv4], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv4)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv3], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv3)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv2], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv2)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeat], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeat)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBar], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBar)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToMark], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToMark)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionStart], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionStart)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionEnd], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionEnd)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionSync], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionSync)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionBoundary], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionBoundary)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv128)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv64], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv64)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv32], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv32)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv28], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv28)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv24], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv24)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv20], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv20)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv16], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv16)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv14], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv14)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv12], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv12)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv10], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv10)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv8], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv8)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv7], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv7)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv6], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv6)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv5], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv5)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv4], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv4)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv3], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv3)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv2], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv2)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeat], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeat)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBar], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBar)));
+	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToNone], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToNone)));
 
 	set_size_request_to_display_given_text (snap_type_selector, snap_type_strings, COMBO_TRIANGLE_WIDTH, 2);
 
@@ -4057,23 +4043,23 @@ unsigned
 Editor::get_grid_beat_divisions(samplepos_t position)
 {
 	switch (_snap_type) {
-	case SnapToBeatDiv128: return 128;
-	case SnapToBeatDiv64:  return 64;
-	case SnapToBeatDiv32:  return 32;
-	case SnapToBeatDiv28:  return 28;
-	case SnapToBeatDiv24:  return 24;
-	case SnapToBeatDiv20:  return 20;
-	case SnapToBeatDiv16:  return 16;
-	case SnapToBeatDiv14:  return 14;
-	case SnapToBeatDiv12:  return 12;
-	case SnapToBeatDiv10:  return 10;
-	case SnapToBeatDiv8:   return 8;
-	case SnapToBeatDiv7:   return 7;
-	case SnapToBeatDiv6:   return 6;
-	case SnapToBeatDiv5:   return 5;
-	case SnapToBeatDiv4:   return 4;
-	case SnapToBeatDiv3:   return 3;
-	case SnapToBeatDiv2:   return 2;
+	case QuantizeToBeatDiv128: return 128;
+	case QuantizeToBeatDiv64:  return 64;
+	case QuantizeToBeatDiv32:  return 32;
+	case QuantizeToBeatDiv28:  return 28;
+	case QuantizeToBeatDiv24:  return 24;
+	case QuantizeToBeatDiv20:  return 20;
+	case QuantizeToBeatDiv16:  return 16;
+	case QuantizeToBeatDiv14:  return 14;
+	case QuantizeToBeatDiv12:  return 12;
+	case QuantizeToBeatDiv10:  return 10;
+	case QuantizeToBeatDiv8:   return 8;
+	case QuantizeToBeatDiv7:   return 7;
+	case QuantizeToBeatDiv6:   return 6;
+	case QuantizeToBeatDiv5:   return 5;
+	case QuantizeToBeatDiv4:   return 4;
+	case QuantizeToBeatDiv3:   return 3;
+	case QuantizeToBeatDiv2:   return 2;
 	default:               return 0;
 	}
 	return 0;
@@ -4096,25 +4082,25 @@ Editor::get_grid_music_divisions (uint32_t event_state)
 	}
 
 	switch (_snap_type) {
-	case SnapToBeatDiv128: return 128;
-	case SnapToBeatDiv64:  return 64;
-	case SnapToBeatDiv32:  return 32;
-	case SnapToBeatDiv28:  return 28;
-	case SnapToBeatDiv24:  return 24;
-	case SnapToBeatDiv20:  return 20;
-	case SnapToBeatDiv16:  return 16;
-	case SnapToBeatDiv14:  return 14;
-	case SnapToBeatDiv12:  return 12;
-	case SnapToBeatDiv10:  return 10;
-	case SnapToBeatDiv8:   return 8;
-	case SnapToBeatDiv7:   return 7;
-	case SnapToBeatDiv6:   return 6;
-	case SnapToBeatDiv5:   return 5;
-	case SnapToBeatDiv4:   return 4;
-	case SnapToBeatDiv3:   return 3;
-	case SnapToBeatDiv2:   return 2;
-	case SnapToBeat:       return 1;
-	case SnapToBar :       return -1;
+	case QuantizeToBeatDiv128: return 128;
+	case QuantizeToBeatDiv64:  return 64;
+	case QuantizeToBeatDiv32:  return 32;
+	case QuantizeToBeatDiv28:  return 28;
+	case QuantizeToBeatDiv24:  return 24;
+	case QuantizeToBeatDiv20:  return 20;
+	case QuantizeToBeatDiv16:  return 16;
+	case QuantizeToBeatDiv14:  return 14;
+	case QuantizeToBeatDiv12:  return 12;
+	case QuantizeToBeatDiv10:  return 10;
+	case QuantizeToBeatDiv8:   return 8;
+	case QuantizeToBeatDiv7:   return 7;
+	case QuantizeToBeatDiv6:   return 6;
+	case QuantizeToBeatDiv5:   return 5;
+	case QuantizeToBeatDiv4:   return 4;
+	case QuantizeToBeatDiv3:   return 3;
+	case QuantizeToBeatDiv2:   return 2;
+	case QuantizeToBeat:       return 1;
+	case QuantizeToBar :       return -1;
 	default:               return 0;
 	}
 	return 0;
@@ -4131,9 +4117,9 @@ Editor::get_grid_type_as_beats (bool& success, samplepos_t position)
 	}
 
 	switch (_snap_type) {
-	case SnapToBeat:
+	case QuantizeToBeat:
 		return Temporal::Beats(4.0 / _session->tempo_map().meter_at_sample (position).note_divisor());
-	case SnapToBar:
+	case QuantizeToBar:
 		if (_session) {
 			const Meter& m = _session->tempo_map().meter_at_sample (position);
 			return Temporal::Beats((4.0 * m.divisions_per_bar()) / m.note_divisor());

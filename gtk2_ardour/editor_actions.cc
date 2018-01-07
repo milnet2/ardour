@@ -543,7 +543,7 @@ Editor::register_actions ()
 	myactions.register_action (editor_actions, "set-edit-lock", S_("EditMode|Lock"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Lock));
 	myactions.register_action (editor_actions, "cycle-edit-mode", _("Cycle Edit Mode"), sigc::mem_fun (*this, &Editor::cycle_edit_mode));
 
-	myactions.register_action (editor_actions, X_("SnapTo"), _("Snap to"));
+	myactions.register_action (editor_actions, X_("QuantizeTo"), _("Snap to"));
 	myactions.register_action (editor_actions, X_("SnapMode"), _("Snap Mode"));
 
 	RadioAction::Group snap_mode_group;
@@ -553,45 +553,46 @@ Editor::register_actions ()
 
 	myactions.register_action (editor_actions, X_("cycle-snap-mode"), _("Next Snap Mode"), sigc::mem_fun (*this, &Editor::cycle_snap_mode));
 	myactions.register_action (editor_actions, X_("next-snap-choice"), _("Next Snap Choice"), sigc::mem_fun (*this, &Editor::next_snap_choice));
-	myactions.register_action (editor_actions, X_("next-snap-choice-music-only"), _("Next Musical Snap Choice"), sigc::mem_fun (*this, &Editor::next_snap_choice_music_only));
 	myactions.register_action (editor_actions, X_("prev-snap-choice"), _("Previous Snap Choice"), sigc::mem_fun (*this, &Editor::prev_snap_choice));
-	myactions.register_action (editor_actions, X_("prev-snap-choice-music-only"), _("Previous Musical Snap Choice"), sigc::mem_fun (*this, &Editor::prev_snap_choice_music_only));
 
 	Glib::RefPtr<ActionGroup> snap_actions = myactions.create_action_group (X_("Snap"));
 	RadioAction::Group snap_choice_group;
 
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-cd-frame"), _("Snap to CD Frame"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToCDFrame)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-frame"), _("Snap to Timecode Frame"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToTimecodeFrame)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-seconds"), _("Snap to Timecode Seconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToTimecodeSeconds)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-minutes"), _("Snap to Timecode Minutes"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToTimecodeMinutes)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-seconds"), _("Snap to Seconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToSeconds)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-minutes"), _("Snap to Minutes"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToMinutes)));
+//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-cd-frame"), _("Snap to CD Frame"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToCDFrame)));
+//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-frame"), _("Snap to Timecode Frame"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToTimecodeFrame)));
+//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-seconds"), _("Snap to Timecode Seconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToTimecodeSeconds)));
+//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-minutes"), _("Snap to Timecode Minutes"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToTimecodeMinutes)));
+//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-seconds"), _("Snap to Seconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToSeconds)));
+//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-minutes"), _("Snap to Minutes"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToMinutes)));
 
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-onetwentyeighths"), _("Snap to One Twenty Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv128)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-sixtyfourths"), _("Snap to Sixty Fourths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv64)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirtyseconds"), _("Snap to Thirty Seconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv32)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-twentyeighths"), _("Snap to Twenty Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv28)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-twentyfourths"), _("Snap to Twenty Fourths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv24)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-twentieths"), _("Snap to Twentieths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv20)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-asixteenthbeat"), _("Snap to Sixteenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv16)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-fourteenths"), _("Snap to Fourteenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv14)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-twelfths"), _("Snap to Twelfths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv12)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-tenths"), _("Snap to Tenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv10)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-eighths"), _("Snap to Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv8)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-sevenths"), _("Snap to Sevenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv7)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-sixths"), _("Snap to Sixths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv6)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-fifths"), _("Snap to Fifths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv5)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-quarters"), _("Snap to Quarters"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv4)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirds"), _("Snap to Thirds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv3)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-halves"), _("Snap to Halves"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeatDiv2)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-onetwentyeighths"), _("Snap to One Twenty Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv128)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-sixtyfourths"), _("Snap to Sixty Fourths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv64)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirtyseconds"), _("Snap to Thirty Seconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv32)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-twentyeighths"), _("Snap to Twenty Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv28)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-twentyfourths"), _("Snap to Twenty Fourths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv24)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-twentieths"), _("Snap to Twentieths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv20)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-asixteenthbeat"), _("Snap to Sixteenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv16)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-fourteenths"), _("Snap to Fourteenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv14)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-twelfths"), _("Snap to Twelfths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv12)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-tenths"), _("Snap to Tenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv10)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-eighths"), _("Snap to Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv8)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-sevenths"), _("Snap to Sevenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv7)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-sixths"), _("Snap to Sixths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv6)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-fifths"), _("Snap to Fifths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv5)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-quarters"), _("Snap to Quarters"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv4)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirds"), _("Snap to Thirds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv3)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-halves"), _("Snap to Halves"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv2)));
 
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-beat"), _("Snap to Beat"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeat)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-bar"), _("Snap to Bar"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBar)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-mark"), _("Snap to Mark"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToMark)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-start"), _("Snap to Region Start"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToRegionStart)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-end"), _("Snap to Region End"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToRegionEnd)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-sync"), _("Snap to Region Sync"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToRegionSync)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-boundary"), _("Snap to Region Boundary"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToRegionBoundary)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-beat"), _("Snap to Beat"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeat)));
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-bar"), _("Snap to Bar"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBar)));
+
+	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-none"), _("Snap to None"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToNone)));
+
+//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-mark"), _("Snap to Mark"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToMark)));
+//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-start"), _("Snap to Region Start"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToRegionStart)));
+//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-end"), _("Snap to Region End"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToRegionEnd)));
+//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-sync"), _("Snap to Region Sync"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToRegionSync)));
+//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-boundary"), _("Snap to Region Boundary"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToRegionBoundary)));
 
 	myactions.register_toggle_action (editor_actions, X_("show-marker-lines"), _("Show Marker Lines"), sigc::mem_fun (*this, &Editor::toggle_marker_lines));
 
@@ -1057,95 +1058,65 @@ Editor::snap_type_action (SnapType type)
 	RefPtr<Action> act;
 
 	switch (type) {
-	case Editing::SnapToCDFrame:
-		action = "snap-to-cd-frame";
-		break;
-	case Editing::SnapToTimecodeFrame:
-		action = "snap-to-timecode-frame";
-		break;
-	case Editing::SnapToTimecodeSeconds:
-		action = "snap-to-timecode-seconds";
-		break;
-	case Editing::SnapToTimecodeMinutes:
-		action = "snap-to-timecode-minutes";
-		break;
-	case Editing::SnapToSeconds:
-		action = "snap-to-seconds";
-		break;
-	case Editing::SnapToMinutes:
-		action = "snap-to-minutes";
-		break;
-	case Editing::SnapToBeatDiv128:
+	case Editing::QuantizeToBeatDiv128:
 		action = "snap-to-onetwentyeighths";
 		break;
-	case Editing::SnapToBeatDiv64:
+	case Editing::QuantizeToBeatDiv64:
 		action = "snap-to-sixtyfourths";
 		break;
-	case Editing::SnapToBeatDiv32:
+	case Editing::QuantizeToBeatDiv32:
 		action = "snap-to-thirtyseconds";
 		break;
-	case Editing::SnapToBeatDiv28:
+	case Editing::QuantizeToBeatDiv28:
 		action = "snap-to-twentyeighths";
 		break;
-	case Editing::SnapToBeatDiv24:
+	case Editing::QuantizeToBeatDiv24:
 		action = "snap-to-twentyfourths";
 		break;
-	case Editing::SnapToBeatDiv20:
+	case Editing::QuantizeToBeatDiv20:
 		action = "snap-to-twentieths";
 		break;
-	case Editing::SnapToBeatDiv16:
+	case Editing::QuantizeToBeatDiv16:
 		action = "snap-to-asixteenthbeat";
 		break;
-	case Editing::SnapToBeatDiv14:
+	case Editing::QuantizeToBeatDiv14:
 		action = "snap-to-fourteenths";
 		break;
-	case Editing::SnapToBeatDiv12:
+	case Editing::QuantizeToBeatDiv12:
 		action = "snap-to-twelfths";
 		break;
-	case Editing::SnapToBeatDiv10:
+	case Editing::QuantizeToBeatDiv10:
 		action = "snap-to-tenths";
 		break;
-	case Editing::SnapToBeatDiv8:
+	case Editing::QuantizeToBeatDiv8:
 		action = "snap-to-eighths";
 		break;
-	case Editing::SnapToBeatDiv7:
+	case Editing::QuantizeToBeatDiv7:
 		action = "snap-to-sevenths";
 		break;
-	case Editing::SnapToBeatDiv6:
+	case Editing::QuantizeToBeatDiv6:
 		action = "snap-to-sixths";
 		break;
-	case Editing::SnapToBeatDiv5:
+	case Editing::QuantizeToBeatDiv5:
 		action = "snap-to-fifths";
 		break;
-	case Editing::SnapToBeatDiv4:
+	case Editing::QuantizeToBeatDiv4:
 		action = "snap-to-quarters";
 		break;
-	case Editing::SnapToBeatDiv3:
+	case Editing::QuantizeToBeatDiv3:
 		action = "snap-to-thirds";
 		break;
-	case Editing::SnapToBeatDiv2:
+	case Editing::QuantizeToBeatDiv2:
 		action = "snap-to-halves";
 		break;
-	case Editing::SnapToBeat:
+	case Editing::QuantizeToBeat:
 		action = "snap-to-beat";
 		break;
-	case Editing::SnapToBar:
+	case Editing::QuantizeToBar:
 		action = "snap-to-bar";
 		break;
-	case Editing::SnapToMark:
-		action = "snap-to-mark";
-		break;
-	case Editing::SnapToRegionStart:
-		action = "snap-to-region-start";
-		break;
-	case Editing::SnapToRegionEnd:
-		action = "snap-to-region-end";
-		break;
-	case Editing::SnapToRegionSync:
-		action = "snap-to-region-sync";
-		break;
-	case Editing::SnapToRegionBoundary:
-		action = "snap-to-region-boundary";
+	case Editing::QuantizeToNone:
+		action = "snap-to-none";
 		break;
 	default:
 		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible snap-to type", (int) type) << endmsg;
@@ -1168,95 +1139,65 @@ void
 Editor::next_snap_choice ()
 {
 	switch (_snap_type) {
-	case Editing::SnapToCDFrame:
-		set_snap_to (Editing::SnapToTimecodeFrame);
+	case Editing::QuantizeToBeatDiv128:
+		set_snap_to (Editing::QuantizeToBeatDiv64);
 		break;
-	case Editing::SnapToTimecodeFrame:
-		set_snap_to (Editing::SnapToTimecodeSeconds);
+	case Editing::QuantizeToBeatDiv64:
+		set_snap_to (Editing::QuantizeToBeatDiv32);
 		break;
-	case Editing::SnapToTimecodeSeconds:
-		set_snap_to (Editing::SnapToTimecodeMinutes);
+	case Editing::QuantizeToBeatDiv32:
+		set_snap_to (Editing::QuantizeToBeatDiv28);
 		break;
-	case Editing::SnapToTimecodeMinutes:
-		set_snap_to (Editing::SnapToSeconds);
+	case Editing::QuantizeToBeatDiv28:
+		set_snap_to (Editing::QuantizeToBeatDiv24);
 		break;
-	case Editing::SnapToSeconds:
-		set_snap_to (Editing::SnapToMinutes);
+	case Editing::QuantizeToBeatDiv24:
+		set_snap_to (Editing::QuantizeToBeatDiv20);
 		break;
-	case Editing::SnapToMinutes:
-		set_snap_to (Editing::SnapToBeatDiv128);
+	case Editing::QuantizeToBeatDiv20:
+		set_snap_to (Editing::QuantizeToBeatDiv16);
 		break;
-	case Editing::SnapToBeatDiv128:
-		set_snap_to (Editing::SnapToBeatDiv64);
+	case Editing::QuantizeToBeatDiv16:
+		set_snap_to (Editing::QuantizeToBeatDiv14);
 		break;
-	case Editing::SnapToBeatDiv64:
-		set_snap_to (Editing::SnapToBeatDiv32);
+	case Editing::QuantizeToBeatDiv14:
+		set_snap_to (Editing::QuantizeToBeatDiv12);
 		break;
-	case Editing::SnapToBeatDiv32:
-		set_snap_to (Editing::SnapToBeatDiv28);
+	case Editing::QuantizeToBeatDiv12:
+		set_snap_to (Editing::QuantizeToBeatDiv10);
 		break;
-	case Editing::SnapToBeatDiv28:
-		set_snap_to (Editing::SnapToBeatDiv24);
+	case Editing::QuantizeToBeatDiv10:
+		set_snap_to (Editing::QuantizeToBeatDiv8);
 		break;
-	case Editing::SnapToBeatDiv24:
-		set_snap_to (Editing::SnapToBeatDiv20);
+	case Editing::QuantizeToBeatDiv8:
+		set_snap_to (Editing::QuantizeToBeatDiv7);
 		break;
-	case Editing::SnapToBeatDiv20:
-		set_snap_to (Editing::SnapToBeatDiv16);
+	case Editing::QuantizeToBeatDiv7:
+		set_snap_to (Editing::QuantizeToBeatDiv6);
 		break;
-	case Editing::SnapToBeatDiv16:
-		set_snap_to (Editing::SnapToBeatDiv14);
+	case Editing::QuantizeToBeatDiv6:
+		set_snap_to (Editing::QuantizeToBeatDiv5);
 		break;
-	case Editing::SnapToBeatDiv14:
-		set_snap_to (Editing::SnapToBeatDiv12);
+	case Editing::QuantizeToBeatDiv5:
+		set_snap_to (Editing::QuantizeToBeatDiv4);
 		break;
-	case Editing::SnapToBeatDiv12:
-		set_snap_to (Editing::SnapToBeatDiv10);
+	case Editing::QuantizeToBeatDiv4:
+		set_snap_to (Editing::QuantizeToBeatDiv3);
 		break;
-	case Editing::SnapToBeatDiv10:
-		set_snap_to (Editing::SnapToBeatDiv8);
+	case Editing::QuantizeToBeatDiv3:
+		set_snap_to (Editing::QuantizeToBeatDiv2);
 		break;
-	case Editing::SnapToBeatDiv8:
-		set_snap_to (Editing::SnapToBeatDiv7);
+	case Editing::QuantizeToBeatDiv2:
+		set_snap_to (Editing::QuantizeToBeat);
 		break;
-	case Editing::SnapToBeatDiv7:
-		set_snap_to (Editing::SnapToBeatDiv6);
+	case Editing::QuantizeToBeat:
+		set_snap_to (Editing::QuantizeToBar);
 		break;
-	case Editing::SnapToBeatDiv6:
-		set_snap_to (Editing::SnapToBeatDiv5);
+	case Editing::QuantizeToBar:
+		set_snap_to (Editing::QuantizeToNone);
 		break;
-	case Editing::SnapToBeatDiv5:
-		set_snap_to (Editing::SnapToBeatDiv4);
-		break;
-	case Editing::SnapToBeatDiv4:
-		set_snap_to (Editing::SnapToBeatDiv3);
-		break;
-	case Editing::SnapToBeatDiv3:
-		set_snap_to (Editing::SnapToBeatDiv2);
-		break;
-	case Editing::SnapToBeatDiv2:
-		set_snap_to (Editing::SnapToBeat);
-		break;
-	case Editing::SnapToBeat:
-		set_snap_to (Editing::SnapToBar);
-		break;
-	case Editing::SnapToBar:
-		set_snap_to (Editing::SnapToMark);
-		break;
-	case Editing::SnapToMark:
-		set_snap_to (Editing::SnapToRegionStart);
-		break;
-	case Editing::SnapToRegionStart:
-		set_snap_to (Editing::SnapToRegionEnd);
-		break;
-	case Editing::SnapToRegionEnd:
-		set_snap_to (Editing::SnapToRegionSync);
-		break;
-	case Editing::SnapToRegionSync:
-		set_snap_to (Editing::SnapToRegionBoundary);
-		break;
-	case Editing::SnapToRegionBoundary:
-		set_snap_to (Editing::SnapToCDFrame);
+	case Editing::QuantizeToNone:
+		set_snap_to (Editing::QuantizeToBeatDiv128);
 		break;
 	}
 }
@@ -1265,249 +1206,65 @@ void
 Editor::prev_snap_choice ()
 {
 	switch (_snap_type) {
-	case Editing::SnapToCDFrame:
-		set_snap_to (Editing::SnapToRegionBoundary);
+	case Editing::QuantizeToBeatDiv128:
+		set_snap_to (Editing::QuantizeToNone);
 		break;
-	case Editing::SnapToTimecodeFrame:
-		set_snap_to (Editing::SnapToCDFrame);
+	case Editing::QuantizeToBeatDiv64:
+		set_snap_to (Editing::QuantizeToBeatDiv128);
 		break;
-	case Editing::SnapToTimecodeSeconds:
-		set_snap_to (Editing::SnapToTimecodeFrame);
+	case Editing::QuantizeToBeatDiv32:
+		set_snap_to (Editing::QuantizeToBeatDiv64);
 		break;
-	case Editing::SnapToTimecodeMinutes:
-		set_snap_to (Editing::SnapToTimecodeSeconds);
+	case Editing::QuantizeToBeatDiv28:
+		set_snap_to (Editing::QuantizeToBeatDiv32);
 		break;
-	case Editing::SnapToSeconds:
-		set_snap_to (Editing::SnapToTimecodeMinutes);
+	case Editing::QuantizeToBeatDiv24:
+		set_snap_to (Editing::QuantizeToBeatDiv28);
 		break;
-	case Editing::SnapToMinutes:
-		set_snap_to (Editing::SnapToSeconds);
+	case Editing::QuantizeToBeatDiv20:
+		set_snap_to (Editing::QuantizeToBeatDiv24);
 		break;
-	case Editing::SnapToBeatDiv128:
-		set_snap_to (Editing::SnapToMinutes);
+	case Editing::QuantizeToBeatDiv16:
+		set_snap_to (Editing::QuantizeToBeatDiv20);
 		break;
-	case Editing::SnapToBeatDiv64:
-		set_snap_to (Editing::SnapToBeatDiv128);
+	case Editing::QuantizeToBeatDiv14:
+		set_snap_to (Editing::QuantizeToBeatDiv16);
 		break;
-	case Editing::SnapToBeatDiv32:
-		set_snap_to (Editing::SnapToBeatDiv64);
+	case Editing::QuantizeToBeatDiv12:
+		set_snap_to (Editing::QuantizeToBeatDiv14);
 		break;
-	case Editing::SnapToBeatDiv28:
-		set_snap_to (Editing::SnapToBeatDiv32);
+	case Editing::QuantizeToBeatDiv10:
+		set_snap_to (Editing::QuantizeToBeatDiv12);
 		break;
-	case Editing::SnapToBeatDiv24:
-		set_snap_to (Editing::SnapToBeatDiv28);
+	case Editing::QuantizeToBeatDiv8:
+		set_snap_to (Editing::QuantizeToBeatDiv10);
 		break;
-	case Editing::SnapToBeatDiv20:
-		set_snap_to (Editing::SnapToBeatDiv24);
+	case Editing::QuantizeToBeatDiv7:
+		set_snap_to (Editing::QuantizeToBeatDiv8);
 		break;
-	case Editing::SnapToBeatDiv16:
-		set_snap_to (Editing::SnapToBeatDiv20);
+	case Editing::QuantizeToBeatDiv6:
+		set_snap_to (Editing::QuantizeToBeatDiv7);
 		break;
-	case Editing::SnapToBeatDiv14:
-		set_snap_to (Editing::SnapToBeatDiv16);
+	case Editing::QuantizeToBeatDiv5:
+		set_snap_to (Editing::QuantizeToBeatDiv6);
 		break;
-	case Editing::SnapToBeatDiv12:
-		set_snap_to (Editing::SnapToBeatDiv14);
+	case Editing::QuantizeToBeatDiv4:
+		set_snap_to (Editing::QuantizeToBeatDiv5);
 		break;
-	case Editing::SnapToBeatDiv10:
-		set_snap_to (Editing::SnapToBeatDiv12);
+	case Editing::QuantizeToBeatDiv3:
+		set_snap_to (Editing::QuantizeToBeatDiv4);
 		break;
-	case Editing::SnapToBeatDiv8:
-		set_snap_to (Editing::SnapToBeatDiv10);
+	case Editing::QuantizeToBeatDiv2:
+		set_snap_to (Editing::QuantizeToBeatDiv3);
 		break;
-	case Editing::SnapToBeatDiv7:
-		set_snap_to (Editing::SnapToBeatDiv8);
+	case Editing::QuantizeToBeat:
+		set_snap_to (Editing::QuantizeToBeatDiv2);
 		break;
-	case Editing::SnapToBeatDiv6:
-		set_snap_to (Editing::SnapToBeatDiv7);
+	case Editing::QuantizeToBar:
+		set_snap_to (Editing::QuantizeToNone);
 		break;
-	case Editing::SnapToBeatDiv5:
-		set_snap_to (Editing::SnapToBeatDiv6);
-		break;
-	case Editing::SnapToBeatDiv4:
-		set_snap_to (Editing::SnapToBeatDiv5);
-		break;
-	case Editing::SnapToBeatDiv3:
-		set_snap_to (Editing::SnapToBeatDiv4);
-		break;
-	case Editing::SnapToBeatDiv2:
-		set_snap_to (Editing::SnapToBeatDiv3);
-		break;
-	case Editing::SnapToBeat:
-		set_snap_to (Editing::SnapToBeatDiv2);
-		break;
-	case Editing::SnapToBar:
-		set_snap_to (Editing::SnapToBeat);
-		break;
-	case Editing::SnapToMark:
-		set_snap_to (Editing::SnapToBar);
-		break;
-	case Editing::SnapToRegionStart:
-		set_snap_to (Editing::SnapToMark);
-		break;
-	case Editing::SnapToRegionEnd:
-		set_snap_to (Editing::SnapToRegionStart);
-		break;
-	case Editing::SnapToRegionSync:
-		set_snap_to (Editing::SnapToRegionEnd);
-		break;
-	case Editing::SnapToRegionBoundary:
-		set_snap_to (Editing::SnapToRegionSync);
-		break;
-	}
-}
-
-void
-Editor::next_snap_choice_music_only ()
-{
-	switch (_snap_type) {
-	case Editing::SnapToMark:
-	case Editing::SnapToRegionStart:
-	case Editing::SnapToRegionEnd:
-	case Editing::SnapToRegionSync:
-	case Editing::SnapToRegionBoundary:
-	case Editing::SnapToCDFrame:
-	case Editing::SnapToTimecodeFrame:
-	case Editing::SnapToTimecodeSeconds:
-	case Editing::SnapToTimecodeMinutes:
-	case Editing::SnapToSeconds:
-	case Editing::SnapToMinutes:
-		set_snap_to (Editing::SnapToBeatDiv128);
-		break;
-	case Editing::SnapToBeatDiv128:
-		set_snap_to (Editing::SnapToBeatDiv64);
-		break;
-	case Editing::SnapToBeatDiv64:
-		set_snap_to (Editing::SnapToBeatDiv32);
-		break;
-	case Editing::SnapToBeatDiv32:
-		set_snap_to (Editing::SnapToBeatDiv28);
-		break;
-	case Editing::SnapToBeatDiv28:
-		set_snap_to (Editing::SnapToBeatDiv24);
-		break;
-	case Editing::SnapToBeatDiv24:
-		set_snap_to (Editing::SnapToBeatDiv20);
-		break;
-	case Editing::SnapToBeatDiv20:
-		set_snap_to (Editing::SnapToBeatDiv16);
-		break;
-	case Editing::SnapToBeatDiv16:
-		set_snap_to (Editing::SnapToBeatDiv14);
-		break;
-	case Editing::SnapToBeatDiv14:
-		set_snap_to (Editing::SnapToBeatDiv12);
-		break;
-	case Editing::SnapToBeatDiv12:
-		set_snap_to (Editing::SnapToBeatDiv10);
-		break;
-	case Editing::SnapToBeatDiv10:
-		set_snap_to (Editing::SnapToBeatDiv8);
-		break;
-	case Editing::SnapToBeatDiv8:
-		set_snap_to (Editing::SnapToBeatDiv7);
-		break;
-	case Editing::SnapToBeatDiv7:
-		set_snap_to (Editing::SnapToBeatDiv6);
-		break;
-	case Editing::SnapToBeatDiv6:
-		set_snap_to (Editing::SnapToBeatDiv5);
-		break;
-	case Editing::SnapToBeatDiv5:
-		set_snap_to (Editing::SnapToBeatDiv4);
-		break;
-	case Editing::SnapToBeatDiv4:
-		set_snap_to (Editing::SnapToBeatDiv3);
-		break;
-	case Editing::SnapToBeatDiv3:
-		set_snap_to (Editing::SnapToBeatDiv2);
-		break;
-	case Editing::SnapToBeatDiv2:
-		set_snap_to (Editing::SnapToBeat);
-		break;
-	case Editing::SnapToBeat:
-		set_snap_to (Editing::SnapToBar);
-		break;
-	case Editing::SnapToBar:
-		set_snap_to (Editing::SnapToBeatDiv128);
-		break;
-	}
-}
-
-void
-Editor::prev_snap_choice_music_only ()
-{
-	switch (_snap_type) {
-	case Editing::SnapToMark:
-	case Editing::SnapToRegionStart:
-	case Editing::SnapToRegionEnd:
-	case Editing::SnapToRegionSync:
-	case Editing::SnapToRegionBoundary:
-	case Editing::SnapToCDFrame:
-	case Editing::SnapToTimecodeFrame:
-	case Editing::SnapToTimecodeSeconds:
-	case Editing::SnapToTimecodeMinutes:
-	case Editing::SnapToSeconds:
-	case Editing::SnapToMinutes:
-		set_snap_to (Editing::SnapToBar);
-		break;
-	case Editing::SnapToBeatDiv128:
-		set_snap_to (Editing::SnapToBeat);
-		break;
-	case Editing::SnapToBeatDiv64:
-		set_snap_to (Editing::SnapToBeatDiv128);
-		break;
-	case Editing::SnapToBeatDiv32:
-		set_snap_to (Editing::SnapToBeatDiv64);
-		break;
-	case Editing::SnapToBeatDiv28:
-		set_snap_to (Editing::SnapToBeatDiv32);
-		break;
-	case Editing::SnapToBeatDiv24:
-		set_snap_to (Editing::SnapToBeatDiv28);
-		break;
-	case Editing::SnapToBeatDiv20:
-		set_snap_to (Editing::SnapToBeatDiv24);
-		break;
-	case Editing::SnapToBeatDiv16:
-		set_snap_to (Editing::SnapToBeatDiv20);
-		break;
-	case Editing::SnapToBeatDiv14:
-		set_snap_to (Editing::SnapToBeatDiv16);
-		break;
-	case Editing::SnapToBeatDiv12:
-		set_snap_to (Editing::SnapToBeatDiv14);
-		break;
-	case Editing::SnapToBeatDiv10:
-		set_snap_to (Editing::SnapToBeatDiv12);
-		break;
-	case Editing::SnapToBeatDiv8:
-		set_snap_to (Editing::SnapToBeatDiv10);
-		break;
-	case Editing::SnapToBeatDiv7:
-		set_snap_to (Editing::SnapToBeatDiv8);
-		break;
-	case Editing::SnapToBeatDiv6:
-		set_snap_to (Editing::SnapToBeatDiv7);
-		break;
-	case Editing::SnapToBeatDiv5:
-		set_snap_to (Editing::SnapToBeatDiv6);
-		break;
-	case Editing::SnapToBeatDiv4:
-		set_snap_to (Editing::SnapToBeatDiv5);
-		break;
-	case Editing::SnapToBeatDiv3:
-		set_snap_to (Editing::SnapToBeatDiv4);
-		break;
-	case Editing::SnapToBeatDiv2:
-		set_snap_to (Editing::SnapToBeatDiv3);
-		break;
-	case Editing::SnapToBeat:
-		set_snap_to (Editing::SnapToBeatDiv2);
-		break;
-	case Editing::SnapToBar:
-		set_snap_to (Editing::SnapToBeat);
+	case Editing::QuantizeToNone:
+		set_snap_to (Editing::QuantizeToBeatDiv128);
 		break;
 	}
 }

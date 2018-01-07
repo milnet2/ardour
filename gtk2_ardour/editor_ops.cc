@@ -193,16 +193,16 @@ Editor::split_regions_at (MusicSample where, RegionSelection& regions, bool snap
 	// region boundaries, don't pay attention to them
 
 	if (regions.size() == 1) {
-		switch (_snap_type) {
-		case SnapToRegionStart:
-		case SnapToRegionSync:
-		case SnapToRegionEnd:
-			break;
-		default:
-			if (snap_sample) {
+//		switch (_snap_type) {   //ToDo !!!
+//		case SnapToRegionStart:
+//		case SnapToRegionSync:
+//		case SnapToRegionEnd:
+//			break;
+//		default:
+//			if (snap_sample) {
 				snap_to (where);
-			}
-		}
+//			}
+//		}
 	} else {
 		if (snap_sample) {
 			snap_to (where);
@@ -721,27 +721,27 @@ Editor::build_region_boundary_cache ()
 
 	bool maybe_first_sample = false;
 
-	switch (_snap_type) {
-	case SnapToRegionStart:
+//	switch (_snap_type) {  //ToDo !!!
+//	case SnapToRegionStart:
+//		interesting_points.push_back (Start);
+//		maybe_first_sample = true;
+//		break;
+//	case SnapToRegionEnd:
+//		interesting_points.push_back (End);
+//		break;
+//	case SnapToRegionSync:
+//		interesting_points.push_back (SyncPoint);
+//		break;
+//	case SnapToRegionBoundary:
 		interesting_points.push_back (Start);
-		maybe_first_sample = true;
-		break;
-	case SnapToRegionEnd:
-		interesting_points.push_back (End);
-		break;
-	case SnapToRegionSync:
-		interesting_points.push_back (SyncPoint);
-		break;
-	case SnapToRegionBoundary:
-		interesting_points.push_back (Start);
 		interesting_points.push_back (End);
 		maybe_first_sample = true;
-		break;
-	default:
-		fatal << string_compose (_("build_region_boundary_cache called with snap_type = %1"), _snap_type) << endmsg;
-		abort(); /*NOTREACHED*/
-		return;
-	}
+//		break;
+//	default:
+//		fatal << string_compose (_("build_region_boundary_cache called with snap_type = %1"), _snap_type) << endmsg;
+//		abort(); /*NOTREACHED*/
+//		return;
+//	}
 
 	TimeAxisView *ontrack = 0;
 	TrackViewList tlist;

@@ -293,16 +293,16 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 		_was_rolling = false;
 	}
 
-	switch (_editor->snap_type()) {
-	case SnapToRegionStart:
-	case SnapToRegionEnd:
-	case SnapToRegionSync:
-	case SnapToRegionBoundary:
+//	switch (_editor->snap_type()) {
+//	case SnapToRegionStart:
+//	case SnapToRegionEnd:
+//	case SnapToRegionSync:
+//	case SnapToRegionBoundary:
 		_editor->build_region_boundary_cache ();
-		break;
-	default:
-		break;
-	}
+//		break;
+//	default:
+//		break;
+//	}
 }
 
 /** Call to end a drag `successfully'.  Ungrabs item and calls
@@ -3304,7 +3304,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		}
 		/* only snap to bars. leave snap mode alone for audio locked meters.*/
 		if (_real_section->position_lock_style() != AudioTime) {
-			_editor->set_snap_to (SnapToBar);
+			_editor->set_snap_to (QuantizeToBar);
 			_editor->set_snap_mode (SnapNormal);
 		}
 	}

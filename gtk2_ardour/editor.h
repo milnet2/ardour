@@ -162,11 +162,7 @@ public:
 
 	void cycle_snap_mode ();
 	void next_snap_choice ();
-	void next_snap_choice_music_only ();
-	void next_snap_choice_music_and_time ();
 	void prev_snap_choice ();
-	void prev_snap_choice_music_only ();
-	void prev_snap_choice_music_and_time ();
 	void set_snap_to (Editing::SnapType);
 	void set_snap_mode (Editing::SnapMode);
 	void set_snap_threshold (double pixel_distance) {snap_threshold = pixel_distance;}
@@ -2194,14 +2190,13 @@ private:
 	void snap_to_internal (ARDOUR::MusicSample& first,
 	                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
 	                       bool                for_mark  = false,
-			       bool                ensure_snap = false);
+	                       bool                ensure_snap = false);
 
-	void timecode_snap_to_internal (ARDOUR::MusicSample& first,
-	                                ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
-	                                bool                for_mark  = false);
+	samplepos_t timecode_snap_to_internal (samplepos_t        presnap,
+	                                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest);
 
 	samplepos_t marker_snap_to_internal (samplepos_t        presnap,
-	                                	ARDOUR::RoundMode   direction = ARDOUR::RoundNearest);
+	                                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest);
 
 	RhythmFerret* rhythm_ferret;
 

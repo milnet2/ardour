@@ -2377,22 +2377,9 @@ Editor::mouse_rename_region (ArdourCanvas::Item* /*item*/, GdkEvent* /*event*/)
 void
 Editor::mouse_brush_insert_region (RegionView* rv, samplepos_t pos)
 {
-	/* no brushing without a useful snap setting */
-
-	switch (_snap_mode) {
-	case SnapMagnetic:
-		return; /* can't work because it allows region to be placed anywhere */
-	default:
-		break; /* OK */
-	}
-
-	switch (_snap_type) {
-	case SnapToMark:
+	/* no brushing without a useful quantize setting */
+	if (_snap_type == QuantizeToNone)
 		return;
-
-	default:
-		break;
-	}
 
 	/* don't brush a copy over the original */
 

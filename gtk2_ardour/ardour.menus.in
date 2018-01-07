@@ -240,16 +240,8 @@
         <menuitem action='cycle-snap-mode'/>
         <menuitem action='next-snap-choice'/>
         <menuitem action='prev-snap-choice'/>
-        <menuitem action='next-snap-choice-music-only'/>
-        <menuitem action='prev-snap-choice-music-only'/>
       </menu>
       <menu name='SnapTo' action='SnapTo'>
-        <menuitem action='snap-to-cd-frame'/>
-        <menuitem action='snap-to-timecode-frame'/>
-        <menuitem action='snap-to-timecode-seconds'/>
-        <menuitem action='snap-to-timecode-minutes'/>
-        <menuitem action='snap-to-seconds'/>
-        <menuitem action='snap-to-minutes'/>
         <menuitem action='snap-to-onetwentyeighths'/>
         <menuitem action='snap-to-sixtyfourths'/>
         <menuitem action='snap-to-thirtyseconds'/>
@@ -269,11 +261,7 @@
         <menuitem action='snap-to-halves'/>
         <menuitem action='snap-to-beat'/>
         <menuitem action='snap-to-bar'/>
-        <menuitem action='snap-to-mark'/>
-        <menuitem action='snap-to-region-start'/>
-        <menuitem action='snap-to-region-end'/>
-        <menuitem action='snap-to-region-sync'/>
-        <menuitem action='snap-to-region-boundary'/>
+        <menuitem action='snap-to-none'/>
       </menu>
       <separator/>
       <menu action="TempoMenu">

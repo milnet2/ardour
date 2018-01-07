@@ -990,68 +990,68 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	bbt_ruler_scale =  bbt_show_many;
 
 	switch (_snap_type) {
-	case SnapToBeatDiv2:
+	case QuantizeToBeatDiv2:
 		bbt_beat_subdivision = 2;
 		break;
-	case SnapToBeatDiv3:
+	case QuantizeToBeatDiv3:
 		bbt_beat_subdivision = 3;
 		break;
-	case SnapToBeatDiv4:
+	case QuantizeToBeatDiv4:
 		bbt_beat_subdivision = 4;
 		break;
-	case SnapToBeatDiv5:
+	case QuantizeToBeatDiv5:
 		bbt_beat_subdivision = 5;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
-	case SnapToBeatDiv6:
+	case QuantizeToBeatDiv6:
 		bbt_beat_subdivision = 6;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
-	case SnapToBeatDiv7:
+	case QuantizeToBeatDiv7:
 		bbt_beat_subdivision = 7;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
-	case SnapToBeatDiv8:
+	case QuantizeToBeatDiv8:
 		bbt_beat_subdivision = 8;
 		bbt_accent_modulo = 2;
 		break;
-	case SnapToBeatDiv10:
+	case QuantizeToBeatDiv10:
 		bbt_beat_subdivision = 10;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
-	case SnapToBeatDiv12:
+	case QuantizeToBeatDiv12:
 		bbt_beat_subdivision = 12;
 		bbt_accent_modulo = 3;
 		break;
-	case SnapToBeatDiv14:
+	case QuantizeToBeatDiv14:
 		bbt_beat_subdivision = 14;
 		bbt_accent_modulo = 3; // XXX YIKES!
 		break;
-	case SnapToBeatDiv16:
+	case QuantizeToBeatDiv16:
 		bbt_beat_subdivision = 16;
 		bbt_accent_modulo = 4;
 		break;
-	case SnapToBeatDiv20:
+	case QuantizeToBeatDiv20:
 		bbt_beat_subdivision = 20;
 		bbt_accent_modulo = 5;
 		break;
-	case SnapToBeatDiv24:
+	case QuantizeToBeatDiv24:
 		bbt_beat_subdivision = 24;
 		bbt_accent_modulo = 6;
 		break;
-	case SnapToBeatDiv28:
+	case QuantizeToBeatDiv28:
 		bbt_beat_subdivision = 28;
 		bbt_accent_modulo = 7;
 		break;
-	case SnapToBeatDiv32:
+	case QuantizeToBeatDiv32:
 		bbt_beat_subdivision = 32;
 		bbt_accent_modulo = 8;
 		break;
-	case SnapToBeatDiv64:
+	case QuantizeToBeatDiv64:
 		bbt_beat_subdivision = 64;
 		bbt_accent_modulo = 8;
 		break;
-	case SnapToBeatDiv128:
+	case QuantizeToBeatDiv128:
 		bbt_beat_subdivision = 128;
 		bbt_accent_modulo = 8;
 		break;
