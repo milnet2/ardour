@@ -2306,14 +2306,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor"), new OptionEditorHeading (_("General")));
 
-	add_option (_("Editor"),
-	     new BoolOption (
-		     "rubberbanding-snaps-to-grid",
-		     _("Snap rubberband to grid"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_rubberbanding_snaps_to_grid),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rubberbanding_snaps_to_grid)
-		     ));
-
 	bo = new BoolOption (
 		     "name-new-markers",
 		     _("Prompt for new marker names"),
@@ -2490,6 +2482,98 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor"), rsas);
 
+	add_option (_("Editor/Snap"), new OptionEditorHeading (_("When Grid is Enabled, snap to:")));
+	
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "snap-to-marks",
+		     _("Snap to Markers"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_marks),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_marks)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "snap-to-region-sync",
+		     _("Snap to Region Sync"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_region_sync),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_region_sync)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "snap-to-region-start",
+		     _("Snap to Region Start"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_region_start),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_region_start)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "snap-to-region-end",
+		     _("Snap to Region End"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_region_end),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_region_end)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "snap-to-tc-frames",
+		     _("Snap to TC Frames"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_tc_frames),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_tc_frames)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "snap-to-tc-seconds",
+		     _("Snap to TC Seconds"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_tc_seconds),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_tc_seconds)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "snap-to-tc-minutes",
+		     _("Snap to TC Minutes"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_tc_minutes),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_tc_minutes)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "snap-to-seconds",
+		     _("Snap to Seconds"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_seconds),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_seconds)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "snap-to-minutes",
+		     _("Snap to Minutes"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_minutes),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_minutes)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "snap-to-cd-frames",
+		     _("Snap to CD Frames"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_cd_frames),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_cd_frames)
+		     ));
+
+	add_option (_("Editor/Snap"), new OptionEditorHeading (_("Other Snap options")));
+	
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "rubberbanding-snaps-to-grid",
+		     _("Snap rubberband to grid"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_rubberbanding_snaps_to_grid),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rubberbanding_snaps_to_grid)
+		     ));
+		     
 	add_option (_("Editor/Modifiers"), new OptionEditorHeading (_("Keyboard Modifiers")));
 	add_option (_("Editor/Modifiers"), new KeyboardOptions);
 	add_option (_("Editor/Modifiers"), new OptionEditorBlank ());
