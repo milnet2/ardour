@@ -1533,6 +1533,8 @@ ARDOUR_UI::every_point_one_seconds ()
 {
 	// TODO get rid of this..
 	// ShuttleControl is updated directly via TransportStateChange signal
+	
+	if (editor) editor->build_region_boundary_cache();
 }
 
 void

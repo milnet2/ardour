@@ -1065,7 +1065,9 @@ private:
 	ARDOUR::samplepos_t find_next_region_boundary (ARDOUR::samplepos_t, int32_t dir, const TrackViewList&);
 
 	std::vector<ARDOUR::samplepos_t> region_boundary_cache;
+	void mark_region_boundary_cache_dirty () { _region_boundary_cache_dirty = true; }
 	void build_region_boundary_cache ();
+	bool	_region_boundary_cache_dirty;
 
 	Gtk::HBox           toplevel_hpacker;
 

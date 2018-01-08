@@ -293,15 +293,8 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 		_was_rolling = false;
 	}
 
-//	switch (_editor->snap_type()) {
-//	case SnapToRegionStart:
-//	case SnapToRegionEnd:
-//	case SnapToRegionSync:
-//	case SnapToRegionBoundary:
-		_editor->build_region_boundary_cache ();
-//		break;
-//	default:
-//		break;
+//	if ( UIConfiguration::instance().get_snap_to_region_start() || UIConfiguration::instance().get_snap_to_region_end() || UIConfiguration::instance().get_snap_to_region_sync() ) {
+//		_editor->build_region_boundary_cache ();
 //	}
 }
 
