@@ -327,6 +327,7 @@ Editor::Editor ()
 	, videotl_group (0)
 	, snapped_cursor (0)
 	, playhead_cursor (0)
+	, _region_boundary_cache_dirty (true)
 	, edit_packer (4, 4, true)
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
 	, horizontal_adjustment (0.0, 0.0, 1e16)
@@ -1420,18 +1421,6 @@ Editor::set_session (Session *t)
 		sigc::mem_fun (*this, &Editor::super_rapid_screen_update)
 		);
 
-//	switch (_snap_type) {
-//	case QuantizeToRegionStart:
-//	case QuantizeToRegionEnd:
-//	case QuantizeToRegionSync:
-//	case QuantizeToRegionBoundary:
-		build_region_boundary_cache ();
-//		break;
-
-//	default:
-//		break;
-//	}
-
 	/* register for undo history */
 	_session->register_with_memento_command_factory(id(), this);
 	_session->register_with_memento_command_factory(_selection_memento->id(), _selection_memento);
@@ -2227,11 +2216,7 @@ Editor::set_snap_to (SnapType st)
 		break;
 	}
 
-//	case QuantizeToRegionStart:  //ToDo
-//	case QuantizeToRegionEnd:
-//	case QuantizeToRegionSync:
-//	case QuantizeToRegionBoundary:
-//		build_region_boundary_cache ();
+	mark_region_boundary_cache_dirty ();
 
 	redisplay_tempo (false);
 
@@ -2283,7 +2268,6 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 
 	switch (_edit_point) {
 	case EditAtPlayhead:
-//ToDo:  hide or show mouse_cursor
 		action = "edit-at-playhead";
 		break;
 	case EditAtSelectedMarker:
@@ -2815,12 +2799,14 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 	samplepos_t dist = max_samplepos;  //this records the distance of the best snap result we've found so far
 	samplepos_t best = max_samplepos;  //this records the best snap-result we've found so far
 	
+	//check snap-to-tc
 	if ( UIConfiguration::instance().get_snap_to_tc_frames() || UIConfiguration::instance().get_snap_to_tc_seconds() || UIConfiguration::instance().get_snap_to_tc_minutes() ) {
 		test = timecode_snap_to_internal (presnap, direction);
 		check_best_snap(presnap, test, dist, best);
 	}
 	
-	if ( UIConfiguration::instance().get_snap_to_marks() ) {  //marker snap
+	//check snap-to-marker
+	if ( UIConfiguration::instance().get_snap_to_marks() ) {
 		if (for_mark) {
 			return;
 		}
@@ -2829,7 +2815,8 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		check_best_snap(presnap, test, dist, best);
 	}
 
-	if ( UIConfiguration::instance().get_snap_to_cd_frames() ) {  // QuantizeToCDFrame
+	//check snap-to-cd
+	if ( UIConfiguration::instance().get_snap_to_cd_frames() ) {
 		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
 		    test % (one_second/75) == 0) {
 			/* start is already on a whole CD sample, do nothing */
@@ -2841,7 +2828,8 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		check_best_snap(presnap, test, dist, best);
 	}
 
-	if ( UIConfiguration::instance().get_snap_to_seconds() ) {  // QuantizeToSeconds
+	//check snap-to-seconds
+	if ( UIConfiguration::instance().get_snap_to_seconds() ) {
 		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
 		    presnap % one_second == 0) {
 			/* start is already on a whole second, do nothing */
@@ -2854,7 +2842,8 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		}
 	}
 
-	if ( UIConfiguration::instance().get_snap_to_minutes() ) {  // QuantizeToMinutes
+	//check snap-to-minutes
+	if ( UIConfiguration::instance().get_snap_to_minutes() ) {
 		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
 		    start.sample % one_minute == 0) {
 			/* start is already on a whole minute, do nothing */
@@ -2867,6 +2856,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		}
 	}
 
+	//check snap-to-region-{start/end/sync}
 	if ( UIConfiguration::instance().get_snap_to_region_start() || UIConfiguration::instance().get_snap_to_region_end() || UIConfiguration::instance().get_snap_to_region_sync() ) {
 		if (!region_boundary_cache.empty()) {
 
@@ -2896,8 +2886,11 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 
 		check_best_snap(presnap, test, dist, best);
 	}
+	
+//	std::cout << "presnap " << presnap << " best = " << best << std::endl;
 
-	MusicSample tst(presnap,0);
+	//now check snap-to-music (quantized) 
+	MusicSample tst(max_samplepos,0);
 	switch (_snap_type) {
 
 		case QuantizeToBar:
@@ -2963,6 +2956,8 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 	check_best_snap(presnap, tst.sample, dist, best);
 
 	//now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
+	//this also helps to avoid snapping to somewhere the user can't see.  ( i.e.:  I clicked on a region and it disappeared!! )
+	//ToDo:  perhaps this should only occur if EditPointMouse?
 	if (ensure_snap) {
 		start.set (best, 0);
 		return;
@@ -5272,12 +5267,16 @@ Editor::region_view_added (RegionView * rv)
 	}
 
 	_summary->set_background_dirty ();
+
+	mark_region_boundary_cache_dirty ();
 }
 
 void
 Editor::region_view_removed ()
 {
 	_summary->set_background_dirty ();
+
+	mark_region_boundary_cache_dirty ();
 }
 
 AxisView*
