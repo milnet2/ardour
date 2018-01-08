@@ -2487,7 +2487,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
 		     "snap-to-marks",
-		     _("Snap to Markers"),
+		     _("Markers"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_marks),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_marks)
 		     ));
@@ -2495,7 +2495,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
 		     "snap-to-region-sync",
-		     _("Snap to Region Sync"),
+		     _("Region Sync Points"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_region_sync),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_region_sync)
 		     ));
@@ -2503,7 +2503,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
 		     "snap-to-region-start",
-		     _("Snap to Region Start"),
+		     _("Region Starts"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_region_start),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_region_start)
 		     ));
@@ -2511,7 +2511,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
 		     "snap-to-region-end",
-		     _("Snap to Region End"),
+		     _("Region Ends"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_region_end),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_region_end)
 		     ));
@@ -2519,7 +2519,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
 		     "snap-to-tc-frames",
-		     _("Snap to TC Frames"),
+		     _("TC Frames"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_tc_frames),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_tc_frames)
 		     ));
@@ -2527,7 +2527,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
 		     "snap-to-tc-seconds",
-		     _("Snap to TC Seconds"),
+		     _("TC Seconds"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_tc_seconds),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_tc_seconds)
 		     ));
@@ -2535,7 +2535,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
 		     "snap-to-tc-minutes",
-		     _("Snap to TC Minutes"),
+		     _("TC Minutes"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_tc_minutes),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_tc_minutes)
 		     ));
@@ -2543,7 +2543,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
 		     "snap-to-seconds",
-		     _("Snap to Seconds"),
+		     _("Seconds"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_seconds),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_seconds)
 		     ));
@@ -2551,7 +2551,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
 		     "snap-to-minutes",
-		     _("Snap to Minutes"),
+		     _("Minutes"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_minutes),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_minutes)
 		     ));
@@ -2559,7 +2559,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
 		     "snap-to-cd-frames",
-		     _("Snap to CD Frames"),
+		     _("CD Frames"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_cd_frames),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_cd_frames)
 		     ));
