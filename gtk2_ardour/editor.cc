@@ -2644,6 +2644,15 @@ Editor::trackview_by_y_position (double y, bool trackview_relative_offset) const
 	return std::make_pair ( (TimeAxisView *) 0, 0);
 }
 
+void
+Editor::set_snapped_cursor_position (samplepos_t pos)
+{
+	if ( _edit_point == EditAtMouse ) {
+		snapped_cursor->set_position(pos);
+	}
+}
+
+
 /** Snap a position to the grid, if appropriate, taking into account current
  *  grid settings and also the state of any snap modifier keys that may be pressed.
  *  @param start Position to snap.
@@ -5844,13 +5853,11 @@ Editor::super_rapid_screen_update ()
 		_last_update_time = now;
 	}
 	
-	//ToDo:  we should probably use snap_to_with_modifer.  problem is:  there is no current action here.
-
 	//snapped cursor stuff ( the snapped_cursor shows where an operation is going to occur )
 	bool ignored;
 	MusicSample where (sample, 0);
-	if ( _edit_point == EditAtPlayhead ) {
-		snap_to (where);  // should use snap_to_with_modifier?
+	if ( _edit_point == EditAtPlayhead && !_dragging_playhead) {
+		snap_to (where);  // can't use snap_to_with_modifier?
 		snapped_cursor->set_position (where.sample);
 		snapped_cursor->show ();
 	} else if ( _edit_point == EditAtSelectedMarker ) {
@@ -5860,15 +5867,12 @@ Editor::super_rapid_screen_update ()
 		snap_to (ms);  // should use snap_to_with_modifier?
 		snapped_cursor->set_position ( ms.sample );
 		snapped_cursor->show ();
-	} else if (mouse_sample (where.sample, ignored)) {
-		snap_to (where);  // should use snap_to_with_modifier?
-		snapped_cursor->set_position (where.sample);
+	} else if (mouse_sample (where.sample, ignored)) {   //cursor is in the editing canvas. show it.
 		snapped_cursor->show ();
 	} else { //mouse is out of the editing canvas.  hide the snapped_cursor
 		snapped_cursor->hide ();
 	}
 	
-
 	/* There are a few reasons why we might not update the playhead / viewport stuff:
 	 *
 	 * 1.  we don't update things when there's a pending locate request, otherwise
