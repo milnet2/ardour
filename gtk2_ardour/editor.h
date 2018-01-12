@@ -1826,9 +1826,13 @@ private:
 	ArdourWidgets::ArdourDropdown snap_type_selector;
 	void build_snap_type_menu ();
 
-	ArdourWidgets::ArdourDropdown snap_mode_selector;
-	void build_snap_mode_menu ();
+	ArdourWidgets::ArdourButton snap_mode_button;
+	Glib::RefPtr<Gtk::ToggleAction> toggle_snap_mode_action;
+	void snap_mode_button_toggled ();
+
 	Gtk::HBox snap_box;
+
+	Gtk::HBox _box;
 
 	std::vector<std::string> snap_type_strings;
 	std::vector<std::string> snap_mode_strings;
