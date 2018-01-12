@@ -472,6 +472,8 @@ public:
 	              ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
 	              bool                for_mark  = false);
 
+	void set_snapped_cursor_position (samplepos_t pos);
+
 	void begin_selection_op_history ();
 	void begin_reversible_selection_op (std::string cmd_name);
 	void commit_reversible_selection_op ();

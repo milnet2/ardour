@@ -468,6 +468,8 @@ public:
 	                                    ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
 	                                    bool                for_mark  = false) = 0;
 
+	virtual void set_snapped_cursor_position (samplepos_t pos) = 0;
+
 	virtual void get_regions_at (RegionSelection &, samplepos_t where, TrackViewList const &) const = 0;
 	virtual void get_regions_after (RegionSelection&, samplepos_t where, const TrackViewList& ts) const = 0;
 	virtual RegionSelection get_regions_from_selection_and_mouse (samplepos_t) = 0;
