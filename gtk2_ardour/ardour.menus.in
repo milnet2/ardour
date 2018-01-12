@@ -234,7 +234,6 @@
       </menu>
       <menu name='SnapMode' action='SnapMode'>
         <menuitem action='snap-off'/>
-        <menuitem action='snap-normal'/>
         <menuitem action='snap-magnetic'/>
         <separator/>
         <menuitem action='cycle-snap-mode'/>

@@ -324,7 +324,6 @@
 		   <menuitem action='cycle-edit-point-with-marker'/>
 		   <menuitem action='toggle-edit-mode'/>
 		   <menuitem action='snap-off'/>
-		   <menuitem action='snap-normal'/>
 		   <menuitem action='snap-magnetic'/>
 		   <menuitem action='cycle-snap-mode'/>
 		   <menuitem action='cycle-snap-choice'/>

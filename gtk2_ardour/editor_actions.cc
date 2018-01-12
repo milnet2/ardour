@@ -1322,8 +1322,6 @@ Editor::cycle_snap_mode ()
 {
 	switch (_snap_mode) {
 	case SnapOff:
-		set_snap_mode (SnapNormal);
-		break;
 	case SnapNormal:
 		set_snap_mode (SnapMagnetic);
 		break;
@@ -1340,6 +1338,10 @@ Editor::snap_mode_chosen (SnapMode mode)
 	   once for the item that became inactive and once for the one that became
 	   active.
 	*/
+
+	if (mode == SnapNormal) {
+		mode = SnapMagnetic;
+	}
 
 	RefPtr<RadioAction> ract = snap_mode_action (mode);
 
