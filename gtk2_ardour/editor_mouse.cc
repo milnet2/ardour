@@ -217,6 +217,17 @@ Editor::mouse_mode_object_range_toggled()
 	set_mouse_mode(m, true);  //call this so the button styles can get updated
 }
 
+void
+Editor::snap_mode_button_toggled()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-snap-mode"));
+	assert (act);
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	assert (tact);
+
+	cycle_snap_mode();
+}
+
 static Glib::RefPtr<Action>
 get_mouse_mode_action(MouseMode m)
 {

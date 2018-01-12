@@ -184,13 +184,6 @@ static const gchar *_snap_type_strings[] = {
 	0
 };
 
-static const gchar *_snap_mode_strings[] = {
-	N_("No Grid"),
-	N_("Grid"),
-	N_("Magnetic"),
-	0
-};
-
 static const gchar *_edit_point_strings[] = {
 	N_("Playhead"),
 	N_("Marker"),
@@ -465,7 +458,6 @@ Editor::Editor ()
 	before.clear();
 
 	snap_type_strings =  I18N (_snap_type_strings);
-	snap_mode_strings =  I18N (_snap_mode_strings);
 	zoom_focus_strings = I18N (_zoom_focus_strings);
 	edit_mode_strings = I18N (_edit_mode_strings);
 	edit_point_strings = I18N (_edit_point_strings);
@@ -477,7 +469,6 @@ Editor::Editor ()
 	build_edit_mode_menu();
 	build_zoom_focus_menu();
 	build_track_count_menu();
-	build_snap_mode_menu();
 	build_snap_type_menu();
 	build_edit_point_menu();
 
@@ -2205,8 +2196,6 @@ Editor::set_snap_to (SnapType st)
 void
 Editor::set_snap_mode (SnapMode mode)
 {
-	string str = snap_mode_strings[(int)mode];
-
 	if (internal_editing()) {
 		internal_snap_mode = mode;
 	} else {
@@ -2214,10 +2203,6 @@ Editor::set_snap_mode (SnapMode mode)
 	}
 
 	_snap_mode = mode;
-
-	if (str != snap_mode_selector.get_text ()) {
-		snap_mode_selector.set_text (str);
-	}
 
 	instant_save ();
 }
@@ -2989,7 +2974,7 @@ Editor::setup_toolbar ()
 	}
 
 	mouse_mode_size_group->add_widget (snap_type_selector);
-	mouse_mode_size_group->add_widget (snap_mode_selector);
+	mouse_mode_size_group->add_widget (snap_mode_button);
 
 	mouse_mode_size_group->add_widget (edit_point_selector);
 	mouse_mode_size_group->add_widget (edit_mode_selector);
@@ -3109,11 +3094,11 @@ Editor::setup_toolbar ()
 
 	snap_type_selector.set_name ("mouse mode button");
 
-	snap_mode_selector.set_name ("mouse mode button");
+	snap_mode_button.set_name ("mouse mode button");
 
 	edit_point_selector.set_name ("mouse mode button");
 
-	snap_box.pack_start (snap_mode_selector, false, false);
+	snap_box.pack_start (snap_mode_button, false, false);
 	snap_box.pack_start (snap_type_selector, false, false);
 
 	/* Edit Point*/
@@ -3197,18 +3182,6 @@ Editor::build_edit_mode_menu ()
 }
 
 void
-Editor::build_snap_mode_menu ()
-{
-	using namespace Menu_Helpers;
-
-	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapOff], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapOff)));
-	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapNormal], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapNormal)));
-	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapMagnetic], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapMagnetic)));
-
-	set_size_request_to_display_given_text (snap_mode_selector, snap_mode_strings, COMBO_TRIANGLE_WIDTH, 2);
-}
-
-void
 Editor::build_snap_type_menu ()
 {
 	using namespace Menu_Helpers;
@@ -3260,8 +3233,8 @@ Editor::setup_tooltips ()
 	set_tooltip (tav_expand_button, _("Expand Tracks"));
 	set_tooltip (tav_shrink_button, _("Shrink Tracks"));
 	set_tooltip (visible_tracks_selector, _("Number of visible tracks"));
-	set_tooltip (snap_type_selector, _("Snap/Grid Units"));
-	set_tooltip (snap_mode_selector, _("Snap/Grid Mode"));
+	set_tooltip (snap_type_selector, _("Musical Snap (Quantize)"));
+	set_tooltip (snap_mode_button, _("Snap Mode"));
 	set_tooltip (edit_point_selector, _("Edit Point"));
 	set_tooltip (edit_mode_selector, _("Edit Mode"));
 	set_tooltip (nudge_clock, _("Nudge Clock\n(controls distance used to nudge regions and selections)"));
