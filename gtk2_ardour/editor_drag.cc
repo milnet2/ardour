@@ -6956,16 +6956,11 @@ CrossfadeEdgeDrag::aborted (bool)
 
 RegionCutDrag::RegionCutDrag (Editor* e, ArdourCanvas::Item* item, samplepos_t pos)
 	: Drag (e, item, true)
-	, line (new EditorCursor (*e))
 {
-	line->set_position (pos);
-	line->show ();
-	line->track_canvas_item().reparent (_editor->_drag_motion_group);
 }
 
 RegionCutDrag::~RegionCutDrag ()
 {
-	delete line;
 }
 
 void
@@ -6978,10 +6973,6 @@ RegionCutDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 void
 RegionCutDrag::motion (GdkEvent* event, bool)
 {
-	MusicSample pos (_drags->current_pointer_sample(), 0);
-	_editor->snap_to_with_modifier (pos, event);
-
-	line->set_position (pos.sample);
 }
 
 void
@@ -6992,7 +6983,6 @@ RegionCutDrag::finished (GdkEvent* event, bool)
 
 	MusicSample pos (_drags->current_pointer_sample(), 0);
 	_editor->snap_to_with_modifier (pos, event);
-	line->hide ();
 
 	RegionSelection rs = _editor->get_regions_from_selection_and_mouse (pos.sample);
 

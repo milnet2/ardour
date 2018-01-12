@@ -426,6 +426,7 @@ public:
 	virtual ArdourCanvas::ScrollGroup* get_hscroll_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_hvscroll_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const = 0;
+	virtual ArdourCanvas::Container* get_drag_motion_group () const = 0;
 
 	virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
 
