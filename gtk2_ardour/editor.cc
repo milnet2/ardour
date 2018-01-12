@@ -1411,8 +1411,7 @@ Editor::set_session (Session *t)
 	playhead_cursor->show ();
 
 	snapped_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
-//	snapped_cursor->set_color (UIConfiguration::instance().color ("edit accent"));  //ToDo
-	snapped_cursor->set_color ( Color (0xff0000ff) );
+	snapped_cursor->set_color (UIConfiguration::instance().color ("edit point"));
 	snapped_cursor->show ();
 
 	boost::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));
