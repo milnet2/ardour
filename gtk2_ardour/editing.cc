@@ -63,7 +63,7 @@ SnapMode
 str2snapmode (const string & str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
-	return SnapNormal;
+	return SnapMagnetic;
 }
 
 #undef SNAPMODE

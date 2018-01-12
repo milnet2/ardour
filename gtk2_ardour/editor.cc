@@ -2127,31 +2127,10 @@ Editor::snap_type() const
 bool
 Editor::snap_musical() const
 {
-	switch (_snap_type) {
-	case QuantizeToBeatDiv128:
-	case QuantizeToBeatDiv64:
-	case QuantizeToBeatDiv32:
-	case QuantizeToBeatDiv28:
-	case QuantizeToBeatDiv24:
-	case QuantizeToBeatDiv20:
-	case QuantizeToBeatDiv16:
-	case QuantizeToBeatDiv14:
-	case QuantizeToBeatDiv12:
-	case QuantizeToBeatDiv10:
-	case QuantizeToBeatDiv8:
-	case QuantizeToBeatDiv7:
-	case QuantizeToBeatDiv6:
-	case QuantizeToBeatDiv5:
-	case QuantizeToBeatDiv4:
-	case QuantizeToBeatDiv3:
-	case QuantizeToBeatDiv2:
-	case QuantizeToBeat:
-	case QuantizeToBar:
+	if (_snap_type == QuantizeToNone) {
 		return true;
-	default:
-		break;
 	}
-
+	
 	return false;
 }
 
