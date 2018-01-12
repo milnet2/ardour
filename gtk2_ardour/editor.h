@@ -533,6 +533,7 @@ public:
 	ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
 	ArdourCanvas::ScrollGroup* get_hvscroll_group () const { return hv_scroll_group; }
 	ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const { return cursor_scroll_group; }
+	ArdourCanvas::Container* get_drag_motion_group () const { return _drag_motion_group; }
 
 	ArdourCanvas::GtkCanvasViewport* get_track_canvas () const;
 
