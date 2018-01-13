@@ -989,7 +989,7 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 
 	bbt_ruler_scale =  bbt_show_many;
 
-	switch (_snap_type) {
+	switch (_grid_type) {
 	case QuantizeToBeatDiv2:
 		bbt_beat_subdivision = 2;
 		break;

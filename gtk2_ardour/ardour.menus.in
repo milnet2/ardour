@@ -237,8 +237,8 @@
         <menuitem action='snap-magnetic'/>
         <separator/>
         <menuitem action='cycle-snap-mode'/>
-        <menuitem action='next-snap-choice'/>
-        <menuitem action='prev-snap-choice'/>
+        <menuitem action='next-grid-choice'/>
+        <menuitem action='prev-grid-choice'/>
       </menu>
       <menu name='SnapTo' action='SnapTo'>
         <menuitem action='snap-to-onetwentyeighths'/>

@@ -160,27 +160,27 @@ using Gtkmm2ext::Keyboard;
 
 double Editor::timebar_height = 15.0;
 
-static const gchar *_snap_type_strings[] = {
-	N_("Beats/128"),
-	N_("Beats/64"),
-	N_("Beats/32"),
-	N_("Beats/28"),
-	N_("Beats/24"),
-	N_("Beats/20"),
-	N_("Beats/16"),
-	N_("Beats/14"),
-	N_("Beats/12"),
-	N_("Beats/10"),
-	N_("Beats/8"),
-	N_("Beats/7"),
-	N_("Beats/6"),
-	N_("Beats/5"),
-	N_("Beats/4"),
-	N_("Beats/3"),
-	N_("Beats/2"),
-	N_("Beats"),
-	N_("Bars"),
-	N_("None"),
+static const gchar *_grid_type_strings[] = {
+	N_("Grid: Beats/128"),
+	N_("Grid: Beats/64"),
+	N_("Grid: Beats/32"),
+	N_("Grid: Beats/28"),
+	N_("Grid: Beats/24"),
+	N_("Grid: Beats/20"),
+	N_("Grid: Beats/16"),
+	N_("Grid: Beats/14"),
+	N_("Grid: Beats/12"),
+	N_("Grid: Beats/10"),
+	N_("Grid: Beats/8"),
+	N_("Grid: Beats/7"),
+	N_("Grid: Beats/6"),
+	N_("Grid: Beats/5"),
+	N_("Grid: Beats/4"),
+	N_("Grid: Beats/3"),
+	N_("Grid: Beats/2"),
+	N_("Grid: Beats"),
+	N_("Grid: Bars"),
+	N_("Grid: None"),
 	0
 };
 
@@ -235,9 +235,9 @@ Editor::Editor ()
 	, samples_per_pixel (2048)
 	, zoom_focus (ZoomFocusPlayhead)
 	, mouse_mode (MouseObject)
-	, pre_internal_snap_type (QuantizeToBeat)
+	, pre_internal_grid_type (QuantizeToBeat)
 	, pre_internal_snap_mode (SnapOff)
-	, internal_snap_type (QuantizeToBeat)
+	, internal_grid_type (QuantizeToBeat)
 	, internal_snap_mode (SnapOff)
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
 	, _notebook_shrunk (false)
@@ -350,7 +350,7 @@ Editor::Editor ()
 	, scrub_reverse_distance (0)
 	, have_pending_keyboard_selection (false)
 	, pending_keyboard_selection_start (0)
-	, _snap_type (QuantizeToBeat)
+	, _grid_type (QuantizeToBeat)
 	, _snap_mode (SnapOff)
 	, snap_threshold (25.0)
 	, ignore_gui_changes (false)
@@ -457,7 +457,7 @@ Editor::Editor ()
 	selection_op_history.clear();
 	before.clear();
 
-	snap_type_strings =  I18N (_snap_type_strings);
+	grid_type_strings =  I18N (_grid_type_strings);
 	zoom_focus_strings = I18N (_zoom_focus_strings);
 	edit_mode_strings = I18N (_edit_mode_strings);
 	edit_point_strings = I18N (_edit_point_strings);
@@ -469,7 +469,7 @@ Editor::Editor ()
 	build_edit_mode_menu();
 	build_zoom_focus_menu();
 	build_track_count_menu();
-	build_snap_type_menu();
+	build_grid_type_menu();
 	build_edit_point_menu();
 
 	location_marker_color = UIConfiguration::instance().color ("location marker");
@@ -2110,15 +2110,15 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 }
 
 SnapType
-Editor::snap_type() const
+Editor::grid_type() const
 {
-	return _snap_type;
+	return _grid_type;
 }
 
 bool
 Editor::snap_musical() const
 {
-	if (_snap_type == QuantizeToNone) {
+	if (_grid_type == QuantizeToNone) {
 		return true;
 	}
 	
@@ -2132,32 +2132,32 @@ Editor::snap_mode() const
 }
 
 void
-Editor::set_snap_to (SnapType st)
+Editor::set_grid_to (SnapType st)
 {
 	unsigned int snap_ind = (unsigned int)st;
 
 	if (internal_editing()) {
-		internal_snap_type = st;
+		internal_grid_type = st;
 	} else {
-		pre_internal_snap_type = st;
+		pre_internal_grid_type = st;
 	}
 
-	_snap_type = st;
+	_grid_type = st;
 
-	if (snap_ind > snap_type_strings.size() - 1) {
+	if (snap_ind > grid_type_strings.size() - 1) {
 		snap_ind = 0;
-		_snap_type = (SnapType)snap_ind;
+		_grid_type = (SnapType)snap_ind;
 	}
 
-	string str = snap_type_strings[snap_ind];
+	string str = grid_type_strings[snap_ind];
 
-	if (str != snap_type_selector.get_text()) {
-		snap_type_selector.set_text (str);
+	if (str != grid_type_selector.get_text()) {
+		grid_type_selector.set_text (str);
 	}
 
 	instant_save ();
 
-	switch (_snap_type) {
+	switch (_grid_type) {
 	case QuantizeToNone:
 	case QuantizeToBeatDiv128:
 	case QuantizeToBeatDiv64:
@@ -2305,11 +2305,11 @@ Editor::set_state (const XMLNode& node, int version)
 		set_visible_track_count (cnt);
 	}
 
-	SnapType snap_type;
-	if (!node.get_property ("quantize-to", snap_type)) {
-		snap_type = _snap_type;
+	SnapType grid_type;
+	if (!node.get_property ("quantize-to", grid_type)) {
+		grid_type = _grid_type;
 	}
-	set_snap_to (snap_type);
+	set_grid_to (grid_type);
 
 	SnapMode sm;
 	if (node.get_property ("snap-mode", sm)) {
@@ -2323,9 +2323,9 @@ Editor::set_state (const XMLNode& node, int version)
 		set_snap_mode (_snap_mode);
 	}
 
-	node.get_property ("internal-quantize-to", internal_snap_type);
+	node.get_property ("internal-quantize-to", internal_grid_type);
 	node.get_property ("internal-snap-mode", internal_snap_mode);
-	node.get_property ("pre-internal-quantize-to", pre_internal_snap_type);
+	node.get_property ("pre-internal-quantize-to", pre_internal_grid_type);
 	node.get_property ("pre-internal-snap-mode", pre_internal_snap_mode);
 
 	std::string mm_str;
@@ -2502,11 +2502,11 @@ Editor::get_state ()
 	node->set_property ("zoom-focus", zoom_focus);
 
 	node->set_property ("zoom", samples_per_pixel);
-	node->set_property ("snap-to", _snap_type);
+	node->set_property ("snap-to", _grid_type);
 	node->set_property ("snap-mode", _snap_mode);
-	node->set_property ("internal-quantize-to", internal_snap_type);
+	node->set_property ("internal-quantize-to", internal_grid_type);
 	node->set_property ("internal-snap-mode", internal_snap_mode);
-	node->set_property ("pre-internal-quantize-to", pre_internal_snap_type);
+	node->set_property ("pre-internal-quantize-to", pre_internal_grid_type);
 	node->set_property ("pre-internal-snap-mode", pre_internal_snap_mode);
 	node->set_property ("edit-point", _edit_point);
 	node->set_property ("visible-track-count", _visible_track_count);
@@ -2861,7 +2861,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 
 	//now check snap-to-music (quantized) 
 	MusicSample tst(max_samplepos,0);
-	switch (_snap_type) {
+	switch (_grid_type) {
 
 		case QuantizeToBar:
 			tst = _session->tempo_map().round_to_bar (presnap, direction);
@@ -2979,7 +2979,7 @@ Editor::setup_toolbar ()
 		mouse_mode_size_group->add_widget (visible_tracks_selector);
 	}
 
-	mouse_mode_size_group->add_widget (snap_type_selector);
+	mouse_mode_size_group->add_widget (grid_type_selector);
 	mouse_mode_size_group->add_widget (snap_mode_button);
 
 	mouse_mode_size_group->add_widget (edit_point_selector);
@@ -3098,14 +3098,14 @@ Editor::setup_toolbar ()
 	snap_box.set_spacing (2);
 	snap_box.set_border_width (2);
 
-	snap_type_selector.set_name ("mouse mode button");
+	grid_type_selector.set_name ("mouse mode button");
 
 	snap_mode_button.set_name ("mouse mode button");
 
 	edit_point_selector.set_name ("mouse mode button");
 
 	snap_box.pack_start (snap_mode_button, false, false);
-	snap_box.pack_start (snap_type_selector, false, false);
+	snap_box.pack_start (grid_type_selector, false, false);
 
 	/* Edit Point*/
 	HBox *ep_box = manage (new HBox);
@@ -3188,32 +3188,32 @@ Editor::build_edit_mode_menu ()
 }
 
 void
-Editor::build_snap_type_menu ()
+Editor::build_grid_type_menu ()
 {
 	using namespace Menu_Helpers;
 
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv128)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv64], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv64)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv32], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv32)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv28], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv28)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv24], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv24)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv20], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv20)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv16], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv16)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv14], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv14)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv12], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv12)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv10], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv10)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv8], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv8)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv7], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv7)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv6], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv6)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv5], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv5)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv4], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv4)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv3], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv3)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeatDiv2], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeatDiv2)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBeat], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBeat)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToBar], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToBar)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)QuantizeToNone], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) QuantizeToNone)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv128)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv64], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv64)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv32], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv32)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv28], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv28)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv24], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv24)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv20], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv20)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv16], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv16)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv14], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv14)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv12], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv12)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv10], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv10)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv8], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv8)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv7], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv7)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv6], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv6)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv5], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv5)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv4], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv4)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv3], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv3)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv2], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv2)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeat], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeat)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBar], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBar)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToNone], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToNone)));
 
-	set_size_request_to_display_given_text (snap_type_selector, snap_type_strings, COMBO_TRIANGLE_WIDTH, 2);
+	set_size_request_to_display_given_text (grid_type_selector, grid_type_strings, COMBO_TRIANGLE_WIDTH, 2);
 
 }
 
@@ -3239,7 +3239,7 @@ Editor::setup_tooltips ()
 	set_tooltip (tav_expand_button, _("Expand Tracks"));
 	set_tooltip (tav_shrink_button, _("Shrink Tracks"));
 	set_tooltip (visible_tracks_selector, _("Number of visible tracks"));
-	set_tooltip (snap_type_selector, _("Musical Snap (Quantize)"));
+	set_tooltip (grid_type_selector, _("Musical Snap (Quantize)"));
 	set_tooltip (snap_mode_button, _("Snap Mode\n\nRight-click to visit Snap preferences."));
 	set_tooltip (edit_point_selector, _("Edit Point"));
 	set_tooltip (edit_mode_selector, _("Edit Mode"));
@@ -3635,9 +3635,9 @@ Editor::edit_mode_selection_done ( EditMode m )
 }
 
 void
-Editor::snap_type_selection_done (SnapType snaptype)
+Editor::grid_type_selection_done (SnapType snaptype)
 {
-	RefPtr<RadioAction> ract = snap_type_action (snaptype);
+	RefPtr<RadioAction> ract = grid_type_action (snaptype);
 	if (ract) {
 		ract->set_active ();
 	}
@@ -3991,7 +3991,7 @@ Editor::get_paste_offset (samplepos_t pos, unsigned paste_count, samplecnt_t dur
 unsigned
 Editor::get_grid_beat_divisions(samplepos_t position)
 {
-	switch (_snap_type) {
+	switch (_grid_type) {
 	case QuantizeToBeatDiv128: return 128;
 	case QuantizeToBeatDiv64:  return 64;
 	case QuantizeToBeatDiv32:  return 32;
@@ -4030,7 +4030,7 @@ Editor::get_grid_music_divisions (uint32_t event_state)
 		return 0;
 	}
 
-	switch (_snap_type) {
+	switch (_grid_type) {
 	case QuantizeToBeatDiv128: return 128;
 	case QuantizeToBeatDiv64:  return 64;
 	case QuantizeToBeatDiv32:  return 32;
@@ -4065,7 +4065,7 @@ Editor::get_grid_type_as_beats (bool& success, samplepos_t position)
 		return Temporal::Beats(1.0 / (double)get_grid_beat_divisions(position));
 	}
 
-	switch (_snap_type) {
+	switch (_grid_type) {
 	case QuantizeToBeat:
 		return Temporal::Beats(4.0 / _session->tempo_map().meter_at_sample (position).note_divisor());
 	case QuantizeToBar:

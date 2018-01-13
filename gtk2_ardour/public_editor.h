@@ -133,9 +133,9 @@ public:
 	/** Set the snap type.
 	 * @param t Snap type (defined in editing_syms.h)
 	 */
-	virtual void set_snap_to (Editing::SnapType t) = 0;
+	virtual void set_grid_to (Editing::SnapType t) = 0;
 
-	virtual Editing::SnapType snap_type () const = 0;
+	virtual Editing::SnapType grid_type () const = 0;
 	virtual Editing::SnapMode snap_mode () const = 0;
 
 	/** Set the snap mode.
