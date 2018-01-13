@@ -1591,7 +1591,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case MarkerBarItem:
 			if (!_dragging_playhead) {
-				snap_to_with_modifier (where, event, RoundNearest, true);
+				snap_to_with_modifier (where, event, RoundNearest, SnapToAny, true);
 				mouse_add_new_marker (where.sample);
 			}
 			return true;
@@ -1599,7 +1599,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case CdMarkerBarItem:
 			if (!_dragging_playhead) {
 				// if we get here then a dragged range wasn't done
-				snap_to_with_modifier (where, event, RoundNearest, true);
+				snap_to_with_modifier (where, event, RoundNearest, SnapToAny, true);
 				mouse_add_new_marker (where.sample, true);
 			}
 			return true;

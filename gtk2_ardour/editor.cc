@@ -2603,7 +2603,7 @@ Editor::set_snapped_cursor_position (samplepos_t pos)
  *  @param event Event to get current key modifier information from, or 0.
  */
 void
-Editor::snap_to_with_modifier (MusicSample& start, GdkEvent const * event, RoundMode direction, bool for_mark)
+Editor::snap_to_with_modifier (MusicSample& start, GdkEvent const * event, RoundMode direction, SnapPref pref, bool for_mark)
 {
 	if (!_session || !event) {
 		return;
@@ -2611,16 +2611,16 @@ Editor::snap_to_with_modifier (MusicSample& start, GdkEvent const * event, Round
 
 	if (ArdourKeyboard::indicates_snap (event->button.state)) {
 		if (_snap_mode == SnapOff) {
-			snap_to_internal (start, direction, for_mark);
+			snap_to_internal (start, direction, pref, for_mark);
 		} else {
 			start.set (start.sample, 0);
 		}
 	} else {
 		if (_snap_mode != SnapOff) {
-			snap_to_internal (start, direction, for_mark);
+			snap_to_internal (start, direction, pref, for_mark);
 		} else if (ArdourKeyboard::indicates_snap_delta (event->button.state)) {
 			/* SnapOff, but we pressed the snap_delta modifier */
-			snap_to_internal (start, direction, for_mark);
+			snap_to_internal (start, direction, pref, for_mark);
 		} else {
 			start.set (start.sample, 0);
 		}
@@ -2628,14 +2628,14 @@ Editor::snap_to_with_modifier (MusicSample& start, GdkEvent const * event, Round
 }
 
 void
-Editor::snap_to (MusicSample& start, RoundMode direction, bool for_mark, bool ensure_snap)
+Editor::snap_to (MusicSample& start, RoundMode direction, SnapPref pref, bool for_mark, bool ensure_snap)
 {
 	if (!_session || (_snap_mode == SnapOff && !ensure_snap)) {
 		start.set (start.sample, 0);
 		return;
 	}
 
-	snap_to_internal (start, direction, for_mark, ensure_snap);
+	snap_to_internal (start, direction, pref, for_mark, ensure_snap);
 }
 
 void
@@ -2759,7 +2759,7 @@ Editor::marker_snap_to_internal (samplepos_t presnap, RoundMode direction)
 }
 
 void
-Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark, bool ensure_snap)
+Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref, bool for_mark, bool ensure_snap)
 {
 	const samplepos_t one_second = _session->sample_rate();
 	const samplepos_t one_minute = _session->sample_rate() * 60;
@@ -2857,7 +2857,11 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		check_best_snap(presnap, test, dist, best);
 	}
 	
-//	std::cout << "presnap " << presnap << " best = " << best << std::endl;
+	//if SnapToGrid is selected, the user wants to prioritize the music grid
+	//in this case we should reset the best distance, so Grid will prevail
+	if ( pref == SnapToGrid ) {
+		dist = max_samplepos;
+	}
 
 	//now check snap-to-music (quantized) 
 	MusicSample tst(max_samplepos,0);
@@ -2920,11 +2924,11 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		case QuantizeToBeatDiv2:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 2, direction);
 			break;
-		case QuantizeToNone:
-			break;
 	}
-	check_best_snap(presnap, tst.sample, dist, best);
-
+	if (_grid_type != QuantizeToNone) {
+		check_best_snap(presnap, tst.sample, dist, best);
+	}
+	
 	//now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
 	//this also helps to avoid snapping to somewhere the user can't see.  ( i.e.:  I clicked on a region and it disappeared!! )
 	//ToDo:  perhaps this should only occur if EditPointMouse?

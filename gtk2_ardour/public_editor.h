@@ -154,6 +154,7 @@ public:
 	 */
 	virtual void snap_to (ARDOUR::MusicSample& first,
 	                      ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	                      ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny,
 	                      bool                for_mark  = false,
 	                      bool                ensure_snap = false) = 0;
 
@@ -466,7 +467,8 @@ public:
 	virtual void snap_to_with_modifier (ARDOUR::MusicSample& first,
 	                                    GdkEvent const *    ev,
 	                                    ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
-	                                    bool                for_mark  = false) = 0;
+	                                    ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny,
+	                                    bool                for_mark = false) = 0;
 
 	virtual void set_snapped_cursor_position (samplepos_t pos) = 0;
 
