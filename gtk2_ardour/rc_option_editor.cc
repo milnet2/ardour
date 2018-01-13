@@ -2482,7 +2482,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor"), rsas);
 
-	add_option (_("Editor/Snap"), new OptionEditorHeading (_("When Grid is Enabled, snap to:")));
+	add_option (_("Editor/Snap"), new OptionEditorHeading (_("When \"Snap\" is enabled, snap to:")));
 	
 	add_option (_("Editor/Snap"),
 	     new BoolOption (

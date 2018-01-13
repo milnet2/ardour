@@ -1827,8 +1827,7 @@ private:
 	void build_snap_type_menu ();
 
 	ArdourWidgets::ArdourButton snap_mode_button;
-	Glib::RefPtr<Gtk::ToggleAction> toggle_snap_mode_action;
-	void snap_mode_button_toggled ();
+	bool snap_mode_button_clicked (GdkEventButton *);
 
 	Gtk::HBox snap_box;
 

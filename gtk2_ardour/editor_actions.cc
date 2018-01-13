@@ -551,12 +551,9 @@ Editor::register_actions ()
 	/* deprecated */  myactions.register_radio_action (editor_actions, snap_mode_group, X_("snap-normal"), _("Grid"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapNormal)));  //deprecated
 	myactions.register_radio_action (editor_actions, snap_mode_group, X_("snap-magnetic"), _("Magnetic"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapMagnetic)));
 
-	act = myactions.register_toggle_action (editor_actions, "toggle-snap-mode", _("Snap Mode"), sigc::mem_fun (*this, &Editor::snap_mode_button_toggled));
-	toggle_snap_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
-	snap_mode_button.set_related_action (toggle_snap_mode_action);
 	snap_mode_button.set_text (_("Snap"));
 	snap_mode_button.set_name ("mouse mode button");
-
+	snap_mode_button.signal_button_press_event().connect (sigc::mem_fun (*this, &Editor::snap_mode_button_clicked), false);
 
 	myactions.register_action (editor_actions, X_("cycle-snap-mode"), _("Next Snap Mode"), sigc::mem_fun (*this, &Editor::cycle_snap_mode));
 	myactions.register_action (editor_actions, X_("next-snap-choice"), _("Next Snap Choice"), sigc::mem_fun (*this, &Editor::next_snap_choice));
