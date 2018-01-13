@@ -3224,7 +3224,7 @@ TrimDrag::setup_pointer_sample_offset ()
 MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	: Drag (e, i)
 	, _copy (c)
-	, _old_snap_type (e->snap_type())
+	, _old_grid_type (e->grid_type())
 	, _old_snap_mode (e->snap_mode())
 	, before_state (0)
 {
@@ -3297,7 +3297,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		}
 		/* only snap to bars. leave snap mode alone for audio locked meters.*/
 		if (_real_section->position_lock_style() != AudioTime) {
-			_editor->set_snap_to (QuantizeToBar);
+			_editor->set_grid_to (QuantizeToBar);
 			_editor->set_snap_mode (SnapMagnetic);
 		}
 	}
@@ -3329,7 +3329,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	/* reinstate old snap setting */
-	_editor->set_snap_to (_old_snap_type);
+	_editor->set_grid_to (_old_grid_type);
 	_editor->set_snap_mode (_old_snap_mode);
 
 	TempoMap& map (_editor->session()->tempo_map());
@@ -3349,7 +3349,7 @@ MeterMarkerDrag::aborted (bool moved)
 	_marker->set_position (_marker->meter().sample ());
 	if (moved) {
 		/* reinstate old snap setting */
-		_editor->set_snap_to (_old_snap_type);
+		_editor->set_grid_to (_old_grid_type);
 		_editor->set_snap_mode (_old_snap_mode);
 
 		_editor->session()->tempo_map().set_state (*before_state, Stateful::current_state_version);

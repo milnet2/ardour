@@ -161,14 +161,14 @@ public:
 	double trackviews_height () const;
 
 	void cycle_snap_mode ();
-	void next_snap_choice ();
-	void prev_snap_choice ();
-	void set_snap_to (Editing::SnapType);
+	void next_grid_choice ();
+	void prev_grid_choice ();
+	void set_grid_to (Editing::SnapType);
 	void set_snap_mode (Editing::SnapMode);
 	void set_snap_threshold (double pixel_distance) {snap_threshold = pixel_distance;}
 
 	Editing::SnapMode  snap_mode () const;
-	Editing::SnapType  snap_type () const;
+	Editing::SnapType  grid_type () const;
 	bool  snap_musical () const;
 
 	void undo (uint32_t n = 1);
@@ -611,9 +611,9 @@ private:
 	void on_samples_per_pixel_changed ();
 
 	Editing::MouseMode mouse_mode;
-	Editing::SnapType  pre_internal_snap_type;
+	Editing::SnapType  pre_internal_grid_type;
 	Editing::SnapMode  pre_internal_snap_mode;
-	Editing::SnapType  internal_snap_type;
+	Editing::SnapType  internal_grid_type;
 	Editing::SnapMode  internal_snap_mode;
 	Editing::MouseMode effective_mouse_mode () const;
 
@@ -1529,7 +1529,7 @@ private:
 
 	void move_range_selection_start_or_end_to_region_boundary (bool, bool);
 
-	Editing::SnapType _snap_type;
+	Editing::SnapType _grid_type;
 	Editing::SnapMode _snap_mode;
 
 	/// Snap threshold in pixels
@@ -1823,8 +1823,8 @@ private:
 	void set_edit_mode (ARDOUR::EditMode);
 	void cycle_edit_mode ();
 
-	ArdourWidgets::ArdourDropdown snap_type_selector;
-	void build_snap_type_menu ();
+	ArdourWidgets::ArdourDropdown grid_type_selector;
+	void build_grid_type_menu ();
 
 	ArdourWidgets::ArdourButton snap_mode_button;
 	bool snap_mode_button_clicked (GdkEventButton *);
@@ -1833,15 +1833,15 @@ private:
 
 	Gtk::HBox _box;
 
-	std::vector<std::string> snap_type_strings;
+	std::vector<std::string> grid_type_strings;
 	std::vector<std::string> snap_mode_strings;
 
-	void snap_type_selection_done (Editing::SnapType);
+	void grid_type_selection_done (Editing::SnapType);
 	void snap_mode_selection_done (Editing::SnapMode);
 	void snap_mode_chosen (Editing::SnapMode);
-	void snap_type_chosen (Editing::SnapType);
+	void grid_type_chosen (Editing::SnapType);
 
-	Glib::RefPtr<Gtk::RadioAction> snap_type_action (Editing::SnapType);
+	Glib::RefPtr<Gtk::RadioAction> grid_type_action (Editing::SnapType);
 	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
 
 	//zoom focus meu stuff

@@ -45,7 +45,7 @@ setup_gtk_ardour_enums ()
 	EditPoint edit_point;
 	LayerDisplay layer_display;
 	RegionListSortType region_list_sort_type;
-	SnapType snap_type;
+	SnapType grid_type;
 	SnapMode snap_mode;
 	ZoomFocus zoom_focus;
 	ItemType item_type;
@@ -113,7 +113,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (QuantizeToBeatDiv2);
 	REGISTER_ENUM (QuantizeToBeat);
 	REGISTER_ENUM (QuantizeToBar);
-	REGISTER (snap_type);  //ToDo:  quantize_type?
+	REGISTER (grid_type);  //ToDo:  quantize_type?
 
 	REGISTER_ENUM (SnapOff);
 	REGISTER_ENUM (SnapNormal);

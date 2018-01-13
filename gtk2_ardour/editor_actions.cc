@@ -556,47 +556,34 @@ Editor::register_actions ()
 	snap_mode_button.signal_button_press_event().connect (sigc::mem_fun (*this, &Editor::snap_mode_button_clicked), false);
 
 	myactions.register_action (editor_actions, X_("cycle-snap-mode"), _("Next Snap Mode"), sigc::mem_fun (*this, &Editor::cycle_snap_mode));
-	myactions.register_action (editor_actions, X_("next-snap-choice"), _("Next Snap Choice"), sigc::mem_fun (*this, &Editor::next_snap_choice));
-	myactions.register_action (editor_actions, X_("prev-snap-choice"), _("Previous Snap Choice"), sigc::mem_fun (*this, &Editor::prev_snap_choice));
+	myactions.register_action (editor_actions, X_("next-grid-choice"), _("Next Quantize Grid Choice"), sigc::mem_fun (*this, &Editor::next_grid_choice));
+	myactions.register_action (editor_actions, X_("prev-grid-choice"), _("Previous Quantize Grid Choice"), sigc::mem_fun (*this, &Editor::prev_grid_choice));
 
 	Glib::RefPtr<ActionGroup> snap_actions = myactions.create_action_group (X_("Snap"));
-	RadioAction::Group snap_choice_group;
+	RadioAction::Group grid_choice_group;
 
-//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-cd-frame"), _("Snap to CD Frame"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToCDFrame)));
-//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-frame"), _("Snap to Timecode Frame"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToTimecodeFrame)));
-//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-seconds"), _("Snap to Timecode Seconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToTimecodeSeconds)));
-//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-minutes"), _("Snap to Timecode Minutes"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToTimecodeMinutes)));
-//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-seconds"), _("Snap to Seconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToSeconds)));
-//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-minutes"), _("Snap to Minutes"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToMinutes)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-onetwentyeighths"), _("Snap to One Twenty Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv128)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-sixtyfourths"), _("Snap to Sixty Fourths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv64)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-thirtyseconds"), _("Snap to Thirty Seconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv32)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-twentyeighths"), _("Snap to Twenty Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv28)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-twentyfourths"), _("Snap to Twenty Fourths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv24)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-twentieths"), _("Snap to Twentieths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv20)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-asixteenthbeat"), _("Snap to Sixteenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv16)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-fourteenths"), _("Snap to Fourteenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv14)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-twelfths"), _("Snap to Twelfths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv12)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-tenths"), _("Snap to Tenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv10)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-eighths"), _("Snap to Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv8)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-sevenths"), _("Snap to Sevenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv7)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-sixths"), _("Snap to Sixths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv6)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-fifths"), _("Snap to Fifths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv5)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-quarters"), _("Snap to Quarters"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv4)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-thirds"), _("Snap to Thirds"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv3)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-halves"), _("Snap to Halves"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv2)));
 
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-onetwentyeighths"), _("Snap to One Twenty Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv128)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-sixtyfourths"), _("Snap to Sixty Fourths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv64)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirtyseconds"), _("Snap to Thirty Seconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv32)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-twentyeighths"), _("Snap to Twenty Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv28)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-twentyfourths"), _("Snap to Twenty Fourths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv24)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-twentieths"), _("Snap to Twentieths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv20)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-asixteenthbeat"), _("Snap to Sixteenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv16)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-fourteenths"), _("Snap to Fourteenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv14)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-twelfths"), _("Snap to Twelfths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv12)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-tenths"), _("Snap to Tenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv10)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-eighths"), _("Snap to Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv8)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-sevenths"), _("Snap to Sevenths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv7)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-sixths"), _("Snap to Sixths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv6)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-fifths"), _("Snap to Fifths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv5)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-quarters"), _("Snap to Quarters"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv4)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirds"), _("Snap to Thirds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv3)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-halves"), _("Snap to Halves"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeatDiv2)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-beat"), _("Snap to Beat"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeat)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-bar"), _("Snap to Bar"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBar)));
 
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-beat"), _("Snap to Beat"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBeat)));
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-bar"), _("Snap to Bar"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToBar)));
-
-	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-none"), _("Snap to None"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToNone)));
-
-//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-mark"), _("Snap to Mark"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToMark)));
-//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-start"), _("Snap to Region Start"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToRegionStart)));
-//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-end"), _("Snap to Region End"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToRegionEnd)));
-//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-sync"), _("Snap to Region Sync"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToRegionSync)));
-//	myactions.register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-boundary"), _("Snap to Region Boundary"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::QuantizeToRegionBoundary)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-none"), _("Snap to None"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToNone)));
 
 	myactions.register_toggle_action (editor_actions, X_("show-marker-lines"), _("Show Marker Lines"), sigc::mem_fun (*this, &Editor::toggle_marker_lines));
 
@@ -743,7 +730,7 @@ Editor::register_actions ()
 
 	myactions.register_toggle_action (editor_actions, X_("ToggleGroupTabs"), _("Show Group Tabs"), sigc::mem_fun (*this, &Editor::set_group_tabs));
 
-	myactions.register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measure Lines"), sigc::mem_fun (*this, &Editor::toggle_measure_visibility));
+	myactions.register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Grid Lines"), sigc::mem_fun (*this, &Editor::toggle_measure_visibility));
 
 	myactions.register_action (editor_actions, X_("toggle-midi-input-active"), _("Toggle MIDI Input Active for Editor-Selected Tracks/Busses"),
 	                           sigc::bind (sigc::mem_fun (*this, &Editor::toggle_midi_input_active), false));
@@ -1056,7 +1043,7 @@ Editor::edit_current_tempo ()
 }
 
 RefPtr<RadioAction>
-Editor::snap_type_action (SnapType type)
+Editor::grid_type_action (SnapType type)
 {
 	const char* action = 0;
 	RefPtr<Action> act;
@@ -1134,157 +1121,157 @@ Editor::snap_type_action (SnapType type)
 		return ract;
 
 	} else  {
-		error << string_compose (_("programming error: %1"), "Editor::snap_type_chosen could not find action to match type.") << endmsg;
+		error << string_compose (_("programming error: %1"), "Editor::grid_type_chosen could not find action to match type.") << endmsg;
 		return RefPtr<RadioAction>();
 	}
 }
 
 void
-Editor::next_snap_choice ()
+Editor::next_grid_choice ()
 {
-	switch (_snap_type) {
+	switch (_grid_type) {
 	case Editing::QuantizeToBeatDiv128:
-		set_snap_to (Editing::QuantizeToBeatDiv64);
+		set_grid_to (Editing::QuantizeToBeatDiv64);
 		break;
 	case Editing::QuantizeToBeatDiv64:
-		set_snap_to (Editing::QuantizeToBeatDiv32);
+		set_grid_to (Editing::QuantizeToBeatDiv32);
 		break;
 	case Editing::QuantizeToBeatDiv32:
-		set_snap_to (Editing::QuantizeToBeatDiv28);
+		set_grid_to (Editing::QuantizeToBeatDiv28);
 		break;
 	case Editing::QuantizeToBeatDiv28:
-		set_snap_to (Editing::QuantizeToBeatDiv24);
+		set_grid_to (Editing::QuantizeToBeatDiv24);
 		break;
 	case Editing::QuantizeToBeatDiv24:
-		set_snap_to (Editing::QuantizeToBeatDiv20);
+		set_grid_to (Editing::QuantizeToBeatDiv20);
 		break;
 	case Editing::QuantizeToBeatDiv20:
-		set_snap_to (Editing::QuantizeToBeatDiv16);
+		set_grid_to (Editing::QuantizeToBeatDiv16);
 		break;
 	case Editing::QuantizeToBeatDiv16:
-		set_snap_to (Editing::QuantizeToBeatDiv14);
+		set_grid_to (Editing::QuantizeToBeatDiv14);
 		break;
 	case Editing::QuantizeToBeatDiv14:
-		set_snap_to (Editing::QuantizeToBeatDiv12);
+		set_grid_to (Editing::QuantizeToBeatDiv12);
 		break;
 	case Editing::QuantizeToBeatDiv12:
-		set_snap_to (Editing::QuantizeToBeatDiv10);
+		set_grid_to (Editing::QuantizeToBeatDiv10);
 		break;
 	case Editing::QuantizeToBeatDiv10:
-		set_snap_to (Editing::QuantizeToBeatDiv8);
+		set_grid_to (Editing::QuantizeToBeatDiv8);
 		break;
 	case Editing::QuantizeToBeatDiv8:
-		set_snap_to (Editing::QuantizeToBeatDiv7);
+		set_grid_to (Editing::QuantizeToBeatDiv7);
 		break;
 	case Editing::QuantizeToBeatDiv7:
-		set_snap_to (Editing::QuantizeToBeatDiv6);
+		set_grid_to (Editing::QuantizeToBeatDiv6);
 		break;
 	case Editing::QuantizeToBeatDiv6:
-		set_snap_to (Editing::QuantizeToBeatDiv5);
+		set_grid_to (Editing::QuantizeToBeatDiv5);
 		break;
 	case Editing::QuantizeToBeatDiv5:
-		set_snap_to (Editing::QuantizeToBeatDiv4);
+		set_grid_to (Editing::QuantizeToBeatDiv4);
 		break;
 	case Editing::QuantizeToBeatDiv4:
-		set_snap_to (Editing::QuantizeToBeatDiv3);
+		set_grid_to (Editing::QuantizeToBeatDiv3);
 		break;
 	case Editing::QuantizeToBeatDiv3:
-		set_snap_to (Editing::QuantizeToBeatDiv2);
+		set_grid_to (Editing::QuantizeToBeatDiv2);
 		break;
 	case Editing::QuantizeToBeatDiv2:
-		set_snap_to (Editing::QuantizeToBeat);
+		set_grid_to (Editing::QuantizeToBeat);
 		break;
 	case Editing::QuantizeToBeat:
-		set_snap_to (Editing::QuantizeToBar);
+		set_grid_to (Editing::QuantizeToBar);
 		break;
 	case Editing::QuantizeToBar:
-		set_snap_to (Editing::QuantizeToNone);
+		set_grid_to (Editing::QuantizeToNone);
 		break;
 	case Editing::QuantizeToNone:
-		set_snap_to (Editing::QuantizeToBeatDiv128);
+		set_grid_to (Editing::QuantizeToBeatDiv128);
 		break;
 	}
 }
 
 void
-Editor::prev_snap_choice ()
+Editor::prev_grid_choice ()
 {
-	switch (_snap_type) {
+	switch (_grid_type) {
 	case Editing::QuantizeToBeatDiv128:
-		set_snap_to (Editing::QuantizeToNone);
+		set_grid_to (Editing::QuantizeToNone);
 		break;
 	case Editing::QuantizeToBeatDiv64:
-		set_snap_to (Editing::QuantizeToBeatDiv128);
+		set_grid_to (Editing::QuantizeToBeatDiv128);
 		break;
 	case Editing::QuantizeToBeatDiv32:
-		set_snap_to (Editing::QuantizeToBeatDiv64);
+		set_grid_to (Editing::QuantizeToBeatDiv64);
 		break;
 	case Editing::QuantizeToBeatDiv28:
-		set_snap_to (Editing::QuantizeToBeatDiv32);
+		set_grid_to (Editing::QuantizeToBeatDiv32);
 		break;
 	case Editing::QuantizeToBeatDiv24:
-		set_snap_to (Editing::QuantizeToBeatDiv28);
+		set_grid_to (Editing::QuantizeToBeatDiv28);
 		break;
 	case Editing::QuantizeToBeatDiv20:
-		set_snap_to (Editing::QuantizeToBeatDiv24);
+		set_grid_to (Editing::QuantizeToBeatDiv24);
 		break;
 	case Editing::QuantizeToBeatDiv16:
-		set_snap_to (Editing::QuantizeToBeatDiv20);
+		set_grid_to (Editing::QuantizeToBeatDiv20);
 		break;
 	case Editing::QuantizeToBeatDiv14:
-		set_snap_to (Editing::QuantizeToBeatDiv16);
+		set_grid_to (Editing::QuantizeToBeatDiv16);
 		break;
 	case Editing::QuantizeToBeatDiv12:
-		set_snap_to (Editing::QuantizeToBeatDiv14);
+		set_grid_to (Editing::QuantizeToBeatDiv14);
 		break;
 	case Editing::QuantizeToBeatDiv10:
-		set_snap_to (Editing::QuantizeToBeatDiv12);
+		set_grid_to (Editing::QuantizeToBeatDiv12);
 		break;
 	case Editing::QuantizeToBeatDiv8:
-		set_snap_to (Editing::QuantizeToBeatDiv10);
+		set_grid_to (Editing::QuantizeToBeatDiv10);
 		break;
 	case Editing::QuantizeToBeatDiv7:
-		set_snap_to (Editing::QuantizeToBeatDiv8);
+		set_grid_to (Editing::QuantizeToBeatDiv8);
 		break;
 	case Editing::QuantizeToBeatDiv6:
-		set_snap_to (Editing::QuantizeToBeatDiv7);
+		set_grid_to (Editing::QuantizeToBeatDiv7);
 		break;
 	case Editing::QuantizeToBeatDiv5:
-		set_snap_to (Editing::QuantizeToBeatDiv6);
+		set_grid_to (Editing::QuantizeToBeatDiv6);
 		break;
 	case Editing::QuantizeToBeatDiv4:
-		set_snap_to (Editing::QuantizeToBeatDiv5);
+		set_grid_to (Editing::QuantizeToBeatDiv5);
 		break;
 	case Editing::QuantizeToBeatDiv3:
-		set_snap_to (Editing::QuantizeToBeatDiv4);
+		set_grid_to (Editing::QuantizeToBeatDiv4);
 		break;
 	case Editing::QuantizeToBeatDiv2:
-		set_snap_to (Editing::QuantizeToBeatDiv3);
+		set_grid_to (Editing::QuantizeToBeatDiv3);
 		break;
 	case Editing::QuantizeToBeat:
-		set_snap_to (Editing::QuantizeToBeatDiv2);
+		set_grid_to (Editing::QuantizeToBeatDiv2);
 		break;
 	case Editing::QuantizeToBar:
-		set_snap_to (Editing::QuantizeToNone);
+		set_grid_to (Editing::QuantizeToNone);
 		break;
 	case Editing::QuantizeToNone:
-		set_snap_to (Editing::QuantizeToBeatDiv128);
+		set_grid_to (Editing::QuantizeToBeatDiv128);
 		break;
 	}
 }
 
 void
-Editor::snap_type_chosen (SnapType type)
+Editor::grid_type_chosen (SnapType type)
 {
 	/* this is driven by a toggle on a radio group, and so is invoked twice,
 	   once for the item that became inactive and once for the one that became
 	   active.
 	*/
 
-	RefPtr<RadioAction> ract = snap_type_action (type);
+	RefPtr<RadioAction> ract = grid_type_action (type);
 
 	if (ract && ract->get_active()) {
-		set_snap_to (type);
+		set_grid_to (type);
 	}
 }
 
