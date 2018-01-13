@@ -2203,6 +2203,12 @@ Editor::set_snap_mode (SnapMode mode)
 	}
 
 	_snap_mode = mode;
+	
+	if (_snap_mode == SnapOff ) {
+		snap_mode_button.set_active_state (Gtkmm2ext::Off);
+	} else {
+		snap_mode_button.set_active_state (Gtkmm2ext::ExplicitActive);
+	}
 
 	instant_save ();
 }
@@ -3234,7 +3240,7 @@ Editor::setup_tooltips ()
 	set_tooltip (tav_shrink_button, _("Shrink Tracks"));
 	set_tooltip (visible_tracks_selector, _("Number of visible tracks"));
 	set_tooltip (snap_type_selector, _("Musical Snap (Quantize)"));
-	set_tooltip (snap_mode_button, _("Snap Mode"));
+	set_tooltip (snap_mode_button, _("Snap Mode\n\nRight-click to visit Snap preferences."));
 	set_tooltip (edit_point_selector, _("Edit Point"));
 	set_tooltip (edit_mode_selector, _("Edit Mode"));
 	set_tooltip (nudge_clock, _("Nudge Clock\n(controls distance used to nudge regions and selections)"));

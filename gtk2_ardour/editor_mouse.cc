@@ -58,6 +58,7 @@
 #include "marker.h"
 #include "streamview.h"
 #include "region_gain_line.h"
+#include "rc_option_editor.h"
 #include "automation_time_axis.h"
 #include "control_point.h"
 #include "selection.h"
@@ -217,16 +218,24 @@ Editor::mouse_mode_object_range_toggled()
 	set_mouse_mode(m, true);  //call this so the button styles can get updated
 }
 
-void
-Editor::snap_mode_button_toggled()
+bool
+Editor::snap_mode_button_clicked (GdkEventButton* ev)
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-snap-mode"));
-	assert (act);
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	assert (tact);
+	if (ev->button != 3) {
+		cycle_snap_mode();
+		return true;
+	}
 
-	cycle_snap_mode();
+	RCOptionEditor* rc_option_editor = ARDOUR_UI::instance()->get_rc_option_editor();
+	if ( rc_option_editor ) {
+		ARDOUR_UI::instance()->show_tabbable (rc_option_editor);
+		rc_option_editor->set_current_page (_("Editor/Snap"));
+	}
+	
+	return true;
 }
+
+
 
 static Glib::RefPtr<Action>
 get_mouse_mode_action(MouseMode m)
