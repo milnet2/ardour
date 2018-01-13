@@ -7059,7 +7059,7 @@ Editor::snap_regions_to_grid ()
 		(*r)->region()->clear_changes ();
 
 		MusicSample start ((*r)->region()->first_sample (), 0);
-		snap_to (start);
+		snap_to (start, RoundNearest, SnapToGrid );
 		(*r)->region()->set_position (start.sample, start.division);
 		_session->add_command(new StatefulDiffCommand ((*r)->region()));
 	}
@@ -7268,7 +7268,7 @@ Editor::playhead_forward_to_grid ()
 
 	if (pos.sample < max_samplepos - 1) {
 		pos.sample += 2;
-		snap_to_internal (pos, RoundUpAlways, false, true);
+		snap_to_internal (pos, RoundUpAlways, SnapToGrid, false, true);
 		_session->request_locate (pos.sample);
 	}
 }
@@ -7285,7 +7285,7 @@ Editor::playhead_backward_to_grid ()
 
 	if (pos.sample > 2) {
 		pos.sample -= 2;
-		snap_to_internal (pos, RoundDownAlways, false, true);
+		snap_to_internal (pos, RoundDownAlways, SnapToGrid, false, true);
 		_session->request_locate (pos.sample);
 	}
 }

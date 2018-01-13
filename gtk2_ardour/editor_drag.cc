@@ -381,7 +381,7 @@ Drag::setup_snap_delta (MusicSample pos)
 {
 	TempoMap& map (_editor->session()->tempo_map());
 	MusicSample snap (pos);
-	_editor->snap_to (snap, ARDOUR::RoundNearest, false, true);
+	_editor->snap_to (snap, ARDOUR::RoundNearest, ARDOUR::SnapToAny, false, true);
 	_snap_delta = snap.sample - pos.sample;
 
 	_snap_delta_music = 0.0;
@@ -5092,7 +5092,7 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 	MusicSample grab (grab_sample (), 0);
 
 	if (UIConfiguration::instance().get_rubberbanding_snaps_to_grid ()) {
-		_editor->snap_to_with_modifier (grab, event);
+		_editor->snap_to_with_modifier (grab, event, RoundNearest, SnapToGrid);
 	} else {
 		grab.sample = raw_grab_sample ();
 	}
@@ -6071,7 +6071,7 @@ NoteDrag::total_dx (GdkEvent * event) const
 
 	/* possibly snap and return corresponding delta in quarter notes */
 	MusicSample snap (st, 0);
-	_editor->snap_to_with_modifier (snap, event);
+	_editor->snap_to_with_modifier (snap, event, RoundNearest, SnapToGrid);
 	double ret = map.exact_qn_at_sample (snap.sample, snap.division) - n_qn - snap_delta_music (event->button.state);
 
 	/* prevent the earliest note being dragged earlier than the region's start position */
