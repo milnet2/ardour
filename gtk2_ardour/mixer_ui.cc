@@ -34,6 +34,7 @@
 
 #include "pbd/convert.h"
 #include "pbd/stacktrace.h"
+#include "pbd/tokenizer.h"
 #include "pbd/unwind.h"
 
 #include "ardour/amp.h"
@@ -247,7 +248,11 @@ Mixer_UI::Mixer_UI ()
 
 	favorite_plugins_frame.set_name ("BaseFrame");
 	favorite_plugins_frame.set_shadow_type (Gtk::SHADOW_IN);
-	favorite_plugins_frame.add (favorite_plugins_scroller);
+	favorite_plugins_frame.add (favorite_plugins_vbox);
+
+	favorite_plugins_vbox.pack_start (favorite_plugins_scroller, true, true);
+	favorite_plugins_vbox.pack_start (favorite_plugins_tag_combo, false, false);
+	favorite_plugins_tag_combo.signal_changed().connect( sigc::mem_fun (*this, &Mixer_UI::tag_combo_changed) );
 
 	rhs_pane1.add (favorite_plugins_frame);
 	rhs_pane1.add (track_display_frame);
@@ -363,6 +368,7 @@ Mixer_UI::Mixer_UI ()
 #endif
 	PluginManager::instance ().PluginListChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
 	PluginManager::instance ().PluginStatusesChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
+	PluginManager::instance ().PluginTagsChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_tag_combo, this), gui_context());
 	ARDOUR::Plugin::PresetsChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
 }
 
@@ -380,6 +386,12 @@ void
 Mixer_UI::escape ()
 {
 	select_none ();
+}
+
+void
+Mixer_UI::tag_combo_changed ()
+{
+	refill_favorite_plugins();
 }
 
 Gtk::Window*
@@ -1036,6 +1048,7 @@ Mixer_UI::set_session (Session* sess)
 	}
 
 	refill_favorite_plugins();
+	refill_tag_combo();
 
 	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
 	set_state (*node, 0);
@@ -2573,9 +2586,28 @@ Mixer_UI::refiller (PluginInfoList& result, const PluginInfoList& plugs)
 {
 	PluginManager& manager (PluginManager::instance());
 	for (PluginInfoList::const_iterator i = plugs.begin(); i != plugs.end(); ++i) {
+
+		//not a Favorite?  skip it
 		if (manager.get_status (*i) != PluginManager::Favorite) {
 			continue;
 		}
+		
+		//Check the tag combo selection, and skip this plugin if it doesn't match the selected tag(s)
+		string test = favorite_plugins_tag_combo.get_active_text();
+		if ( test != _("Show All") ) {
+			string tags = manager.get_tags(*i);
+			vector<string> tokens;
+			if (!PBD::tokenize ( tags, string(",\n"), std::back_inserter (tokens), true)) {
+				warning << _("PluginManager: Could not tokenize string: ") << tags << endmsg;
+				continue;
+			}
+			//does the selected tag match any of the tags in the plugin?
+			vector<string>::iterator tt =  find (tokens.begin(), tokens.end(), test);
+			if (tt == tokens.end() ) {
+				continue;
+			}
+		}
+
 		result.push_back (*i);
 	}
 }
@@ -2636,6 +2668,34 @@ Mixer_UI::refill_favorite_plugins ()
 	favorite_order = plugs;
 
 	sync_treeview_from_favorite_order ();
+}
+
+struct SortByTag {
+	bool operator() (std::string a, std::string b) {
+		return a.compare (b) < 0;
+	}
+};
+
+
+void
+Mixer_UI::refill_tag_combo ()
+{
+	PluginManager& mgr (PluginManager::instance());
+
+	std::vector<std::string> tags = mgr.get_all_tags( true );
+	
+	//sort in alphabetical order
+	SortByTag sorter;
+	sort (tags.begin(), tags.end(), sorter);
+
+	favorite_plugins_tag_combo.clear();
+	favorite_plugins_tag_combo.append_text( _("Show All") );
+	
+	for (vector<string>::iterator t = tags.begin(); t != tags.end(); ++t) {
+		favorite_plugins_tag_combo.append_text( *t );
+	}
+
+	favorite_plugins_tag_combo.set_active_text( _("Show All") );
 }
 
 void
