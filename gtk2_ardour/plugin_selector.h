@@ -21,6 +21,7 @@
 #define __ardour_plugin_selector_h__
 
 #include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/liststore.h>
@@ -60,6 +61,25 @@ public:
 	void show_manager ();
 
 private:
+	
+	//search 
+	Gtk::CheckButton *_search_name_checkbox;
+	Gtk::CheckButton *_search_tags_checkbox;
+	Gtk::CheckButton *_search_ignore_checkbox;
+
+	//radio-button filters
+	Gtk::RadioButton *_fil_effects_radio;
+	Gtk::RadioButton *_fil_instruments_radio;
+	Gtk::RadioButton *_fil_utils_radio;
+	Gtk::RadioButton *_fil_favorites_radio;
+	Gtk::RadioButton *_fil_hidden_radio;
+	Gtk::RadioButton *_fil_all_radio;
+
+	//combobox filters
+	Gtk::ComboBoxText *_fil_type_combo;
+	Gtk::ComboBoxText *_fil_creator_combo;
+	Gtk::ComboBoxText *_fil_channel_combo;
+
 	PluginInterestedObject* interested_object;
 
 	Gtk::ScrolledWindow scroller;   // Available plugins
