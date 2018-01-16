@@ -78,12 +78,46 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	void set_status (ARDOUR::PluginType type, std::string unique_id, PluginStatusType status);
 	PluginStatusType get_status (const PluginInfoPtr&) const;
 
+ 	void load_tags ();
+ 	void save_tags ();
+ 	void set_tags (ARDOUR::PluginType type, std::string unique_id, std::string tags, bool only_if_empty = false);
+ 	std::string get_tags (const PluginInfoPtr&) const;
+
+	std::vector<std::string> get_all_tags( bool favorites_only ) const; 
+ 
 	/** plugins were added to or removed from one of the PluginInfoLists */
 	PBD::Signal0<void> PluginListChanged;
 	/** Plugin Hidden/Favorite status changed */
 	PBD::Signal0<void> PluginStatusesChanged;
 
+	PBD::Signal0<void> PluginTagsChanged;
+
   private:
+
+	struct PluginTags {
+	    ARDOUR::PluginType type;
+	    std::string unique_id;
+	    std::string tags;
+
+	    PluginTags (ARDOUR::PluginType t, std::string id, std::string s)
+	    : type (t), unique_id (id), tags (s) {}
+
+	    bool operator==(const PluginTags& other) const {
+		    return other.type == type && other.unique_id == unique_id;
+	    }
+
+	    bool operator<(const PluginTags& other) const {
+		    if (other.type < type) {
+			    return true;
+		    } else if (other.type == type && other.unique_id < unique_id) {
+			    return true;
+		    }
+		    return false;
+	    }
+	};
+	typedef std::set<PluginTags> PluginTagsList;
+	PluginTagsList ptags;
+
 	struct PluginStatus {
 	    ARDOUR::PluginType type;
 	    std::string unique_id;

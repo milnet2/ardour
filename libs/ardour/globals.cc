@@ -358,6 +358,11 @@ copy_configuration_files (string const & old_dir, string const & new_dir, int ol
 		old_name = Glib::build_filename (old_dir, X_("plugin_statuses"));
 		new_name = Glib::build_filename (new_dir, X_("plugin_statuses"));
 
+		/* plugin tags */
+
+		old_name = Glib::build_filename (old_dir, X_("plugin_tags"));
+		new_name = Glib::build_filename (new_dir, X_("plugin_tags"));
+
 		copy_file (old_name, new_name);
 
 		/* export formats */

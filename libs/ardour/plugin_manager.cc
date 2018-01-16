@@ -171,6 +171,8 @@ PluginManager::PluginManager ()
 
 	load_statuses ();
 
+	load_tags ();
+
 	if ((s = getenv ("LADSPA_RDF_PATH"))){
 		lrdf_path = s;
 	}
@@ -983,7 +985,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 
 		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
 		info->unique_id = buf;
-		info->category = "VST";
+		info->category = finfo->category;
 		info->path = path;
 		info->creator = finfo->creator;
 		info->index = 0;
@@ -1120,7 +1122,7 @@ PluginManager::mac_vst_discover (string path, bool cache_only)
 
 		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
 		info->unique_id = buf;
-		info->category = "MacVST";
+		info->category = finfo->Category;
 		info->path = path;
 		info->creator = finfo->creator;
 		info->index = 0;
@@ -1239,7 +1241,7 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 
 		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
 		info->unique_id = buf;
-		info->category = "linuxVSTs";
+		info->category = finfo->Category;
 		info->path = path;
 		info->creator = finfo->creator;
 		info->index = 0;
@@ -1339,6 +1341,7 @@ PluginManager::save_statuses ()
 		}
 
 		ofs << ' ';
+
 		ofs << (*i).unique_id;;
 		ofs << endl;
 	}
@@ -1436,6 +1439,198 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 
 	statuses.insert (ps);
 }
+
+PluginType
+to_generic_vst( PluginType pt )
+{
+	PluginType ret = pt;
+
+	switch (pt) {
+		case Windows_VST:
+		case LXVST:
+		case MacVST:
+			ret= LXVST;
+			break;
+		default:
+			break;
+	}
+
+	return ret;
+}
+
+
+std::string
+PluginManager::get_tags (const PluginInfoPtr& pi) const
+{
+	PluginTags ps ( to_generic_vst(pi->type), pi->unique_id, "");
+	PluginTagsList::const_iterator i =  find (ptags.begin(), ptags.end(), ps);
+	if (i ==  ptags.end() ) {
+		return "";
+	} else {
+		return i->tags;
+	}
+}
+
+void
+PluginManager::save_tags ()
+{
+	std::string path = Glib::build_filename (user_config_directory(), "plugin_tags");
+	stringstream ofs;
+
+	for (PluginTagsList::iterator i = ptags.begin(); i != ptags.end(); ++i) {
+		switch ((*i).type) {
+		case LADSPA:
+			ofs << "LADSPA";
+			break;
+		case AudioUnit:
+			ofs << "AudioUnit";
+			break;
+		case LV2:
+			ofs << "LV2";
+			break;
+		case Windows_VST:
+		case LXVST:
+		case MacVST:
+			ofs << "VST";
+			break;
+		case Lua:
+			ofs << "Lua";
+			break;
+		}
+
+		ofs << ' ';
+
+		ofs << (*i).unique_id;;
+
+		ofs << ' ';
+
+		ofs << (*i).tags;
+
+		ofs << '\n';
+	}
+	g_file_set_contents (path.c_str(), ofs.str().c_str(), -1, NULL);
+	
+	PluginTagsChanged (); /* EMIT SIGNAL */
+}
+
+void
+PluginManager::load_tags ()
+{
+	std::string path = Glib::build_filename (user_config_directory(), "plugin_tags");
+	gchar *fbuf = NULL;
+	if (!g_file_get_contents (path.c_str(), &fbuf, NULL, NULL))  {
+		return;
+	}
+	stringstream ifs (fbuf);
+	g_free (fbuf);
+
+	std::string stype;
+	std::string stag;
+	std::string id;
+	PluginType type;
+	char buf[1024];
+
+	while (ifs) {
+
+		ifs >> stype;
+		if (!ifs) {
+			break;
+
+		}
+
+		ifs >> id;
+		if (!ifs) {
+			break;
+
+		}
+
+		/* rest of the line is the tag */
+
+		ifs.getline (buf, sizeof (buf), '\n');
+		if (!ifs) {
+			break;
+		}
+
+
+		if (stype == "LADSPA") {
+			type = LADSPA;
+		} else if (stype == "AudioUnit") {
+			type = AudioUnit;
+		} else if (stype == "LV2") {
+			type = LV2;
+		} else if (stype == "VST") { 
+			type = LXVST; //for the purposes of this file, we pretend all VSTs are LXVST's
+		} else if (stype == "Lua") {
+			type = Lua;
+		} else {
+			error << string_compose (_("unknown plugin type \"%1\" - ignored"), stype)
+			      << endmsg;
+			continue;
+		}
+
+		std::string tagstr = buf;
+		strip_whitespace_edges (tagstr);
+		set_tags (type, id, tagstr);
+	}
+}
+
+void
+PluginManager::set_tags (PluginType t, string id, string tag, bool only_if_empty)
+{
+	PluginTags ps ( to_generic_vst(t), id, tag);
+	PluginTagsList::const_iterator i =  find (ptags.begin(), ptags.end(), ps);
+	if (i == ptags.end() ) {
+		ptags.insert (ps);
+	} else {
+		if ( ((*i).tags.length() == 0) || !only_if_empty ) {
+			ptags.erase (ps);
+			ptags.insert (ps);
+		}
+	}
+} 
+
+#include "pbd/tokenizer.h"
+
+
+std::vector<std::string>
+PluginManager::get_all_tags( bool favorites_only ) const
+{
+	std::vector<std::string> ret;
+
+	PluginTagsList::const_iterator pt;
+	for (pt = ptags.begin(); pt != ptags.end(); ++pt) {
+
+		//if favorites_only then we need to check the info ptr and maybe skip
+		if (favorites_only ) {
+			PluginStatus stat ( (*pt).type, (*pt).unique_id );
+			PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), stat);
+			if ((i != statuses.end()) && (i->status == Favorite) ) {
+				//it's a favorite!
+			} else {
+				continue;
+			}
+		}
+		
+		//parse each plugin's tag string into separate tags
+		vector<string> tags;
+		if (!PBD::tokenize ( (*pt).tags, string(",\n"), std::back_inserter (tags), true)) {
+			warning << _("PluginManager: Could not tokenize string: ") << (*pt).tags << endmsg;
+			continue;
+		}
+
+		//maybe add the tags we've found
+		for (vector<string>::iterator t = tags.begin(); t != tags.end(); ++t) {
+			//if this tag isn't already in the list, add it
+			vector<string>::iterator i =  find (ret.begin(), ret.end(), *t);
+			if (i == ret.end() ) {
+				ret.push_back( *t );
+			}
+		}
+	}
+
+	return ret;
+}
+
 
 const ARDOUR::PluginInfoList&
 PluginManager::windows_vst_plugin_info ()
