@@ -52,6 +52,7 @@
 #include "ardour/debug.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/midi_patch_manager.h"
+#include "ardour/plugin_manager.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/types.h"
@@ -3546,6 +3547,8 @@ LV2PluginInfo::discover()
 
 		info->unique_id = lilv_node_as_uri(lilv_plugin_get_uri(p));
 		info->index     = 0; // Meaningless for LV2
+
+		PluginManager::instance().set_tags( info->type, info->unique_id, info->category, true );  //if we don't have any tags for this plugin, make some up.
 
 		plugs->push_back(info);
 	}

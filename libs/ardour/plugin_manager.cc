@@ -995,6 +995,8 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
 		info->type = ARDOUR::Windows_VST;
 
+		PluginManager::instance().set_tags( info->type, info->unique_id, info->category, true );  //if we don't have any tags for this plugin, make some up.
+
 		// TODO: check dup-IDs (lxvst AND windows vst)
 		bool duplicate = false;
 
@@ -1132,6 +1134,8 @@ PluginManager::mac_vst_discover (string path, bool cache_only)
 		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
 		info->type = ARDOUR::MacVST;
 
+		PluginManager::instance().set_tags( info->type, info->unique_id, info->category, true );  //if we don't have any tags for this plugin, make some up.
+
 		bool duplicate = false;
 		if (!_mac_vst_plugin_info->empty()) {
 			for (PluginInfoList::iterator i =_mac_vst_plugin_info->begin(); i != _mac_vst_plugin_info->end(); ++i) {
@@ -1250,6 +1254,8 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 		info->n_inputs.set_midi ((finfo->wantMidi&1) ? 1 : 0);
 		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
 		info->type = ARDOUR::LXVST;
+
+		PluginManager::instance().set_tags( info->type, info->unique_id, info->category, true );  //if we don't have any tags for this plugin, make some up.
 
 					/* Make sure we don't find the same plugin in more than one place along
 			 the LXVST_PATH We can't use a simple 'find' because the path is included

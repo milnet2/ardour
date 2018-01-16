@@ -38,13 +38,14 @@
 #include <glibmm/miscutils.h>
 
 #include "ardour/ardour.h"
+#include "ardour/audio_unit.h"
 #include "ardour/audioengine.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/debug.h"
-#include "ardour/midi_buffer.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/io.h"
-#include "ardour/audio_unit.h"
+#include "ardour/midi_buffer.h"
+#include "ardour/plugin_manager.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
@@ -3000,6 +3001,8 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 
 			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("detected AU %1 with %2 i/o configurations - %3\n",
 									info->name.c_str(), info->cache.io_configs.size(), info->unique_id));
+
+			PluginManager::instance().set_tags( info->type, info->unique_id, info->category, true );  //if we don't have any tags for this plugin, make some up.
 
 			plugs.push_back (info);
 

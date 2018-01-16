@@ -31,6 +31,7 @@
 #include "ardour/luaproc.h"
 #include "ardour/luascripting.h"
 #include "ardour/midi_buffer.h"
+#include "ardour/plugin_manager.h"
 #include "ardour/plugin.h"
 #include "ardour/session.h"
 
@@ -1229,6 +1230,8 @@ LuaPluginInfo::LuaPluginInfo (LuaScriptInfoPtr lsi) {
 	type = Lua;
 
 	_is_instrument = category == "Instrument";
+	
+	PluginManager::instance().set_tags( type, unique_id, category, true );  //if we don't have any tags for this plugin, make some up.
 }
 
 PluginPtr
