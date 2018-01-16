@@ -52,29 +52,10 @@ using namespace Gtk;
 using namespace std;
 using namespace ArdourWidgets;
 
-static const char* _filter_mode_strings[] = {
-	N_("Name contains"),
-	N_("Type contains"),
-	N_("Category contains"),
-	N_("Author contains"),
-	N_("Library contains"),
-	N_("Favorites only"),
-	N_("Hidden only"),
-	0
-};
-
 PluginSelector::PluginSelector (PluginManager& mgr)
 	: ArdourDialog (_("Plugin Manager"), true, false)
-	, filter_button (Stock::CLEAR)
-	, fil_hidden_button (ArdourButton::led_default_elements)
-	, fil_instruments_button (ArdourButton::default_elements)
-	, fil_analysis_button (ArdourButton::default_elements)
-	, fil_utils_button (ArdourButton::default_elements)
+	, search_clear_button (Stock::CLEAR)
 	, manager (mgr)
-	, _show_hidden (false)
-	, _show_instruments (Gtkmm2ext::ImplicitActive)
-	, _show_analysers (Gtkmm2ext::Off)
-	, _show_utils (Gtkmm2ext::Off)
 
 {
 	set_name ("PluginSelectorWindow");
@@ -158,44 +139,14 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	Gtk::Table* table = manage(new Gtk::Table(7, 11));
 	table->set_size_request(750, 500);
 
-	Gtk::Table* search_table = manage(new Gtk::Table(2, 2));
-
-	Gtk::Table* filter_table = manage(new Gtk::Table(1, 10));
-
-	fil_hidden_button.set_name ("pluginlist hide button");
-	fil_hidden_button.set_text (_("Show Hidden"));
-	fil_hidden_button.set_active (_show_hidden);
-	set_tooltip (fil_hidden_button, _("Include hidden plugins in list."));
-
-	fil_instruments_button.set_name ("pluginlist filter button");
-	fil_instruments_button.set_text (_("Instruments"));
-	fil_instruments_button.set_active_state (_show_instruments);
-	set_tooltip (fil_instruments_button, _("Cycle display of instrument plugins (if any)."));
-
-	fil_analysis_button.set_name ("pluginlist filter button");
-	fil_analysis_button.set_text (_("Analyzers"));
-	fil_analysis_button.set_active_state (_show_analysers);
-	set_tooltip (fil_analysis_button, _("Cycle display of analysis plugins (if any)."));
-
-	fil_utils_button.set_name ("pluginlist filter button");
-	fil_utils_button.set_text (_("Utils"));
-	fil_utils_button.set_active_state (_show_utils);
-	set_tooltip (fil_utils_button, _("Cycle display of utility plugins (if any)."));
-
-	vector<string> filter_strings = I18N (_filter_mode_strings);
-	Gtkmm2ext::set_popdown_strings (filter_mode, filter_strings);
-	filter_mode.set_active_text (filter_strings.front());
-
-	fil_hidden_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_hidden_button_release), false);
-	fil_instruments_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_instruments_button_release), false);
-	fil_analysis_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_analysis_button_release), false);
-	fil_utils_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PluginSelector::fil_utils_button_release), false);
-
-	filter_entry.signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::filter_entry_changed));
-	filter_button.signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::filter_button_clicked));
-	filter_mode.signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::filter_mode_changed));
+//	filter_mode.signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::filter_mode_changed));
 
 	//------------------- SEARCH
+
+	Gtk::Table* search_table = manage(new Gtk::Table(2, 2));
+
+	search_entry.signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::search_entry_changed));
+	search_clear_button.signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::search_clear_button_clicked));
 
 	CheckButton *_button = manage (new CheckButton);
 	Label *_label = manage (new Label);
@@ -214,9 +165,9 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	search_table->attach (*_button,		          0, 1, 0, 1, FILL, FILL);
 	search_table->attach (*_button2,		      1, 2, 0, 1, FILL, FILL);
-	search_table->attach (filter_entry,           0, 3, 1, 2, FILL|EXPAND, FILL);
+	search_table->attach (search_entry,           0, 3, 1, 2, FILL|EXPAND, FILL);
 	search_table->attach (*_button3,			  0, 2, 2, 3, FILL, FILL);
-	search_table->attach (filter_button,          2, 3, 2, 3, FILL, FILL);
+	search_table->attach (search_clear_button,          2, 3, 2, 3, FILL, FILL);
 
 	search_table->set_border_width (4);
 	search_table->set_col_spacings (2);
@@ -230,6 +181,8 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	
 	//------------------- FILTER
 	
+	Gtk::Table* filter_table = manage(new Gtk::Table(1, 10));
+
 	Gtk::RadioButtonGroup fil_button_group;
 
 	RadioButton *fil_effects_checkbox = manage (new RadioButton(fil_button_group));
@@ -396,10 +349,33 @@ static bool is_util (const PluginInfoPtr& info) {
 }
 
 bool
-PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& filterstr)
+PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& searchstr)
 {
-	std::string compstr;
-	std::string mode = filter_mode.get_active_text ();
+	if (!searchstr.empty()) {
+
+		std::string compstr;
+		bool maybe_show = false;
+
+		if ( true ) {  //name contains
+			compstr = info->name;
+			transform (compstr.begin(), compstr.end(), compstr.begin(), ::toupper);
+			if (compstr.find (searchstr) != string::npos) {
+				maybe_show = true;
+			}
+		}
+		
+		if ( true ) {  //tag contains
+			compstr = manager.get_tags (info);
+			transform (compstr.begin(), compstr.end(), compstr.begin(), ::toupper);
+			if (compstr.find (searchstr) != string::npos) {
+				maybe_show = true;
+			}
+		}
+
+		//ToDo:  preference to ignore  the following filters
+		//if (maybe_show && skip_filters)
+		//return true;
+	}
 
 	if (mode == _("Favorites only")) {
 		return manager.get_status (info) == PluginManager::Favorite;
@@ -409,7 +385,8 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		return manager.get_status (info) == PluginManager::Hidden;
 	}
 
-	if (!_show_hidden && manager.get_status (info) == PluginManager::Hidden) {
+/*
+ * 	if (!_show_hidden && manager.get_status (info) == PluginManager::Hidden) {
 		return false;
 	}
 
@@ -422,118 +399,48 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 	if (_show_utils == Gtkmm2ext::Off && is_util (info)) {
 		return false;
 	}
-
-	/* NB once lilv_node_as_string() does honor translation AND
-	 * the lv2 onthology provides localized class name,
-	 * PluginInfo will need methods for Util & Analysis.
-	 */
-	bool exp_ok = false;
-	if (_show_instruments == Gtkmm2ext::ExplicitActive && info->is_instrument()) {
-		exp_ok = true;
-	}
-	if (_show_analysers == Gtkmm2ext::ExplicitActive && is_analyzer(info)) {
-		exp_ok = true;
-	}
-	if (_show_utils == Gtkmm2ext::ExplicitActive && is_util (info)) {
-		exp_ok = true;
-	}
-	if (_show_instruments == Gtkmm2ext::ExplicitActive  || _show_analysers == Gtkmm2ext::ExplicitActive || _show_utils == Gtkmm2ext::ExplicitActive) {
-		if (!exp_ok) {
-			return false;
-		}
-	}
-
-	if (!filterstr.empty()) {
-
-		if (mode == _("Name contains")) {
-			compstr = info->name;
-		} else if (mode == _("Category contains")) {
-			compstr = info->category;
-		} else if (mode == _("Type contains")) {
-
-			switch (info->type) {
-			case LADSPA:
-				compstr = X_("LADSPA");
-				break;
-			case AudioUnit:
-				compstr = X_("AudioUnit");
-				break;
-			case LV2:
-				compstr = X_("LV2");
-				break;
-			case Windows_VST:
-				compstr = X_("VST");
-				break;
-			case LXVST:
-				compstr = X_("LXVST");
-				break;
-			case MacVST:
-				compstr = X_("MacVST");
-				break;
-			case Lua:
-				compstr = X_("Lua");
-				break;
-			}
-
-		} else if (mode == _("Author contains")) {
-			compstr = info->creator;
-		} else if (mode == _("Library contains")) {
-			compstr = info->path;
-		}
-
-		if (compstr.empty()) {
-			return false;
-		}
-
-		transform (compstr.begin(), compstr.end(), compstr.begin(), ::toupper);
-
-		if (compstr.find (filterstr) != string::npos) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+*/
 
 	return true;
 }
 
 void
-PluginSelector::setup_filter_string (string& filterstr)
+PluginSelector::setup_search_string (string& searchstr)
 {
-	filterstr = filter_entry.get_text ();
-	transform (filterstr.begin(), filterstr.end(), filterstr.begin(), ::toupper);
+	searchstr = search_entry.get_text ();
+	transform (searchstr.begin(), searchstr.end(), searchstr.begin(), ::toupper);
 }
 
 void
 PluginSelector::refill ()
 {
-	std::string filterstr;
+	std::string searchstr;
 
 	in_row_change = true;
 
 	plugin_model->clear ();
 
-	setup_filter_string (filterstr);
+	setup_search_string (searchstr);
 
-	ladspa_refiller (filterstr);
-	lv2_refiller (filterstr);
-	vst_refiller (filterstr);
-	lxvst_refiller (filterstr);
-	mac_vst_refiller (filterstr);
-	au_refiller (filterstr);
-	lua_refiller (filterstr);
+	ladspa_refiller (searchstr);
+	lv2_refiller (searchstr);
+	vst_refiller (searchstr);
+	lxvst_refiller (searchstr);
+	mac_vst_refiller (searchstr);
+	au_refiller (searchstr);
+	lua_refiller (searchstr);
 
 	in_row_change = false;
 }
 
 void
-PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filterstr, const char* type)
+PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& searchstr, const char* type)
 {
 	char buf[16];
 
 	for (PluginInfoList::const_iterator i = plugs.begin(); i != plugs.end(); ++i) {
 
-		if (show_this_plugin (*i, filterstr)) {
+		if (show_this_plugin (*i, searchstr)) {
 
 			TreeModel::Row newrow = *(plugin_model->append());
 			newrow[plugin_columns.favorite] = (manager.get_status (*i) == PluginManager::Favorite);
@@ -590,70 +497,70 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 }
 
 void
-PluginSelector::ladspa_refiller (const std::string& filterstr)
+PluginSelector::ladspa_refiller (const std::string& searchstr)
 {
-	refiller (manager.ladspa_plugin_info(), filterstr, "LADSPA");
+	refiller (manager.ladspa_plugin_info(), searchstr, "LADSPA");
 }
 
 void
-PluginSelector::lua_refiller (const std::string& filterstr)
+PluginSelector::lua_refiller (const std::string& searchstr)
 {
-	refiller (manager.lua_plugin_info(), filterstr, "Lua");
+	refiller (manager.lua_plugin_info(), searchstr, "Lua");
 }
 
 void
-PluginSelector::lv2_refiller (const std::string& filterstr)
+PluginSelector::lv2_refiller (const std::string& searchstr)
 {
 #ifdef LV2_SUPPORT
-	refiller (manager.lv2_plugin_info(), filterstr, "LV2");
+	refiller (manager.lv2_plugin_info(), searchstr, "LV2");
 #endif
 }
 
 void
 #ifdef WINDOWS_VST_SUPPORT
-PluginSelector::vst_refiller (const std::string& filterstr)
+PluginSelector::vst_refiller (const std::string& searchstr)
 #else
 PluginSelector::vst_refiller (const std::string&)
 #endif
 {
 #ifdef WINDOWS_VST_SUPPORT
-	refiller (manager.windows_vst_plugin_info(), filterstr, "VST");
+	refiller (manager.windows_vst_plugin_info(), searchstr, "VST");
 #endif
 }
 
 void
 #ifdef LXVST_SUPPORT
-PluginSelector::lxvst_refiller (const std::string& filterstr)
+PluginSelector::lxvst_refiller (const std::string& searchstr)
 #else
 PluginSelector::lxvst_refiller (const std::string&)
 #endif
 {
 #ifdef LXVST_SUPPORT
-	refiller (manager.lxvst_plugin_info(), filterstr, "LXVST");
+	refiller (manager.lxvst_plugin_info(), searchstr, "LXVST");
 #endif
 }
 
 void
 #ifdef MACVST_SUPPORT
-PluginSelector::mac_vst_refiller (const std::string& filterstr)
+PluginSelector::mac_vst_refiller (const std::string& searchstr)
 #else
 PluginSelector::mac_vst_refiller (const std::string&)
 #endif
 {
 #ifdef MACVST_SUPPORT
-	refiller (manager.mac_vst_plugin_info(), filterstr, "MacVST");
+	refiller (manager.mac_vst_plugin_info(), searchstr, "MacVST");
 #endif
 }
 
 void
 #ifdef AUDIOUNIT_SUPPORT
-PluginSelector::au_refiller (const std::string& filterstr)
+PluginSelector::au_refiller (const std::string& searchstr)
 #else
 PluginSelector::au_refiller (const std::string&)
 #endif
 {
 #ifdef AUDIOUNIT_SUPPORT
-	refiller (manager.au_plugin_info(), filterstr, "AU");
+	refiller (manager.au_plugin_info(), searchstr, "AU");
 #endif
 }
 
@@ -704,6 +611,7 @@ PluginSelector::display_selection_changed()
 	if (plugin_display.get_selection()->count_selected_rows() != 0) {
 		btn_add->set_sensitive (true);
 
+		//a plugin row is selected; allow the user to edit the "tags" on it.
 		TreeModel::Row row = *(plugin_display.get_selection()->get_selected());
 		std::string tags = row[plugin_columns.tags];
 		tag_entry->set_text( tags );
@@ -769,13 +677,13 @@ PluginSelector::run ()
 }
 
 void
-PluginSelector::filter_button_clicked ()
+PluginSelector::search_clear_button_clicked ()
 {
-	filter_entry.set_text ("");
+	search_entry.set_text ("");
 }
 
 void
-PluginSelector::filter_entry_changed ()
+PluginSelector::search_entry_changed ()
 {
 	refill ();
 }
@@ -785,40 +693,21 @@ PluginSelector::tag_entry_changed ()
 {
 	if (plugin_display.get_selection()->count_selected_rows() != 0) {
 		TreeModel::Row row = *(plugin_display.get_selection()->get_selected());
+
+//ToDo: set the row text
 //		std::string tags = row[plugin_columns.tags];
 //		tag_entry->set_text( tags );
+
+//ToDo: tell pluginmanager to change the file?  seems heavy to do this with every character entry
+
 	}
-}
-
-void
-PluginSelector::filter_mode_changed ()
-{
-	std::string mode = filter_mode.get_active_text ();
-
-	if (mode == _("Favorites only") || mode == _("Hidden only")) {
-		filter_entry.set_sensitive (false);
-		filter_button.set_sensitive (false);
-		fil_hidden_button.set_sensitive (false);
-		fil_instruments_button.set_sensitive (false);
-		fil_analysis_button.set_sensitive (false);
-		fil_utils_button.set_sensitive (false);
-	} else {
-		filter_entry.set_sensitive (true);
-		filter_button.set_sensitive (true);
-		fil_hidden_button.set_sensitive (true);
-		fil_instruments_button.set_sensitive (true);
-		fil_analysis_button.set_sensitive (true);
-		fil_utils_button.set_sensitive (true);
-	}
-
-	refill ();
 }
 
 void
 PluginSelector::on_show ()
 {
 	ArdourDialog::on_show ();
-	filter_entry.grab_focus ();
+	search_entry.grab_focus ();
 }
 
 struct PluginMenuCompareByCreator {
@@ -1162,96 +1051,6 @@ PluginSelector::hidden_changed (const std::string& path)
 		build_plugin_menu ();
 	}
 	in_row_change = false;
-}
-
-bool
-PluginSelector::fil_hidden_button_release (GdkEventButton*)
-{
-	_show_hidden = (fil_hidden_button.active_state() == 0);
-	fil_hidden_button.set_active (_show_hidden);
-	refill ();
-	return false;
-}
-
-static Gtkmm2ext::ActiveState next_state (Gtkmm2ext::ActiveState s){
-	switch (s) {
-		case Gtkmm2ext::Off:
-			return Gtkmm2ext::ImplicitActive;
-			break;
-		case Gtkmm2ext::ImplicitActive:
-			return Gtkmm2ext::ExplicitActive;
-			break;
-		case Gtkmm2ext::ExplicitActive:
-			return Gtkmm2ext::Off;
-			break;
-		default: assert(0); break; // not reached
-	}
-	/* impossible, but keep some compiles happy */
-	fatal << string_compose (_("programming error: %1"),
-			X_("Illegal Active State."))
-		<< endmsg;
-	abort(); /*NOTREACHED*/
-	return Gtkmm2ext::Off;
-}
-
-static Gtkmm2ext::ActiveState prev_state (Gtkmm2ext::ActiveState s){
-	switch (s) {
-		case Gtkmm2ext::Off:
-			return Gtkmm2ext::ExplicitActive;
-			break;
-		case Gtkmm2ext::ImplicitActive:
-			return Gtkmm2ext::Off;
-			break;
-		case Gtkmm2ext::ExplicitActive:
-			return Gtkmm2ext::ImplicitActive;
-			break;
-		default: assert(0); break; // not reached
-	}
-	/* impossible, but keep some compiles happy */
-	fatal << string_compose (_("programming error: %1"),
-			X_("Illegal Active State."))
-		<< endmsg;
-	abort(); /*NOTREACHED*/
-	return Gtkmm2ext::Off;
-}
-
-bool
-PluginSelector::fil_instruments_button_release (GdkEventButton* ev)
-{
-	if (ev->button == 3) {
-		_show_instruments = prev_state (fil_instruments_button.active_state());
-	} else {
-		_show_instruments = next_state (fil_instruments_button.active_state());
-	}
-	fil_instruments_button.set_active_state (_show_instruments);
-	refill ();
-	return false;
-}
-
-bool
-PluginSelector::fil_analysis_button_release (GdkEventButton* ev)
-{
-	if (ev->button == 3) {
-		_show_analysers = prev_state (fil_analysis_button.active_state());
-	} else {
-		_show_analysers = next_state (fil_analysis_button.active_state());
-	}
-	fil_analysis_button.set_active_state (_show_analysers);
-	refill ();
-	return false;
-}
-
-bool
-PluginSelector::fil_utils_button_release (GdkEventButton* ev)
-{
-	if (ev->button == 3) {
-		_show_utils = prev_state (fil_utils_button.active_state());
-	} else {
-		_show_utils = next_state (fil_utils_button.active_state());
-	}
-	fil_utils_button.set_active_state (_show_utils);
-	refill ();
-	return false;
 }
 
 void

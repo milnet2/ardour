@@ -65,20 +65,13 @@ private:
 	Gtk::ScrolledWindow scroller;   // Available plugins
 	Gtk::ScrolledWindow ascroller;  // Added plugins
 
-	Gtk::ComboBoxText filter_mode;
-	Gtk::Entry filter_entry;
-	Gtk::Button filter_button;
+	Gtk::Entry search_entry;
+	Gtk::Button search_clear_button;
 
 	Gtk::Entry *tag_entry;
 
-	ArdourWidgets::ArdourButton fil_hidden_button;
-	ArdourWidgets::ArdourButton fil_instruments_button;
-	ArdourWidgets::ArdourButton fil_analysis_button;
-	ArdourWidgets::ArdourButton fil_utils_button;
-
-	void filter_button_clicked ();
-	void filter_entry_changed ();
-	void filter_mode_changed ();
+	void search_clear_button_clicked ();
+	void search_entry_changed ();
 
 	void tag_entry_changed ();
 
@@ -150,12 +143,8 @@ private:
 	void btn_apply_clicked();
 	ARDOUR::PluginPtr load_plugin (ARDOUR::PluginInfoPtr);
 	bool show_this_plugin (const ARDOUR::PluginInfoPtr&, const std::string&);
-	void setup_filter_string (std::string&);
 
-	bool fil_hidden_button_release (GdkEventButton*);
-	bool fil_instruments_button_release (GdkEventButton*);
-	bool fil_analysis_button_release (GdkEventButton*);
-	bool fil_utils_button_release (GdkEventButton*);
+	void setup_search_string (std::string&);
 
 	void favorite_changed (const std::string& path);
 	void hidden_changed (const std::string& path);
@@ -168,11 +157,6 @@ private:
 	Gtk::Menu* create_by_category_menu (ARDOUR::PluginInfoList&);
 	void build_plugin_menu ();
 	PBD::ScopedConnectionList plugin_list_changed_connection;
-
-	bool _show_hidden;
-	Gtkmm2ext::ActiveState _show_instruments;
-	Gtkmm2ext::ActiveState _show_analysers;
-	Gtkmm2ext::ActiveState _show_utils;
 };
 
 #endif // __ardour_plugin_selector_h__
