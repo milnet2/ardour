@@ -64,6 +64,8 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	const std::string get_default_windows_vst_path() const { return windows_vst_path; }
 	const std::string get_default_lxvst_path() const { return lxvst_path; }
 
+	static PluginType to_generic_vst(PluginType); //always returns LXVST for any VST subtype
+
 	bool cancelled () { return _cancel_scan; }
 	bool no_timeout () { return _cancel_timeout; }
 

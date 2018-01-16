@@ -191,7 +191,9 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	_fil_type_combo = manage ( new ComboBoxText );
 	_fil_type_combo->append_text( _("Show All Formats") );
 	_fil_type_combo->append_text( X_("VST") );
+#ifdef AUDIOUNIT_SUPPORT
 	_fil_type_combo->append_text( X_("AudioUnit") );
+#endif
 	_fil_type_combo->append_text( X_("LV2") );
 	_fil_type_combo->append_text( X_("LUA") );
 	_fil_type_combo->append_text( X_("LADSPA") );
@@ -205,7 +207,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	_fil_channel_combo->append_text( _("Mono Audio only") );
 	_fil_channel_combo->append_text( _("Stereo Audio only") );
 	_fil_channel_combo->append_text( _("MIDI I/O only") );
-	_fil_channel_combo->append_text( _("All I/O") );
+	_fil_channel_combo->append_text( _("Show All I/O") );
 	_fil_channel_combo->set_active_text( _("Audio I/O only") );
 	
 
@@ -390,7 +392,7 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 
 //================== Filter "type" combobox
 
-	if ( _fil_type_combo->get_active_text() == X_("VST") && info->type != LXVST ) {
+	if ( _fil_type_combo->get_active_text() == X_("VST") && PluginManager::to_generic_vst(info->type) != LXVST ) {
 		return false;
 	}
 	
@@ -418,10 +420,54 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		}
 	}
 
-//================== Filter "creator" combobox
+//================== Filter "I/O" combobox
 
+	if ( _fil_channel_combo->get_active_text() != _("Show All I/O") || info->reconfigurable_io () ) {
 
+//		if ( info->reconfigurable_io () ) {
+//			return true;  //who knows.... ?
+//		}
 
+		if ( _fil_channel_combo->get_active_text() == _("Audio I/O only") ) {
+			if ( info->n_inputs.n_audio() == 0 ||
+			   info->n_outputs.n_audio()  == 0 ||
+			   info->n_outputs.n_midi()   != 0 ||
+			   info->n_outputs.n_midi()   != 0
+			   ) {
+				return false;
+			}	
+		}
+	
+		if ( _fil_channel_combo->get_active_text() == _("Mono Audio only") ) {
+			if ( info->n_inputs.n_audio() != 1 ||
+			   info->n_outputs.n_audio()  != 1 ||
+			   info->n_outputs.n_midi()   != 0 ||
+			   info->n_outputs.n_midi()   != 0
+			   ) {
+				return false;
+			}	
+		}
+	
+		if ( _fil_channel_combo->get_active_text() == _("Stereo Audio only") ) {
+			if ( info->n_inputs.n_audio() != 2 ||
+			   info->n_outputs.n_audio()  != 2 ||
+			   info->n_outputs.n_midi()   != 0 ||
+			   info->n_outputs.n_midi()   != 0
+			   ) {
+				return false;
+			}	
+		}
+	
+		if ( _fil_channel_combo->get_active_text() == _("MIDI I/O only") ) {
+			if ( info->n_inputs.n_audio()   != 0 ||
+			     info->n_outputs.n_audio()  != 0 ||
+			     (info->n_inputs.n_midi()  	== 0 && info->n_outputs.n_midi() == 0)
+			 	) {
+				return false;
+			}	
+		}
+	
+	}
 
 	return true;
 }

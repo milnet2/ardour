@@ -1447,7 +1447,7 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 }
 
 PluginType
-to_generic_vst( PluginType pt )
+PluginManager::to_generic_vst( PluginType pt )
 {
 	PluginType ret = pt;
 
