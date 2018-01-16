@@ -97,10 +97,11 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	*/
 	plugin_display.append_column (_("Fav"), plugin_columns.favorite);
 	plugin_display.append_column (_("Hide"), plugin_columns.hidden);
-	plugin_display.append_column (_("Available Plugins"), plugin_columns.name);
-	plugin_display.append_column (_("Type"), plugin_columns.type_name);
-	plugin_display.append_column (_("Category"), plugin_columns.category);
+	plugin_display.append_column (_("Name"), plugin_columns.name);
+//	plugin_display.append_column (_("Category"), plugin_columns.category);
+	plugin_display.append_column (_("Tags"), plugin_columns.tags);
 	plugin_display.append_column (_("Creator"), plugin_columns.creator);
+	plugin_display.append_column (_("Type"), plugin_columns.type_name);
 	plugin_display.append_column (_("# Audio In"),plugin_columns.audio_ins);
 	plugin_display.append_column (_("# Audio Out"), plugin_columns.audio_outs);
 	plugin_display.append_column (_("# MIDI In"),plugin_columns.midi_ins);
@@ -157,7 +158,9 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	Gtk::Table* table = manage(new Gtk::Table(7, 11));
 	table->set_size_request(750, 500);
 
-	Gtk::Table* filter_table = manage(new Gtk::Table(2, 5));
+	Gtk::Table* search_table = manage(new Gtk::Table(2, 2));
+
+	Gtk::Table* filter_table = manage(new Gtk::Table(1, 10));
 
 	fil_hidden_button.set_name ("pluginlist hide button");
 	fil_hidden_button.set_text (_("Show Hidden"));
@@ -192,31 +195,143 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	filter_button.signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::filter_button_clicked));
 	filter_mode.signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::filter_mode_changed));
 
-	filter_table->attach (filter_mode,            0, 1, 0, 1, FILL, FILL);
-	filter_table->attach (filter_entry,           1, 4, 0, 1, FILL|EXPAND, FILL);
-	filter_table->attach (filter_button,          4, 5, 0, 1, FILL, FILL);
+	//------------------- SEARCH
 
-	filter_table->attach (fil_hidden_button,      1, 2, 1, 2, FILL, FILL);
-	filter_table->attach (fil_instruments_button, 2, 3, 1, 2, FILL, FILL);
-	filter_table->attach (fil_analysis_button,    3, 4, 1, 2, FILL, FILL);
-	filter_table->attach (fil_utils_button,       4, 5, 1, 2, FILL, FILL);
+	CheckButton *_button = manage (new CheckButton);
+	Label *_label = manage (new Label);
+	_label->set_markup ("Name");
+	_button->add (*_label);
+
+	CheckButton *_button2 = manage (new CheckButton);
+	Label *_label2 = manage (new Label);
+	_label2->set_markup ("Tags");
+	_button2->add (*_label2);
+
+	CheckButton *_button3 = manage (new CheckButton);
+	_label = manage (new Label);
+	_label->set_markup ("Ignore Filters when searching.");
+	_button3->add (*_label);
+
+	search_table->attach (*_button,		          0, 1, 0, 1, FILL, FILL);
+	search_table->attach (*_button2,		      1, 2, 0, 1, FILL, FILL);
+	search_table->attach (filter_entry,           0, 3, 1, 2, FILL|EXPAND, FILL);
+	search_table->attach (*_button3,			  0, 2, 2, 3, FILL, FILL);
+	search_table->attach (filter_button,          2, 3, 2, 3, FILL, FILL);
+
+	search_table->set_border_width (4);
+	search_table->set_col_spacings (2);
+	search_table->set_row_spacings (4);
+
+	Frame* search_frame = manage (new Frame);
+	search_frame->set_name ("BaseFrame");
+	search_frame->set_label (_("Search"));
+	search_frame->add (*search_table);
+	search_frame->show_all ();
+	
+	//------------------- FILTER
+	
+	Gtk::RadioButtonGroup fil_button_group;
+
+	RadioButton *fil_effects_checkbox = manage (new RadioButton(fil_button_group));
+	_label = manage (new Label);
+	_label->set_markup ("Show Effects Only");
+	fil_effects_checkbox->add (*_label);
+
+	RadioButton *fil_instruments_checkbox = manage (new RadioButton(fil_button_group));
+	_label = manage (new Label);
+	_label->set_markup ("Show Instruments Only");
+	fil_instruments_checkbox->add (*_label);
+
+	RadioButton *fil_favorites_checkbox = manage (new RadioButton(fil_button_group));
+	_label = manage (new Label);
+	_label->set_markup ("Show Favorites Only");
+	fil_favorites_checkbox->add (*_label);
+
+	RadioButton *fil_utils_checkbox = manage (new RadioButton(fil_button_group));
+	_label = manage (new Label);
+	_label->set_markup ("Show Utilities Only");
+	fil_utils_checkbox->add (*_label);
+
+	RadioButton *fil_hidden_checkbox = manage (new RadioButton(fil_button_group));
+	_label = manage (new Label);
+	_label->set_markup ("Show Hidden Only");
+	fil_hidden_checkbox->add (*_label);
+
+	RadioButton *fil_all_checkbox = manage (new RadioButton(fil_button_group));
+	_label = manage (new Label);
+	_label->set_markup ("Show All");
+	fil_all_checkbox->add (*_label);
+
+	ComboBoxText *fil_type_combo = manage ( new ComboBoxText );
+	fil_type_combo->append_text( _("Show All Formats") );
+	fil_type_combo->append_text( X_("VST") );
+	fil_type_combo->append_text( X_("AudioUnit") );
+	fil_type_combo->append_text( X_("LV2") );
+	fil_type_combo->append_text( X_("LUA") );
+	fil_type_combo->append_text( X_("LADSPA") );
+//	fil_type_combo->signal_changed().connect( sigc::mem_fun (*this, &Mixer_UI::tag_combo_changed) );
+	fil_type_combo->set_active_text( _("Show All Formats") );
+	
+	ComboBoxText *fil_creator_combo = manage (new ComboBoxText);
+	fil_creator_combo->append_text( _("Show All Creators") );
+	fil_creator_combo->append_text( _("Harrison") );
+//	fil_creator_combo->signal_changed().connect( sigc::mem_fun (*this, &Mixer_UI::tag_combo_changed) );
+	fil_creator_combo->set_active_text( _("Show All Creators") );
+	
+	ComboBoxText *fil_channel_combo = manage (new ComboBoxText);
+	fil_channel_combo->append_text( _("Audio I/O only") );
+	fil_channel_combo->append_text( _("Mono Audio only") );
+	fil_channel_combo->append_text( _("Stereo Audio only") );
+	fil_channel_combo->append_text( _("MIDI I/O only") );
+	fil_channel_combo->append_text( _("All I/O") );
+//	fil_channel_combo->signal_changed().connect( sigc::mem_fun (*this, &Mixer_UI::tag_combo_changed) );
+	fil_channel_combo->set_active_text( _("Audio I/O only") );
+	
+
+	int p = 0;
+	filter_table->attach (*fil_effects_checkbox,       2, 3, p, p+1, FILL, FILL); p++;
+	filter_table->attach (*fil_instruments_checkbox,   2, 3, p, p+1, FILL, FILL); p++;
+	filter_table->attach (*fil_utils_checkbox,         2, 3, p, p+1, FILL, FILL); p++;
+	filter_table->attach (*fil_favorites_checkbox,     2, 3, p, p+1, FILL, FILL); p++;
+	filter_table->attach (*fil_hidden_checkbox,        2, 3, p, p+1, FILL, FILL); p++;
+	filter_table->attach (*fil_all_checkbox,           2, 3, p, p+1, FILL, FILL); p++;
+	filter_table->attach (*fil_type_combo,             2, 3, p, p+1, FILL, FILL); p++;
+	filter_table->attach (*fil_creator_combo,          2, 3, p, p+1, FILL, FILL); p++;
+	filter_table->attach (*fil_channel_combo,          2, 3, p, p+1, FILL, FILL); p++;
 
 	filter_table->set_border_width (4);
 	filter_table->set_col_spacings (2);
-	filter_table->set_row_spacings (4);
+	filter_table->set_row_spacings (2);
 
-	Frame* filter_sample = manage (new Frame);
-	filter_sample->set_name ("BaseFrame");
-	filter_sample->set_label (_("Filter"));
-	filter_sample->add (*filter_table);
+	Frame* filter_frame = manage (new Frame);
+	filter_frame->set_name ("BaseFrame");
+	filter_frame->set_label (_("Filter"));
+	filter_frame->add (*filter_table);
+	filter_frame->show_all ();
 
-	filter_sample->show_all ();
+	//--------------------- TAG entry
+	
+	tag_entry = manage (new Gtk::Entry);
+	tag_entry->signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::tag_entry_changed));
+
+	Frame* tag_frame = manage (new Frame);
+	tag_frame->set_name ("BaseFrame");
+	tag_frame->set_label (_("Tags for Selected Plugin"));
+	tag_frame->add (*tag_entry);
+	tag_frame->show_all ();
+
+
+	//-----------------------Top-level TABLE stuff
+	
 
 	HBox* side_by_side = manage (new HBox);
 	VBox* right_side = manage (new VBox);
 
-	table->attach (scroller, 0, 7, 0, 5);
-	table->attach (*filter_sample, 0, 7, 6, 7, FILL|EXPAND, FILL, 5, 5);
+	table->attach (scroller, 0, 8, 0, 5); //this is the main plugin list
+	table->attach (*search_frame, 0, 2, 6, 7, FILL|EXPAND, FILL, 5, 5);
+	table->attach (*tag_frame, 0, 2, 7, 8, FILL|EXPAND, FILL, 5, 5);
+	table->attach (*filter_frame, 2, 7, 6, 8, FILL|EXPAND, FILL, 5, 5);
+	table->attach (*right_side, 7, 8, 6, 8, FILL|EXPAND, FILL, 5, 5);  //to be inserted...
 
 	right_side->pack_start (ascroller);
 
@@ -228,7 +343,6 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	right_side->set_size_request (200, -1);
 
 	side_by_side->pack_start (*table);
-	side_by_side->pack_start (*right_side);
 
 	add_button (Stock::CLOSE, RESPONSE_CLOSE);
 	add_button (_("Insert Plugin(s)"), RESPONSE_APPLY);
@@ -451,6 +565,8 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 
 			newrow[plugin_columns.creator] = creator;
 
+			newrow[plugin_columns.tags] = manager.get_tags(*i);
+
 			if ((*i)->reconfigurable_io ()) {
 				newrow[plugin_columns.audio_ins] = _("variable");
 				newrow[plugin_columns.midi_ins] = _("variable");
@@ -587,6 +703,11 @@ PluginSelector::display_selection_changed()
 {
 	if (plugin_display.get_selection()->count_selected_rows() != 0) {
 		btn_add->set_sensitive (true);
+
+		TreeModel::Row row = *(plugin_display.get_selection()->get_selected());
+		std::string tags = row[plugin_columns.tags];
+		tag_entry->set_text( tags );
+
 	} else {
 		btn_add->set_sensitive (false);
 	}
@@ -657,6 +778,16 @@ void
 PluginSelector::filter_entry_changed ()
 {
 	refill ();
+}
+
+void
+PluginSelector::tag_entry_changed ()
+{
+	if (plugin_display.get_selection()->count_selected_rows() != 0) {
+		TreeModel::Row row = *(plugin_display.get_selection()->get_selected());
+//		std::string tags = row[plugin_columns.tags];
+//		tag_entry->set_text( tags );
+	}
 }
 
 void
@@ -989,6 +1120,8 @@ PluginSelector::favorite_changed (const std::string& path)
 		manager.set_status (pi->type, pi->unique_id, status);
 
 		manager.save_statuses ();
+
+		manager.save_tags ();  //ToDo:  whenever a tag changes... 
 
 		build_plugin_menu ();
 	}

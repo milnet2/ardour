@@ -69,6 +69,8 @@ private:
 	Gtk::Entry filter_entry;
 	Gtk::Button filter_button;
 
+	Gtk::Entry *tag_entry;
+
 	ArdourWidgets::ArdourButton fil_hidden_button;
 	ArdourWidgets::ArdourButton fil_instruments_button;
 	ArdourWidgets::ArdourButton fil_analysis_button;
@@ -78,6 +80,8 @@ private:
 	void filter_entry_changed ();
 	void filter_mode_changed ();
 
+	void tag_entry_changed ();
+
 	struct PluginColumns : public Gtk::TreeModel::ColumnRecord {
 		PluginColumns () {
 			add (favorite);
@@ -86,6 +90,7 @@ private:
 			add (type_name);
 			add (category);
 			add (creator);
+			add (tags);
 			add (audio_ins);
 			add (audio_outs);
 			add (midi_ins);
@@ -98,6 +103,7 @@ private:
 		Gtk::TreeModelColumn<std::string> type_name;
 		Gtk::TreeModelColumn<std::string> category;
 		Gtk::TreeModelColumn<std::string> creator;
+		Gtk::TreeModelColumn<std::string> tags;
 		Gtk::TreeModelColumn<std::string> audio_ins;
 		Gtk::TreeModelColumn<std::string> audio_outs;
 		Gtk::TreeModelColumn<std::string> midi_ins;
