@@ -43,6 +43,7 @@
 #include "ardour/debug.h"
 #include "ardour/disk_reader.h"
 #include "ardour/location.h"
+#include "ardour/playlist.h"
 #include "ardour/profile.h"
 #include "ardour/scene_changer.h"
 #include "ardour/session.h"
@@ -299,7 +300,17 @@ Session::solo_selection ( StripableList &list, bool new_state  )
 
 		bool found = (std::find(list.begin(), list.end(), s) != list.end());
 		if ( new_state && found ) {
+			
 			solo_list->push_back (s->solo_control());
+			
+			//must invalidate playlists on selected tracks, so only selected regions get heard
+			boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (*i);
+			if (track) {
+				boost::shared_ptr<Playlist> playlist = track->playlist();
+				if (playlist) {
+					playlist->ContentsChanged();
+				}
+			}
 		} else {
 			unsolo_list->push_back (s->solo_control());
 		}

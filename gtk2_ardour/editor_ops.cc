@@ -5907,6 +5907,7 @@ tracklist_to_stripables( TrackViewList list )
 void
 Editor::play_solo_selection (bool restart)
 {
+	//note: session::solo_selection takes care of invalidating the region playlist
 
 	if ( (!selection->tracks.empty()) && selection->time.length() > 0 ) {  //a range is selected; solo the tracks and roll
 	

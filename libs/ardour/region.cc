@@ -451,7 +451,6 @@ Region::set_selected_for_solo(bool yn)
 			} else {
 				pl->RemoveFromSoloSelectedList(this);
 			}
-			pl->ContentsChanged();
 		}
 
 		_soloSelected = yn;

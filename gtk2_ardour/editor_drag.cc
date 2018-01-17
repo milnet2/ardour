@@ -5682,7 +5682,6 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 			if ( !s->config.get_external_sync() && s->transport_rolling() ) {
 				if ( s->solo_selection_active() ) {
 					_editor->play_solo_selection(true);  //play the newly selected range, and move solos to match
-					s->request_play_range (&_editor->selection->time, true);  //play the newly selected range
 				} else if ( UIConfiguration::instance().get_follow_edits() && s->get_play_range() ) {  //already rolling a selected range
 					s->request_play_range (&_editor->selection->time, true);  //play the newly selected range
 				}
