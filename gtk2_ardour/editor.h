@@ -810,7 +810,6 @@ private:
 	size_t push_canvas_cursor (Gdk::Cursor*);
 	void pop_canvas_cursor ();
 
-	Gdk::Cursor* which_grabber_cursor () const;
 	Gdk::Cursor* which_track_cursor () const;
 	Gdk::Cursor* which_mode_cursor () const;
 	Gdk::Cursor* which_trim_cursor (bool left_side) const;
