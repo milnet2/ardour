@@ -1149,26 +1149,6 @@ Editor::pop_canvas_cursor ()
 }
 
 Gdk::Cursor*
-Editor::which_grabber_cursor () const
-{
-	Gdk::Cursor* c = _cursors->grabber;
-
-	switch (_edit_point) {
-	case EditAtMouse:
-		c = _cursors->grabber_edit_point;
-		break;
-	default:
-		boost::shared_ptr<Movable> m = _movable.lock();
-		if (m && m->locked()) {
-			c = _cursors->speaker;
-		}
-		break;
-	}
-
-	return c;
-}
-
-Gdk::Cursor*
 Editor::which_trim_cursor (bool left) const
 {
 	if (!entered_regionview) {
@@ -1267,7 +1247,7 @@ Editor::which_track_cursor () const
 	switch (_join_object_range_state) {
 	case JOIN_OBJECT_RANGE_NONE:
 	case JOIN_OBJECT_RANGE_OBJECT:
-		cursor = which_grabber_cursor ();
+		cursor = _cursors->grabber;
 		break;
 	case JOIN_OBJECT_RANGE_RANGE:
 		cursor = _cursors->selector;
@@ -1314,14 +1294,7 @@ Editor::which_canvas_cursor(ItemType type) const
 			cursor = which_track_cursor ();
 			break;
 		case PlayheadCursorItem:
-			switch (_edit_point) {
-			case EditAtMouse:
-				cursor = _cursors->grabber_edit_point;
-				break;
-			default:
-				cursor = _cursors->grabber;
-				break;
-			}
+			cursor = _cursors->grabber;
 			break;
 		case SelectionItem:
 			cursor = _cursors->selector;
@@ -1431,7 +1404,7 @@ Editor::which_canvas_cursor(ItemType type) const
 	case VideoBarItem:
 	case TransportMarkerBarItem:
 	case DropZoneItem:
-		cursor = which_grabber_cursor();
+		cursor = _cursors->grabber;
 		break;
 
 	default:
