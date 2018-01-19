@@ -89,6 +89,7 @@ private:
 	Gtk::Button search_clear_button;
 
 	Gtk::Entry *tag_entry;
+	void tag_clear_button_clicked ();
 
 	void search_clear_button_clicked ();
 	void search_entry_changed ();

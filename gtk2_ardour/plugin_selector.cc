@@ -136,7 +136,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 
 	Gtk::Table* table = manage(new Gtk::Table(7, 11));
-	table->set_size_request(750, 500);
+	table->set_size_request(850, 500);
 
 //	filter_mode.signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::filter_mode_changed));
 
@@ -153,14 +153,22 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	_search_tags_checkbox = manage (new CheckButton( _("Tags")));
 	_search_tags_checkbox->set_active();
 
-	_search_ignore_checkbox = manage (new CheckButton(_("Ignore Filters when searching.")));
+	_search_ignore_checkbox = manage (new CheckButton(_("Ignore Filters when searching")));
 	_search_ignore_checkbox->set_active();
 
-	search_table->attach (*_search_name_checkbox,  0, 1, 0, 1, FILL, FILL);
-	search_table->attach (*_search_tags_checkbox,  1, 2, 0, 1, FILL, FILL);
-	search_table->attach (search_entry,            0, 3, 1, 2, FILL|EXPAND, FILL);
-	search_table->attach (*_search_ignore_checkbox,0, 2, 2, 3, FILL, FILL);
-	search_table->attach (search_clear_button,     2, 3, 2, 3, FILL, FILL);
+	Gtk::Label* search_help_label1 = manage (new Label(
+		_( "Search terms must \"all\" be matched, to return a hit."), Gtk::ALIGN_LEFT));
+
+	Gtk::Label* search_help_label2 = manage (new Label(
+		_( "Ex: \"ess dyn\" will return \"dynamic de-esser\" but not \"de-esser\"." ), Gtk::ALIGN_LEFT));
+
+	search_table->attach (search_entry,            0, 3, 0, 1, FILL|EXPAND, FILL);
+	search_table->attach (search_clear_button,     3, 4, 0, 1, FILL, FILL);
+	search_table->attach (*_search_name_checkbox,  0, 1, 1, 2, FILL, FILL);
+	search_table->attach (*_search_tags_checkbox,  1, 2, 1, 2, FILL, FILL);
+	search_table->attach (*_search_ignore_checkbox,2, 3, 1, 2, FILL, FILL);
+	search_table->attach (*search_help_label1,      0, 3, 2, 3, FILL, FILL);
+	search_table->attach (*search_help_label2,      0, 3, 3, 4, FILL, FILL);
 
 	search_table->set_border_width (4);
 	search_table->set_col_spacings (2);
@@ -183,8 +191,8 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	_fil_effects_radio = manage (new RadioButton(fil_radio_group, _("Show Effects Only")));
 	_fil_instruments_radio = manage (new RadioButton(fil_radio_group, _("Show Instruments Only")));
-	_fil_favorites_radio = manage (new RadioButton(fil_radio_group, _("Show Favorites Only")));
 	_fil_utils_radio = manage (new RadioButton(fil_radio_group, _("Show Utilities Only")));
+	_fil_favorites_radio = manage (new RadioButton(fil_radio_group, _("Show Favorites Only")));
 	_fil_hidden_radio = manage (new RadioButton(fil_radio_group, _("Show Hidden Only")));
 	_fil_all_radio = manage (new RadioButton(fil_radio_group, _("Show All")));
 
@@ -223,8 +231,8 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	filter_table->attach (*_fil_channel_combo,          2, 3, p, p+1, FILL, FILL); p++;
 
 	filter_table->set_border_width (4);
-	filter_table->set_col_spacings (2);
-	filter_table->set_row_spacings (2);
+	filter_table->set_col_spacings (4);
+	filter_table->set_row_spacings (4);
 
 	Frame* filter_frame = manage (new Frame);
 	filter_frame->set_name ("BaseFrame");
@@ -244,36 +252,59 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	//--------------------- TAG entry
 	
+	Gtk::Table* tagging_table = manage(new Gtk::Table(1, 2));
+	tagging_table->set_border_width (4);
+	tagging_table->set_col_spacings (4);
+	tagging_table->set_row_spacings (4);
+
 	tag_entry = manage (new Gtk::Entry);
 	tag_entry->signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::tag_entry_changed));
+
+	Gtk::Button* tag_clear_button = manage ( new Button( _("Clear") ));
+	tag_clear_button->signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::tag_clear_button_clicked));
+
+	Gtk::Label* tagging_help_label1 = manage (new Label(
+		_( "Enter space-separated, one-word Tags for this file."), Gtk::ALIGN_LEFT));
+
+	Gtk::Label* tagging_help_label2 = manage (new Label(
+		_( "You can use dashes or underscores."), Gtk::ALIGN_LEFT));
+
+	Gtk::Label* tagging_help_label3 = manage (new Label(
+		_("Ex: \"dynamic de-esser vocal\" applies 3 Tags." ), Gtk::ALIGN_LEFT));
+
+	p = 0;
+	tagging_table->attach (*tag_entry,           0, 1, p, p+1, FILL|EXPAND, FILL);
+	tagging_table->attach (*tag_clear_button,    1, 2, p, p+1, FILL, FILL); p++;
+	tagging_table->attach (*tagging_help_label1, 0, 2, p, p+1, FILL, FILL); p++;
+	tagging_table->attach (*tagging_help_label2, 0, 2, p, p+1, FILL, FILL); p++;
+	tagging_table->attach (*tagging_help_label3, 0, 2, p, p+1, FILL, FILL); p++;
 
 	Frame* tag_frame = manage (new Frame);
 	tag_frame->set_name ("BaseFrame");
 	tag_frame->set_label (_("Tags for Selected Plugin"));
-	tag_frame->add (*tag_entry);
+	tag_frame->add (*tagging_table);
 	tag_frame->show_all ();
 
-
-	//-----------------------Top-level Layout
+//-----------------------Top-level Layout
 	
 
 	HBox* side_by_side = manage (new HBox);
-	VBox* right_side = manage (new VBox);
+	VBox* to_be_inserted_vbox = manage (new VBox);
 
-	table->attach (scroller, 0, 8, 0, 5); //this is the main plugin list
-	table->attach (*search_frame, 0, 2, 6, 7, FILL|EXPAND, FILL, 5, 5);
-	table->attach (*tag_frame, 0, 2, 7, 8, FILL|EXPAND, FILL, 5, 5);
-	table->attach (*filter_frame, 2, 7, 6, 8, FILL|EXPAND, FILL, 5, 5);
-	table->attach (*right_side, 7, 8, 6, 8, FILL|EXPAND, FILL, 5, 5);  //to be inserted...
+	table->attach (scroller,               0, 3, 0, 5); //this is the main plugin list
+	table->attach (*search_frame,          0, 1, 6, 7, FILL, FILL, 5, 5);
+	table->attach (*tag_frame,             0, 1, 7, 8, FILL, FILL, 5, 5);
+	table->attach (*filter_frame,          1, 2, 6, 8, FILL, FILL, 5, 5);
+	table->attach (*to_be_inserted_vbox,   2, 3, 6, 8, FILL|EXPAND, FILL, 5, 5);  //to be inserted...
 
-	right_side->pack_start (ascroller);
+	to_be_inserted_vbox->pack_start (ascroller);
 
 	HBox* add_remove = manage (new HBox);
 	add_remove->pack_start (*btn_add, true, true);
 	add_remove->pack_start (*btn_remove, true, true);
 
-	right_side->pack_start (*add_remove, false, false);
-	right_side->set_size_request (200, -1);
+	to_be_inserted_vbox->pack_start (*add_remove, false, false);
+	to_be_inserted_vbox->set_size_request (200, -1);
 
 	side_by_side->pack_start (*table);
 
@@ -319,16 +350,6 @@ PluginSelector::added_row_clicked(GdkEventButton* event)
 		btn_remove_clicked();
 }
 
-static bool is_analyzer (const PluginInfoPtr& info) {
-	// Anaylsis, Analyzer are for backwards compatibility (vst cache)
-	return info->in_category ("Analyser") || info->in_category ("Anaylsis") ||  info->in_category ("Analyzer");
-}
-
-static bool is_util (const PluginInfoPtr& info) {
-	// all MIDI plugins which are not Instruments are Utils.
-	return info->in_category ("Utility") || info->in_category ("MIDI") || info->in_category ("Generator");
-}
-
 bool
 PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& searchstr)
 {
@@ -365,19 +386,19 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		}
 	}
 
-//	if ( _fil_effects_radio->get_active() && info->is_effect() ) {  //ToDo
-//		maybe_show = true;
-//	}
+	if ( _fil_effects_radio->get_active() && !info->is_effect() ) {
+		return false;
+	}
 
 	if ( _fil_instruments_radio->get_active() && !info->is_instrument() ) {
 		return false;
 	}
 
-//	if ( _fil_utils_radio->get_active() && !info->is_util(info) ) {  //ToDo
-//		return false;
-//	}
+	if ( _fil_utils_radio->get_active() && !( info->is_utility() || info->is_analyzer()) ) {
+		return false;
+	}
 
-//	if ( _fil_utils_radio->get_active() && !info->is_analyzer() ) { //ToDo
+//	if ( _fil_analyser_radio->get_active() && !info->is_analyzer() ) { //ToDo: separate radio button for analyzers?
 //		return false;
 //	}
 
@@ -750,6 +771,12 @@ void
 PluginSelector::search_clear_button_clicked ()
 {
 	search_entry.set_text ("");
+}
+
+void
+PluginSelector::tag_clear_button_clicked ()
+{
+	tag_entry->set_text ("");
 }
 
 void
