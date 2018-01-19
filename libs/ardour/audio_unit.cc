@@ -3313,6 +3313,12 @@ AUPluginInfo::is_instrument () const
 	return descriptor->IsMusicDevice();
 }
 
+bool
+AUPluginInfo::is_utility () const
+{
+	return ( descriptor->IsGenerator() || desc.componentType == 'aumi' );  //kAudioUnitType_MidiProcessor  ..looks like we aren't even scanning for these yet?
+}
+
 void
 AUPlugin::set_info (PluginInfoPtr info)
 {

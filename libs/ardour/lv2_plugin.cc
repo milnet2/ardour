@@ -3420,22 +3420,6 @@ LV2PluginInfo::in_category (const std::string &c) const
 	return category == c;
 }
 
-bool
-LV2PluginInfo::is_instrument () const
-{
-	if (category == "Instrument") {
-		return true;
-	}
-#if 1
-	/* until we make sure that category remains untranslated in the lv2.ttl spec
-	 * and until most instruments also classify themselves as such, there's a 2nd check:
-	 */
-	if (n_inputs.n_midi() > 0 && n_inputs.n_audio() == 0 && n_outputs.n_audio() > 0) {
-		return true;
-	}
-#endif
-	return false;
-}
 
 PluginInfoList*
 LV2PluginInfo::discover()

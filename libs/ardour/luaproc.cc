@@ -1229,8 +1229,6 @@ LuaPluginInfo::LuaPluginInfo (LuaScriptInfoPtr lsi) {
 	n_outputs.set (DataType::AUDIO, 1);
 	type = Lua;
 
-	_is_instrument = category == "Instrument";
-	
 	PluginManager::instance().set_tags( type, unique_id, category, true );  //if we don't have any tags for this plugin, make some up.
 }
 
