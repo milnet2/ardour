@@ -264,7 +264,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	tag_clear_button->signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::tag_clear_button_clicked));
 
 	Gtk::Label* tagging_help_label1 = manage (new Label(
-		_( "Enter space-separated, one-word Tags for this file."), Gtk::ALIGN_LEFT));
+		_( "Enter space-separated, one-word Tags for selected plugin."), Gtk::ALIGN_LEFT));
 
 	Gtk::Label* tagging_help_label2 = manage (new Label(
 		_( "You can use dashes or underscores."), Gtk::ALIGN_LEFT));
