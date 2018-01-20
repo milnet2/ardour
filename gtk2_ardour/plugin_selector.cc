@@ -418,6 +418,12 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		return false;
 	}
 
+	if (manager.get_status (info) == PluginManager::Hidden) {
+		if ( !_fil_hidden_radio->get_active() && !_fil_all_radio->get_active() ) {
+			return false;
+		}
+	}
+
 //================== Filter "type" combobox
 
 	if ( _fil_type_combo->get_active_text() == X_("VST") && PluginManager::to_generic_vst(info->type) != LXVST ) {
