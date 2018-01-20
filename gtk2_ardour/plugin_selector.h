@@ -91,6 +91,8 @@ private:
 	Gtk::Entry *tag_entry;
 	void tag_reset_button_clicked ();
 
+	void set_sensitive_widgets();
+
 	void search_clear_button_clicked ();
 	void search_entry_changed ();
 

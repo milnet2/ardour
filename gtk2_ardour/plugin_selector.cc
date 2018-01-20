@@ -161,6 +161,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	_search_ignore_checkbox = manage (new CheckButton(_("Ignore Filters when searching")));
 	_search_ignore_checkbox->set_active();
+	_search_ignore_checkbox->signal_toggled().connect (sigc::mem_fun (*this, &PluginSelector::set_sensitive_widgets));
 
 	Gtk::Label* search_help_label1 = manage (new Label(
 		_( "Search terms must \"all\" be matched, to return a hit."), Gtk::ALIGN_LEFT));
@@ -507,6 +508,32 @@ PluginSelector::setup_search_string (string& searchstr)
 }
 
 void
+PluginSelector::set_sensitive_widgets ()
+{
+	if (_search_ignore_checkbox->get_active() && (search_entry.get_text() != "") ) {
+		_fil_effects_radio->set_sensitive(false);
+		_fil_instruments_radio->set_sensitive(false);
+		_fil_utils_radio->set_sensitive(false);
+		_fil_favorites_radio->set_sensitive(false);
+		_fil_hidden_radio->set_sensitive(false);
+		_fil_all_radio->set_sensitive(false);
+		_fil_type_combo->set_sensitive(false);
+		_fil_creator_combo->set_sensitive(false);
+		_fil_channel_combo->set_sensitive(false);
+	} else {
+		_fil_effects_radio->set_sensitive(true);
+		_fil_instruments_radio->set_sensitive(true);
+		_fil_utils_radio->set_sensitive(true);
+		_fil_favorites_radio->set_sensitive(true);
+		_fil_hidden_radio->set_sensitive(true);
+		_fil_all_radio->set_sensitive(true);
+		_fil_type_combo->set_sensitive(true);
+		_fil_creator_combo->set_sensitive(true);
+		_fil_channel_combo->set_sensitive(true);
+	}
+}
+
+void
 PluginSelector::refill ()
 {
 	std::string searchstr;
@@ -796,6 +823,7 @@ PluginSelector::tag_reset_button_clicked ()
 void
 PluginSelector::search_entry_changed ()
 {
+	set_sensitive_widgets();
 	refill ();
 }
 
