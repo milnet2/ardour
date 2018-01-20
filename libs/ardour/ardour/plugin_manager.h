@@ -84,7 +84,8 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
  	void save_tags ();
  	void set_tags (ARDOUR::PluginType type, std::string unique_id, std::string tags, bool only_if_empty = false);
  	std::string get_tags (const PluginInfoPtr&) const;
-
+	std::string sanitize_tag (const std::string) const;
+	
 	std::vector<std::string> get_all_tags( bool favorites_only ) const; 
  
 	/** plugins were added to or removed from one of the PluginInfoLists */
@@ -92,7 +93,7 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	/** Plugin Hidden/Favorite status changed */
 	PBD::Signal0<void> PluginStatusesChanged;
 
-	PBD::Signal0<void> PluginTagsChanged;
+	PBD::Signal3<void, ARDOUR::PluginType, std::string, std::string> PluginTagsChanged; //PluginType t, string id, string tag
 
   private:
 

@@ -71,6 +71,7 @@
 
 #include "pbd/whitespace.h"
 #include "pbd/file_utils.h"
+#include "pbd/tokenizer.h"
 
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
@@ -1515,8 +1516,6 @@ PluginManager::save_tags ()
 		ofs << '\n';
 	}
 	g_file_set_contents (path.c_str(), ofs.str().c_str(), -1, NULL);
-	
-	PluginTagsChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -1583,20 +1582,49 @@ PluginManager::load_tags ()
 void
 PluginManager::set_tags (PluginType t, string id, string tag, bool only_if_empty)
 {
-	PluginTags ps ( to_generic_vst(t), id, tag);
+	string sanitized = sanitize_tag(tag);
+	
+	PluginTags ps ( to_generic_vst(t), id, sanitized);
 	PluginTagsList::const_iterator i =  find (ptags.begin(), ptags.end(), ps);
 	if (i == ptags.end() ) {
 		ptags.insert (ps);
+		PluginTagsChanged ( t, id, sanitized ); /* EMIT SIGNAL */
 	} else {
 		if ( ((*i).tags.length() == 0) || !only_if_empty ) {
 			ptags.erase (ps);
 			ptags.insert (ps);
+			PluginTagsChanged ( t, id, sanitized ); /* EMIT SIGNAL */
 		}
 	}
+
 } 
 
-#include "pbd/tokenizer.h"
+std::string
+PluginManager::sanitize_tag( const std::string to_sanitize ) const
+{
+	string sanitized = to_sanitize;
+	vector<string> tags;
+	if (!PBD::tokenize (sanitized, string(" ,\n"), std::back_inserter (tags), true)) {
+		cout << _("PluginManager::sanitize_tag could not tokenize string: ") << sanitized << endmsg;
+		return "";
+	}
 
+	//convert tokens to lower-case, comma-separated list
+	sanitized = "";
+	for (vector<string>::iterator t = tags.begin(); t != tags.end(); ++t) {
+		string temp(*t);
+		std::transform (temp.begin(), temp.end(), temp.begin(), ::tolower);
+		sanitized.append(temp);
+		sanitized.append(",");
+	}
+	
+	//remove trailing comma
+	if (sanitized.length() > 0) {
+		sanitized.erase(sanitized.length()-1, 1);
+	}
+	
+	return sanitized;
+}
 
 std::vector<std::string>
 PluginManager::get_all_tags( bool favorites_only ) const
@@ -1620,7 +1648,7 @@ PluginManager::get_all_tags( bool favorites_only ) const
 		//parse each plugin's tag string into separate tags
 		vector<string> tags;
 		if (!PBD::tokenize ( (*pt).tags, string(",\n"), std::back_inserter (tags), true)) {
-			warning << _("PluginManager: Could not tokenize string: ") << (*pt).tags << endmsg;
+			cout << _("PluginManager: Could not tokenize string: ") << (*pt).tags << endmsg;
 			continue;
 		}
 
