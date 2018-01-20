@@ -367,7 +367,7 @@ Mixer_UI::Mixer_UI ()
 #error implement deferred Plugin-Favorite list
 #endif
 	PluginManager::instance ().PluginListChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
-	PluginManager::instance ().PluginStatusesChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
+	PluginManager::instance ().PluginStatusesChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::plugin_status_changed, this, _1, _2, _3), gui_context());
 	ARDOUR::Plugin::PresetsChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
 
 	PluginManager::instance ().PluginTagsChanged.connect(*this, invalidator (*this), boost::bind (&Mixer_UI::tags_changed, this, _1, _2, _3), gui_context());
@@ -2676,6 +2676,12 @@ struct SortByTag {
 		return a.compare (b) < 0;
 	}
 };
+
+void
+Mixer_UI::plugin_status_changed ( PluginType, std::string, PluginManager::PluginStatusType )
+{
+	refill_favorite_plugins();
+}
 
 void
 Mixer_UI::tags_changed ( PluginType t, std::string unique_id, std::string tag )

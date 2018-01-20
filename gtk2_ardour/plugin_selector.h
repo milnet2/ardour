@@ -33,6 +33,7 @@
 #include "gtkmm2ext/dndtreeview.h"
 
 #include "ardour/plugin.h"
+#include "ardour/plugin_manager.h"
 #include "ardour/session_handle.h"
 
 #include "widgets/ardour_button.h"
@@ -177,6 +178,8 @@ private:
 
 	void plugin_chosen_from_menu (const ARDOUR::PluginInfoPtr&);
 
+	void plugin_status_changed ( ARDOUR::PluginType t, std::string unique_id, ARDOUR::PluginManager::PluginStatusType s );
+
 	Gtk::Menu* create_favs_menu (ARDOUR::PluginInfoList&);
 	Gtk::Menu* create_by_creator_menu (ARDOUR::PluginInfoList&);
 	Gtk::Menu* create_by_category_menu (ARDOUR::PluginInfoList&);
@@ -184,6 +187,7 @@ private:
 	PBD::ScopedConnectionList plugin_list_changed_connection;
 	
 	bool _need_tag_save;
+	bool _need_status_save;
 };
 
 #endif // __ardour_plugin_selector_h__

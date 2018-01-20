@@ -1353,7 +1353,6 @@ PluginManager::save_statuses ()
 		ofs << endl;
 	}
 	g_file_set_contents (path.c_str(), ofs.str().c_str(), -1, NULL);
-	PluginStatusesChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -1440,11 +1439,11 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 	PluginStatus ps (t, id, status);
 	statuses.erase (ps);
 
-	if (status == Normal) {
-		return;
+	if (status != Normal) {
+		statuses.insert (ps);
 	}
-
-	statuses.insert (ps);
+	
+	PluginStatusesChanged (t, id, status); /* EMIT SIGNAL */
 }
 
 PluginType

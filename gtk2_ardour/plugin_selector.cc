@@ -40,8 +40,6 @@
 #include "pbd/convert.h"
 #include "pbd/tokenizer.h"
 
-#include "ardour/plugin_manager.h"
-#include "ardour/plugin.h"
 #include "ardour/utils.h"
 
 #include "plugin_selector.h"
@@ -69,8 +67,8 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	manager.PluginListChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::build_plugin_menu, this), gui_context());
 	manager.PluginListChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::refill, this), gui_context());
-	manager.PluginStatusesChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::build_plugin_menu, this), gui_context());
-	manager.PluginStatusesChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::refill, this), gui_context());
+	
+	manager.PluginStatusesChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::plugin_status_changed, this, _1, _2, _3), gui_context());
 
 	manager.PluginTagsChanged.connect(plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::tags_changed, this, _1, _2, _3), gui_context());
 
@@ -806,6 +804,10 @@ PluginSelector::run ()
 		manager.save_tags();
 	}
 
+	if ( _need_status_save ) {
+		manager.save_statuses();
+	}
+
 	return (int) r;
 }
 
@@ -856,11 +858,35 @@ PluginSelector::tags_changed (PluginType t, std::string unique_id, std::string t
 }
 
 void
+PluginSelector::plugin_status_changed (PluginType t, std::string uid, PluginManager::PluginStatusType stat)
+{
+	Gtk::TreeModel::iterator i;
+	for (i = plugin_model->children().begin(); i != plugin_model->children().end(); ++i) {
+		PluginInfoPtr pp = (*i)[plugin_columns.plugin];	
+		if ( (pp->type == t) && (pp->unique_id == uid) ) {
+			(*i)[plugin_columns.favorite] = ( stat==PluginManager::Favorite ) ? true : false;
+			(*i)[plugin_columns.hidden] = ( stat==PluginManager::Hidden ) ? true : false;
+
+			//if plug was hidden, remove it from the view
+			if (stat==PluginManager::Hidden) {
+				plugin_model->erase(i);
+			}
+
+			build_plugin_menu();
+
+			return;
+		}
+	}
+}
+
+void
 PluginSelector::on_show ()
 {
 	ArdourDialog::on_show ();
 	search_entry.grab_focus ();
+
 	_need_tag_save = false;
+	_need_status_save = false;
 }
 
 struct PluginMenuCompareByCreator {
@@ -1159,8 +1185,6 @@ PluginSelector::favorite_changed (const std::string& path)
 
 		/* change state */
 
-		(*iter)[plugin_columns.favorite] = favorite;
-		(*iter)[plugin_columns.hidden] = false;
 		PluginManager::PluginStatusType status = (favorite ? PluginManager::Favorite : PluginManager::Normal);
 
 		/* save new statuses list */
@@ -1169,9 +1193,7 @@ PluginSelector::favorite_changed (const std::string& path)
 
 		manager.set_status (pi->type, pi->unique_id, status);
 
-		manager.save_statuses ();
-
-		build_plugin_menu ();
+		_need_status_save = true;
 	}
 	in_row_change = false;
 }
@@ -1195,8 +1217,6 @@ PluginSelector::hidden_changed (const std::string& path)
 
 		/* change state */
 
-		(*iter)[plugin_columns.favorite] = false;
-		(*iter)[plugin_columns.hidden] = hidden;
 		PluginManager::PluginStatusType status = (hidden ? PluginManager::Hidden : PluginManager::Normal);
 
 		/* save new statuses list */
@@ -1205,9 +1225,7 @@ PluginSelector::hidden_changed (const std::string& path)
 
 		manager.set_status (pi->type, pi->unique_id, status);
 
-		manager.save_statuses ();
-
-		build_plugin_menu ();
+		_need_status_save = true;
 	}
 	in_row_change = false;
 }

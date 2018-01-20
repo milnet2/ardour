@@ -90,8 +90,9 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
  
 	/** plugins were added to or removed from one of the PluginInfoLists */
 	PBD::Signal0<void> PluginListChanged;
+
 	/** Plugin Hidden/Favorite status changed */
-	PBD::Signal0<void> PluginStatusesChanged;
+	PBD::Signal3<void, ARDOUR::PluginType, std::string, PluginStatusType> PluginStatusesChanged; //PluginType t, string id, string tag
 
 	PBD::Signal3<void, ARDOUR::PluginType, std::string, std::string> PluginTagsChanged; //PluginType t, string id, string tag
 
