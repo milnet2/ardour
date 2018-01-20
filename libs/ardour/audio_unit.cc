@@ -2917,14 +2917,14 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			continue;
 
 		case kAudioUnitType_Output:
-			info->category = _("AudioUnit Output");
+			info->category = _("Output");
 			break;
 		case kAudioUnitType_MusicDevice:
 			info->category = _("Instrument");
 			has_midi_in = true;
 			break;
 		case kAudioUnitType_MusicEffect:
-			info->category = _("Music Effect");
+			info->category = _("Effect");
 			has_midi_in = true;
 			break;
 		case kAudioUnitType_Effect:
@@ -2937,7 +2937,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			info->category = _("Generator");
 			break;
 		default:
-			info->category = _("AudioUnit (Unknown)");
+			info->category = _("(Unknown)");
 			break;
 		}
 
@@ -3316,7 +3316,7 @@ AUPluginInfo::is_instrument () const
 bool
 AUPluginInfo::is_utility () const
 {
-	return ( descriptor->IsGenerator() || desc.componentType == 'aumi' );  //kAudioUnitType_MidiProcessor  ..looks like we aren't even scanning for these yet?
+	return ( descriptor->IsGenerator() || descriptor->componentType == 'aumi' );  //kAudioUnitType_MidiProcessor  ..looks like we aren't even scanning for these yet?
 }
 
 void
