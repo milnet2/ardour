@@ -89,12 +89,14 @@ private:
 	Gtk::Button search_clear_button;
 
 	Gtk::Entry *tag_entry;
-	void tag_clear_button_clicked ();
+	void tag_reset_button_clicked ();
 
 	void search_clear_button_clicked ();
 	void search_entry_changed ();
 
 	void tag_entry_changed ();
+
+	void tags_changed ( ARDOUR::PluginType t, std::string unique_id, std::string tag);
 
 	struct PluginColumns : public Gtk::TreeModel::ColumnRecord {
 		PluginColumns () {
@@ -178,6 +180,8 @@ private:
 	Gtk::Menu* create_by_category_menu (ARDOUR::PluginInfoList&);
 	void build_plugin_menu ();
 	PBD::ScopedConnectionList plugin_list_changed_connection;
+	
+	bool _need_tag_save;
 };
 
 #endif // __ardour_plugin_selector_h__

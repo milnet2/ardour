@@ -34,8 +34,11 @@
 #include <gtkmm/table.h>
 
 #include "gtkmm2ext/utils.h"
-#include "pbd/convert.h"
+
 #include "widgets/tooltips.h"
+
+#include "pbd/convert.h"
+#include "pbd/tokenizer.h"
 
 #include "ardour/plugin_manager.h"
 #include "ardour/plugin.h"
@@ -68,6 +71,9 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	manager.PluginListChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::refill, this), gui_context());
 	manager.PluginStatusesChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::build_plugin_menu, this), gui_context());
 	manager.PluginStatusesChanged.connect (plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::refill, this), gui_context());
+
+	manager.PluginTagsChanged.connect(plugin_list_changed_connection, invalidator (*this), boost::bind (&PluginSelector::tags_changed, this, _1, _2, _3), gui_context());
+
 
 	plugin_model = Gtk::ListStore::create (plugin_columns);
 	plugin_display.set_model (plugin_model);
@@ -260,8 +266,8 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	tag_entry = manage (new Gtk::Entry);
 	tag_entry->signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::tag_entry_changed));
 
-	Gtk::Button* tag_clear_button = manage ( new Button( _("Clear") ));
-	tag_clear_button->signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::tag_clear_button_clicked));
+	Gtk::Button* tag_reset_button = manage ( new Button( _("Reset") ));
+	tag_reset_button->signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::tag_reset_button_clicked));
 
 	Gtk::Label* tagging_help_label1 = manage (new Label(
 		_( "Enter space-separated, one-word Tags for selected plugin."), Gtk::ALIGN_LEFT));
@@ -274,7 +280,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	p = 0;
 	tagging_table->attach (*tag_entry,           0, 1, p, p+1, FILL|EXPAND, FILL);
-	tagging_table->attach (*tag_clear_button,    1, 2, p, p+1, FILL, FILL); p++;
+	tagging_table->attach (*tag_reset_button,    1, 2, p, p+1, FILL, FILL); p++;
 	tagging_table->attach (*tagging_help_label1, 0, 2, p, p+1, FILL, FILL); p++;
 	tagging_table->attach (*tagging_help_label2, 0, 2, p, p+1, FILL, FILL); p++;
 	tagging_table->attach (*tagging_help_label3, 0, 2, p, p+1, FILL, FILL); p++;
@@ -503,8 +509,6 @@ PluginSelector::setup_search_string (string& searchstr)
 void
 PluginSelector::refill ()
 {
-	tag_entry->set_text("");
-	
 	std::string searchstr;
 
 	in_row_change = true;
@@ -709,6 +713,7 @@ PluginSelector::display_selection_changed()
 
 	} else {
 		btn_add->set_sensitive (false);
+		tag_entry->set_text( "" );
 	}
 }
 
@@ -763,6 +768,10 @@ PluginSelector::run ()
 	hide();
 	amodel->clear();
 	interested_object = 0;
+	
+	if ( _need_tag_save ) {
+		manager.save_tags();
+	}
 
 	return (int) r;
 }
@@ -774,9 +783,14 @@ PluginSelector::search_clear_button_clicked ()
 }
 
 void
-PluginSelector::tag_clear_button_clicked ()
+PluginSelector::tag_reset_button_clicked ()
 {
-	tag_entry->set_text ("");
+	if (plugin_display.get_selection()->count_selected_rows() != 0) {
+		TreeModel::Row row = *(plugin_display.get_selection()->get_selected());
+		std::string str = row[plugin_columns.category];
+		std::transform (str.begin(), str.end(), str.begin(), ::tolower);
+		tag_entry->set_text ( str );
+	}	
 }
 
 void
@@ -791,12 +805,19 @@ PluginSelector::tag_entry_changed ()
 	if (plugin_display.get_selection()->count_selected_rows() != 0) {
 		TreeModel::Row row = *(plugin_display.get_selection()->get_selected());
 
-//ToDo: set the row text
-//		std::string tags = row[plugin_columns.tags];
-//		tag_entry->set_text( tags );
+		ARDOUR::PluginInfoPtr pi = row[plugin_columns.plugin];
+		manager.set_tags( pi->type, pi->unique_id, tag_entry->get_text() );
 
-//ToDo: tell pluginmanager to change the file?  seems heavy to do this with every character entry
+		_need_tag_save = true;
+	}
+}
 
+void
+PluginSelector::tags_changed (PluginType t, std::string unique_id, std::string tag)
+{
+	if (plugin_display.get_selection()->count_selected_rows() != 0) {
+		TreeModel::Row row = *(plugin_display.get_selection()->get_selected());
+		row[plugin_columns.tags] = tag;
 	}
 }
 
@@ -805,6 +826,7 @@ PluginSelector::on_show ()
 {
 	ArdourDialog::on_show ();
 	search_entry.grab_focus ();
+	_need_tag_save = false;
 }
 
 struct PluginMenuCompareByCreator {
@@ -1114,8 +1136,6 @@ PluginSelector::favorite_changed (const std::string& path)
 		manager.set_status (pi->type, pi->unique_id, status);
 
 		manager.save_statuses ();
-
-		manager.save_tags ();  //ToDo:  whenever a tag changes... 
 
 		build_plugin_menu ();
 	}

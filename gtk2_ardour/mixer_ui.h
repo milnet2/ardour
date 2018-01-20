@@ -369,8 +369,11 @@ private:
 	void store_current_favorite_order();
 	void refiller (ARDOUR::PluginInfoList& result, const ARDOUR::PluginInfoList& plugs);
 	void refill_favorite_plugins ();
+
 	void refill_tag_combo ();
+	void tags_changed ( ARDOUR::PluginType t, std::string unique_id, std::string tag );
 	void tag_combo_changed ();
+
 	void sync_treeview_from_favorite_order ();
 	void sync_treeview_favorite_ui_state (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&);
 	void save_favorite_ui_state (const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path);

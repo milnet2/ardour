@@ -368,8 +368,9 @@ Mixer_UI::Mixer_UI ()
 #endif
 	PluginManager::instance ().PluginListChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
 	PluginManager::instance ().PluginStatusesChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
-	PluginManager::instance ().PluginTagsChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_tag_combo, this), gui_context());
 	ARDOUR::Plugin::PresetsChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
+
+	PluginManager::instance ().PluginTagsChanged.connect(*this, invalidator (*this), boost::bind (&Mixer_UI::tags_changed, this, _1, _2, _3), gui_context());
 }
 
 Mixer_UI::~Mixer_UI ()
@@ -2676,10 +2677,17 @@ struct SortByTag {
 	}
 };
 
+void
+Mixer_UI::tags_changed ( PluginType t, std::string unique_id, std::string tag )
+{
+	refill_tag_combo();
+}
 
 void
 Mixer_UI::refill_tag_combo ()
 {
+	//rebuild the favorite_plugins_tag_combo, with an entry per tag.
+
 	PluginManager& mgr (PluginManager::instance());
 
 	std::vector<std::string> tags = mgr.get_all_tags( true );
