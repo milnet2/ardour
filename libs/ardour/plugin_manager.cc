@@ -1625,6 +1625,13 @@ PluginManager::sanitize_tag( const std::string to_sanitize ) const
 	return sanitized;
 }
 
+struct SortByTag {
+	bool operator() (std::string a, std::string b) {
+		return a.compare (b) < 0;
+	}
+};
+
+
 std::vector<std::string>
 PluginManager::get_all_tags( bool favorites_only ) const
 {
@@ -1660,6 +1667,10 @@ PluginManager::get_all_tags( bool favorites_only ) const
 			}
 		}
 	}
+	
+	//sort in alphabetical order
+	SortByTag sorter;
+	sort (ret.begin(), ret.end(), sorter);
 
 	return ret;
 }
