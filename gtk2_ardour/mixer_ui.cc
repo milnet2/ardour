@@ -2671,12 +2671,6 @@ Mixer_UI::refill_favorite_plugins ()
 	sync_treeview_from_favorite_order ();
 }
 
-struct SortByTag {
-	bool operator() (std::string a, std::string b) {
-		return a.compare (b) < 0;
-	}
-};
-
 void
 Mixer_UI::plugin_status_changed ( PluginType, std::string, PluginManager::PluginStatusType )
 {
@@ -2698,10 +2692,6 @@ Mixer_UI::refill_tag_combo ()
 
 	std::vector<std::string> tags = mgr.get_all_tags( true );
 	
-	//sort in alphabetical order
-	SortByTag sorter;
-	sort (tags.begin(), tags.end(), sorter);
-
 	favorite_plugins_tag_combo.clear();
 	favorite_plugins_tag_combo.append_text( _("Show All") );
 	

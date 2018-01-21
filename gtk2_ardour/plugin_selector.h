@@ -182,12 +182,13 @@ private:
 
 	Gtk::Menu* create_favs_menu (ARDOUR::PluginInfoList&);
 	Gtk::Menu* create_by_creator_menu (ARDOUR::PluginInfoList&);
-	Gtk::Menu* create_by_category_menu (ARDOUR::PluginInfoList&);
+	Gtk::Menu* create_by_tags_menu (ARDOUR::PluginInfoList&);
 	void build_plugin_menu ();
 	PBD::ScopedConnectionList plugin_list_changed_connection;
 	
 	bool _need_tag_save;
 	bool _need_status_save;
+	bool _need_menu_rebuild;
 
 	bool inhibit_refill;
 };

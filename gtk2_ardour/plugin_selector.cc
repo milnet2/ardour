@@ -334,7 +334,6 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	added_list.signal_button_press_event().connect_notify (mem_fun(*this, &PluginSelector::added_row_clicked));
 
 	build_plugin_menu ();
-	refill ();
 }
 
 PluginSelector::~PluginSelector ()
@@ -812,6 +811,10 @@ PluginSelector::run ()
 		manager.save_statuses();
 	}
 
+	if ( _need_menu_rebuild ) {
+		build_plugin_menu();
+	}
+
 	return (int) r;
 }
 
@@ -859,6 +862,10 @@ PluginSelector::tags_changed (PluginType t, std::string unique_id, std::string t
 		TreeModel::Row row = *(plugin_display.get_selection()->get_selected());
 		row[plugin_columns.tags] = tag;
 	}
+	
+	//a plugin's tags change while the user is entering them.
+	//defer a rebuilding of the "tag" menu until the dialog is closed.
+	_need_menu_rebuild = true;
 }
 
 void
@@ -890,8 +897,11 @@ PluginSelector::on_show ()
 	ArdourDialog::on_show ();
 	search_entry.grab_focus ();
 
+	refill ();
+	
 	_need_tag_save = false;
 	_need_status_save = false;
+	_need_menu_rebuild = false;
 }
 
 struct PluginMenuCompareByCreator {
@@ -997,8 +1007,8 @@ PluginSelector::build_plugin_menu ()
 	Menu* by_creator = create_by_creator_menu(all_plugs);
 	items.push_back (MenuElem (_("By Creator"), *manage (by_creator)));
 
-	Menu* by_category = create_by_category_menu(all_plugs);
-	items.push_back (MenuElem (_("By Category"), *manage (by_category)));
+	Menu* by_tags = create_by_tags_menu(all_plugs);
+	items.push_back (MenuElem (_("By Tags"), *manage (by_tags)));
 }
 
 string
@@ -1121,42 +1131,50 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 }
 
 Gtk::Menu*
-PluginSelector::create_by_category_menu (ARDOUR::PluginInfoList& all_plugs)
+PluginSelector::create_by_tags_menu (ARDOUR::PluginInfoList& all_plugs)
 {
 	using namespace Menu_Helpers;
 
 	typedef std::map<std::string,Gtk::Menu*> SubmenuMap;
-	SubmenuMap category_submenu_map;
+	SubmenuMap tags_submenu_map;
 
-	Menu* by_category = new Menu();
-	by_category->set_name("ArdourContextMenu");
+	Menu* by_tags = new Menu();
+	by_tags->set_name("ArdourContextMenu");
+	MenuList& by_tags_items = by_tags->items();
 
-	MenuList& by_category_items = by_category->items();
-	PluginMenuCompareByCategory cmp_by_category;
-	all_plugs.sort (cmp_by_category);
-
+	std::vector<std::string> all_tags = manager.get_all_tags(false);
+	for (vector<string>::iterator t = all_tags.begin(); t != all_tags.end(); ++t) {
+		Gtk::Menu *submenu = new Gtk::Menu;
+		by_tags_items.push_back (MenuElem (*t, *manage (submenu)));
+		tags_submenu_map.insert (pair<std::string,Menu*> (*t, submenu));
+		submenu->set_name("ArdourContextMenu");
+	}
+	
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
 
 		if (manager.get_status (*i) == PluginManager::Hidden) continue;
 
-		string category = (*i)->category;
-
-		SubmenuMap::iterator x;
-		Gtk::Menu* submenu;
-		if ((x = category_submenu_map.find (category)) != category_submenu_map.end()) {
-			submenu = x->second;
-		} else {
-			submenu = new Gtk::Menu;
-			by_category_items.push_back (MenuElem (category, *manage (submenu)));
-			category_submenu_map.insert (pair<std::string,Menu*> (category, submenu));
-			submenu->set_name("ArdourContextMenu");
+		//for each tag in the plugins tag list, add it to that submenu
+		string tags = manager.get_tags(*i);
+		vector<string> tokens;
+		if (!PBD::tokenize ( tags, string(",\n"), std::back_inserter (tokens), true)) {
+			warning << _("PluginManager: Could not tokenize string: ") << tags << endmsg;
+			continue;
 		}
-		string typ = GetPluginTypeStr(*i);
-		MenuElem elem ((*i)->name + typ, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i)));
-		elem.get_child()->set_use_underline (false);
-		submenu->items().push_back (elem);
+		for (vector<string>::iterator t = tokens.begin(); t != tokens.end(); ++t) {
+			SubmenuMap::iterator x;
+			Gtk::Menu* submenu;
+			if ((x = tags_submenu_map.find (*t)) != tags_submenu_map.end()) {
+				submenu = x->second;
+			} else {
+			}
+			string typ = GetPluginTypeStr(*i);
+			MenuElem elem ((*i)->name + typ, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i)));
+			elem.get_child()->set_use_underline (false);
+			submenu->items().push_back (elem);
+		}
 	}
-	return by_category;
+	return by_tags;
 }
 
 void
