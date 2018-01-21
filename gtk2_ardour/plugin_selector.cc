@@ -1150,6 +1150,9 @@ PluginSelector::create_by_tags_menu (ARDOUR::PluginInfoList& all_plugs)
 		submenu->set_name("ArdourContextMenu");
 	}
 	
+	PluginMenuCompareByName cmp_by_name;
+	all_plugs.sort (cmp_by_name);
+
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
 
 		if (manager.get_status (*i) == PluginManager::Hidden) continue;
