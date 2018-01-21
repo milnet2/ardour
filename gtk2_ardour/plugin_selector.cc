@@ -373,7 +373,7 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		}
 		
 		if ( _search_tags_checkbox->get_active() ) {  //tag contains
-			compstr = manager.get_tags (info);
+			compstr = manager.get_tags_as_string (info);
 			transform (compstr.begin(), compstr.end(), compstr.begin(), ::toupper);
 			if (compstr.find (searchstr) != string::npos) {
 				maybe_show = true;
@@ -601,7 +601,7 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& searc
 
 			newrow[plugin_columns.creator] = creator;
 
-			newrow[plugin_columns.tags] = manager.get_tags(*i);
+			newrow[plugin_columns.tags] = manager.get_tags_as_string(*i);
 
 			if ((*i)->reconfigurable_io ()) {
 				newrow[plugin_columns.audio_ins] = _("variable");
@@ -860,7 +860,7 @@ PluginSelector::tags_changed (PluginType t, std::string unique_id, std::string t
 {
 	if (plugin_display.get_selection()->count_selected_rows() != 0) {
 		TreeModel::Row row = *(plugin_display.get_selection()->get_selected());
-		row[plugin_columns.tags] = tag;
+		row[plugin_columns.tags] = manager.get_tags_as_string( row[plugin_columns.plugin] );
 	}
 	
 	//a plugin's tags change while the user is entering them.
@@ -1155,12 +1155,7 @@ PluginSelector::create_by_tags_menu (ARDOUR::PluginInfoList& all_plugs)
 		if (manager.get_status (*i) == PluginManager::Hidden) continue;
 
 		//for each tag in the plugins tag list, add it to that submenu
-		string tags = manager.get_tags(*i);
-		vector<string> tokens;
-		if (!PBD::tokenize ( tags, string(",\n"), std::back_inserter (tokens), true)) {
-			warning << _("PluginManager: Could not tokenize string: ") << tags << endmsg;
-			continue;
-		}
+		vector<string> tokens = manager.get_tags(*i);
 		for (vector<string>::iterator t = tokens.begin(); t != tokens.end(); ++t) {
 			SubmenuMap::iterator x;
 			Gtk::Menu* submenu;

@@ -1464,17 +1464,49 @@ PluginManager::to_generic_vst( PluginType pt )
 	return ret;
 }
 
+struct SortByTag {
+	bool operator() (std::string a, std::string b) {
+		return a.compare (b) < 0;
+	}
+};
 
-std::string
+vector<std::string>
 PluginManager::get_tags (const PluginInfoPtr& pi) const
 {
+	vector<std::string> tags;
+	
 	PluginTags ps ( to_generic_vst(pi->type), pi->unique_id, "");
 	PluginTagsList::const_iterator i =  find (ptags.begin(), ptags.end(), ps);
 	if (i ==  ptags.end() ) {
-		return "";
+		return tags;
 	} else {
-		return i->tags;
+
+		if (!PBD::tokenize ( i->tags, string(",\n"), std::back_inserter (tags), true)) {
+			cout << _("PluginManager: Could not tokenize string: ") << i->tags << endmsg;
+			return tags;
+		}
+
+		SortByTag sorter;
+		sort (tags.begin(), tags.end(), sorter);
+		
+		return tags;
 	}
+}
+
+std::string
+PluginManager::get_tags_as_string (const PluginInfoPtr& pi) const
+{
+	std::string ret;
+	
+	vector<std::string> tags = get_tags(pi);
+	for (vector<string>::iterator t = tags.begin(); t != tags.end(); ++t) {
+		if ( t != tags.begin() ) {
+			ret.append(" ");
+		}
+		ret.append(*t);
+	}
+	
+	return ret;
 }
 
 void
@@ -1624,13 +1656,6 @@ PluginManager::sanitize_tag( const std::string to_sanitize ) const
 	
 	return sanitized;
 }
-
-struct SortByTag {
-	bool operator() (std::string a, std::string b) {
-		return a.compare (b) < 0;
-	}
-};
-
 
 std::vector<std::string>
 PluginManager::get_all_tags( bool favorites_only ) const

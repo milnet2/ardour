@@ -82,8 +82,9 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 
  	void load_tags ();
  	void save_tags ();
- 	void set_tags (ARDOUR::PluginType type, std::string unique_id, std::string tags, bool only_if_empty = false);
- 	std::string get_tags (const PluginInfoPtr&) const;
+ 	void set_tags (ARDOUR::PluginType type, std::string unique_id, std::string tags, bool only_if_empty = false);  //accepts a string that might be comma- or space-delimited tags
+ 	std::vector<std::string> get_tags (const PluginInfoPtr&) const;
+ 	std::string get_tags_as_string (const PluginInfoPtr&) const;
 	std::string sanitize_tag (const std::string) const;
 	
 	std::vector<std::string> get_all_tags( bool favorites_only ) const; 

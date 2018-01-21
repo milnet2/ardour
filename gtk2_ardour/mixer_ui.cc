@@ -2596,15 +2596,11 @@ Mixer_UI::refiller (PluginInfoList& result, const PluginInfoList& plugs)
 		//Check the tag combo selection, and skip this plugin if it doesn't match the selected tag(s)
 		string test = favorite_plugins_tag_combo.get_active_text();
 		if ( test != _("Show All") ) {
-			string tags = manager.get_tags(*i);
-			vector<string> tokens;
-			if (!PBD::tokenize ( tags, string(",\n"), std::back_inserter (tokens), true)) {
-				warning << _("PluginManager: Could not tokenize string: ") << tags << endmsg;
-				continue;
-			}
+			vector<string> tags = manager.get_tags(*i);
+
 			//does the selected tag match any of the tags in the plugin?
-			vector<string>::iterator tt =  find (tokens.begin(), tokens.end(), test);
-			if (tt == tokens.end() ) {
+			vector<string>::iterator tt =  find (tags.begin(), tags.end(), test);
+			if (tt == tags.end() ) {
 				continue;
 			}
 		}
