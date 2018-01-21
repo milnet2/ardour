@@ -188,6 +188,8 @@ private:
 	
 	bool _need_tag_save;
 	bool _need_status_save;
+
+	bool inhibit_refill;
 };
 
 #endif // __ardour_plugin_selector_h__

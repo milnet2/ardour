@@ -57,7 +57,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	: ArdourDialog (_("Plugin Manager"), true, false)
 	, search_clear_button (Stock::CLEAR)
 	, manager (mgr)
-
+	, inhibit_refill (false)
 {
 	set_name ("PluginSelectorWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
@@ -540,6 +540,10 @@ PluginSelector::set_sensitive_widgets ()
 void
 PluginSelector::refill ()
 {
+	if (inhibit_refill) {
+		return;
+	}
+	
 	std::string searchstr;
 
 	in_row_change = true;
@@ -872,6 +876,7 @@ PluginSelector::plugin_status_changed (PluginType t, std::string uid, PluginMana
 				plugin_model->erase(i);
 			}
 
+			//plugin menu must be re-built to accommodate Hidden and Favorite plugins
 			build_plugin_menu();
 
 			return;
@@ -1049,9 +1054,11 @@ PluginSelector::create_favs_menu (PluginInfoList& all_plugs)
 Gtk::Menu*
 PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 {
+	inhibit_refill = true;
 	_fil_creator_combo->clear();
 	_fil_creator_combo->append_text( _("Show All Creators") );
 	_fil_creator_combo->set_active_text( _("Show All Creators") );
+	inhibit_refill = false;
 
 	using namespace Menu_Helpers;
 
