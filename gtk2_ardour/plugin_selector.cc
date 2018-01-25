@@ -120,7 +120,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	added_list.set_headers_visible (true);
 	added_list.set_reorderable (false);
 
-	for (int i = 0; i <=8; i++) {
+	for (int i = 0; i <=9; i++) {
 		Gtk::TreeView::Column* column = plugin_display.get_column(i);
 		column->set_sort_column(i);
 	}
@@ -574,13 +574,20 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& searc
 			TreeModel::Row newrow = *(plugin_model->append());
 			newrow[plugin_columns.favorite] = (manager.get_status (*i) == PluginManager::Favorite);
 			newrow[plugin_columns.hidden] = (manager.get_status (*i) == PluginManager::Hidden);
-			newrow[plugin_columns.name] = (*i)->name;
+
+			string name = (*i)->name;
+			if ( name.length() > 48 ) {
+				name = name.substr (0, 48);
+				name.append("...");
+			}
+			newrow[plugin_columns.name] = name;
+
 			newrow[plugin_columns.type_name] = type;
 			newrow[plugin_columns.category] = (*i)->category;
 
+			//Creator
 			string creator = (*i)->creator;
 			string::size_type pos = 0;
-
 			if ((*i)->type == ARDOUR::LADSPA) {
 				/* stupid LADSPA creator strings */
 #ifdef PLATFORM_WINDOWS
@@ -599,15 +606,25 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& searc
 				creator = creator.substr (0, pos);
 			}
 
+			if ( creator.length() > 32 ) {
+				creator = creator.substr (0, 32);
+				creator.append("...");
+			}
 			newrow[plugin_columns.creator] = creator;
 
-			newrow[plugin_columns.tags] = manager.get_tags_as_string(*i);
+			//Tags
+			string tags =  manager.get_tags_as_string(*i);
+			if ( tags.length() > 32 ) {
+				tags = tags.substr (0, 32);
+				tags.append("...");
+			}
+			newrow[plugin_columns.tags] = tags;
 
 			if ((*i)->reconfigurable_io ()) {
-				newrow[plugin_columns.audio_ins] = _("variable");
-				newrow[plugin_columns.midi_ins] = _("variable");
-				newrow[plugin_columns.audio_outs] = _("variable");
-				newrow[plugin_columns.midi_outs] = _("variable");
+				newrow[plugin_columns.audio_ins] = "*";
+				newrow[plugin_columns.midi_ins] = "*";
+				newrow[plugin_columns.audio_outs] = "*";
+				newrow[plugin_columns.midi_outs] = "*";
 			} else {
 				snprintf (buf, sizeof(buf), "%d", (*i)->n_inputs.n_audio());
 				newrow[plugin_columns.audio_ins] = buf;
@@ -738,16 +755,20 @@ void
 PluginSelector::display_selection_changed()
 {
 	if (plugin_display.get_selection()->count_selected_rows() != 0) {
-		btn_add->set_sensitive (true);
 
 		//a plugin row is selected; allow the user to edit the "tags" on it.
 		TreeModel::Row row = *(plugin_display.get_selection()->get_selected());
-		std::string tags = row[plugin_columns.tags];
+		string tags =  manager.get_tags_as_string( row[plugin_columns.plugin] );
 		tag_entry->set_text( tags );
 
+		tag_entry->set_sensitive (true);
+		btn_add->set_sensitive (true);
+
 	} else {
-		btn_add->set_sensitive (false);
 		tag_entry->set_text( "" );
+
+		tag_entry->set_sensitive (false);
+		btn_add->set_sensitive (false);
 	}
 }
 
@@ -860,7 +881,13 @@ PluginSelector::tags_changed (PluginType t, std::string unique_id, std::string t
 {
 	if (plugin_display.get_selection()->count_selected_rows() != 0) {
 		TreeModel::Row row = *(plugin_display.get_selection()->get_selected());
-		row[plugin_columns.tags] = manager.get_tags_as_string( row[plugin_columns.plugin] );
+		
+		string tags =  manager.get_tags_as_string( row[plugin_columns.plugin] );
+		if ( tags.length() > 32 ) {
+			tags = tags.substr (0, 32);
+			tags.append("...");
+		}
+		row[plugin_columns.tags] = tags;
 	}
 	
 	//a plugin's tags change while the user is entering them.
