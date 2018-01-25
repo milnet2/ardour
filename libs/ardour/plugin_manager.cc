@@ -1358,7 +1358,8 @@ PluginManager::save_statuses ()
 void
 PluginManager::load_statuses ()
 {
-	std::string path = Glib::build_filename (user_config_directory(), "plugin_statuses");
+	std::string path;
+	find_file (plugin_metadata_search_path(), "plugin_statuses", path);  //note: if no user folder is found, this will find the resources path
 	gchar *fbuf = NULL;
 	if (!g_file_get_contents (path.c_str(), &fbuf, NULL, NULL))  {
 		return;
@@ -1552,7 +1553,8 @@ PluginManager::save_tags ()
 void
 PluginManager::load_tags ()
 {
-	std::string path = Glib::build_filename (user_config_directory(), "plugin_tags");
+	std::string path;
+	find_file (plugin_metadata_search_path(), "plugin_tags", path);  //note: if no user folder is found, this will find the resources path
 	gchar *fbuf = NULL;
 	if (!g_file_get_contents (path.c_str(), &fbuf, NULL, NULL))  {
 		return;

@@ -139,6 +139,7 @@ Surfaces=$Frameworks/surfaces
 Panners=$Frameworks/panners
 Backends=$Frameworks/backends
 MidiMaps=$Shared/midi_maps
+PluginMetadata=$Shared/plugin_metadata
 ExportFormats=$Shared/export
 Templates=$Shared/templates
 PatchFiles=$Shared/patchfiles
@@ -173,6 +174,7 @@ mkdir -p $APPROOT/MacOS
 mkdir -p $APPROOT/Resources
 mkdir -p $Surfaces
 mkdir -p $Panners
+mkdir -p $PluginMetadata
 mkdir -p $Backends
 mkdir -p $MidiMaps
 mkdir -p $ExportFormats
@@ -346,6 +348,10 @@ done
 
 #Session templates
 cp -av $BUILD_ROOT/../templates $Templates
+
+# PluginMetadata
+cp $BUILD_ROOT/../plugin_metadata/plugin_statuses $PluginMetadata
+cp $BUILD_ROOT/../plugin_metadata/plugin_tags $PluginMetadata
 
 # MidiMaps
 # got to be careful with names here
