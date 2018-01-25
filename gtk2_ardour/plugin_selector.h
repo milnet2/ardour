@@ -110,10 +110,8 @@ private:
 			add (category);
 			add (creator);
 			add (tags);
-			add (audio_ins);
-			add (audio_outs);
-			add (midi_ins);
-			add (midi_outs);
+			add (audio_io);
+			add (midi_io);
 			add (plugin);
 		}
 		Gtk::TreeModelColumn<bool> favorite;
@@ -123,10 +121,8 @@ private:
 		Gtk::TreeModelColumn<std::string> category;
 		Gtk::TreeModelColumn<std::string> creator;
 		Gtk::TreeModelColumn<std::string> tags;
-		Gtk::TreeModelColumn<std::string> audio_ins;
-		Gtk::TreeModelColumn<std::string> audio_outs;
-		Gtk::TreeModelColumn<std::string> midi_ins;
-		Gtk::TreeModelColumn<std::string> midi_outs;
+		Gtk::TreeModelColumn<std::string> audio_io;
+		Gtk::TreeModelColumn<std::string> midi_io;
 		Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
 	};
 	PluginColumns plugin_columns;

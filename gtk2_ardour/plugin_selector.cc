@@ -86,10 +86,8 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	plugin_display.append_column (_("Tags"), plugin_columns.tags);
 	plugin_display.append_column (_("Creator"), plugin_columns.creator);
 	plugin_display.append_column (_("Type"), plugin_columns.type_name);
-	plugin_display.append_column (_("# Audio In"),plugin_columns.audio_ins);
-	plugin_display.append_column (_("# Audio Out"), plugin_columns.audio_outs);
-	plugin_display.append_column (_("# MIDI In"),plugin_columns.midi_ins);
-	plugin_display.append_column (_("# MIDI Out"), plugin_columns.midi_outs);
+	plugin_display.append_column (_("Audio I/O"),plugin_columns.audio_io);
+	plugin_display.append_column (_("MIDI I/O"), plugin_columns.midi_io);
 	plugin_display.set_headers_visible (true);
 	plugin_display.set_headers_clickable (true);
 	plugin_display.set_reorderable (false);
@@ -120,9 +118,11 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	added_list.set_headers_visible (true);
 	added_list.set_reorderable (false);
 
-	for (int i = 0; i <=9; i++) {
+	for (int i = 0; i <=7; i++) {
 		Gtk::TreeView::Column* column = plugin_display.get_column(i);
-		column->set_sort_column(i);
+		if (column) {
+			column->set_sort_column(i);
+		}
 	}
 
 	ascroller.set_border_width(10);
@@ -621,20 +621,13 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& searc
 			newrow[plugin_columns.tags] = tags;
 
 			if ((*i)->reconfigurable_io ()) {
-				newrow[plugin_columns.audio_ins] = "*";
-				newrow[plugin_columns.midi_ins] = "*";
-				newrow[plugin_columns.audio_outs] = "*";
-				newrow[plugin_columns.midi_outs] = "*";
+				newrow[plugin_columns.audio_io] = "* / *";
+				newrow[plugin_columns.midi_io] = "* / *";
 			} else {
-				snprintf (buf, sizeof(buf), "%d", (*i)->n_inputs.n_audio());
-				newrow[plugin_columns.audio_ins] = buf;
-				snprintf (buf, sizeof(buf), "%d", (*i)->n_inputs.n_midi());
-				newrow[plugin_columns.midi_ins] = buf;
-
-				snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_audio());
-				newrow[plugin_columns.audio_outs] = buf;
-				snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_midi());
-				newrow[plugin_columns.midi_outs] = buf;
+				snprintf (buf, sizeof(buf), "%d / %d", (*i)->n_inputs.n_audio(), (*i)->n_outputs.n_audio());
+				newrow[plugin_columns.audio_io] = buf;
+				snprintf (buf, sizeof(buf), "%d / %d", (*i)->n_inputs.n_audio(), (*i)->n_outputs.n_audio());
+				newrow[plugin_columns.midi_io] = buf;
 			}
 
 			newrow[plugin_columns.plugin] = *i;
