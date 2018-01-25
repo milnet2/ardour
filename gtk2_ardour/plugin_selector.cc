@@ -82,7 +82,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	plugin_display.append_column (_("Fav"), plugin_columns.favorite);
 	plugin_display.append_column (_("Hide"), plugin_columns.hidden);
 	plugin_display.append_column (_("Name"), plugin_columns.name);
-//	plugin_display.append_column (_("Category"), plugin_columns.category);
+	plugin_display.append_column (_("Category"), plugin_columns.category);
 	plugin_display.append_column (_("Tags"), plugin_columns.tags);
 	plugin_display.append_column (_("Creator"), plugin_columns.creator);
 	plugin_display.append_column (_("Type"), plugin_columns.type_name);
@@ -97,6 +97,10 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	// setting a sort-column prevents re-ordering via Drag/Drop
 	plugin_model->set_sort_column (plugin_columns.name.index(), Gtk::SORT_ASCENDING);
+
+	plugin_display.set_name("PluginSelectorDisplay");
+	plugin_display.signal_row_activated().connect_notify (sigc::mem_fun(*this, &PluginSelector::row_activated));
+	plugin_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginSelector::display_selection_changed));
 
 	CellRendererToggle* fav_cell = dynamic_cast<CellRendererToggle*>(plugin_display.get_column_cell_renderer (0));
 	fav_cell->property_activatable() = true;
@@ -139,11 +143,6 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	btn_remove->set_name("PluginSelectorButton");
 
 
-	Gtk::Table* table = manage(new Gtk::Table(7, 11));
-	table->set_size_request(850, 500);
-
-//	filter_mode.signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::filter_mode_changed));
-
 	//------------------- SEARCH
 
 	Gtk::Table* search_table = manage(new Gtk::Table(2, 2));
@@ -162,7 +161,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	_search_ignore_checkbox->signal_toggled().connect (sigc::mem_fun (*this, &PluginSelector::set_sensitive_widgets));
 
 	Gtk::Label* search_help_label1 = manage (new Label(
-		_( "Search terms must \"all\" be matched, to return a hit."), Gtk::ALIGN_LEFT));
+		_( "All search terms must be matched."), Gtk::ALIGN_LEFT));
 
 	Gtk::Label* search_help_label2 = manage (new Label(
 		_( "Ex: \"ess dyn\" will return \"dynamic de-esser\" but not \"de-esser\"." ), Gtk::ALIGN_LEFT));
@@ -269,10 +268,10 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	tag_reset_button->signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::tag_reset_button_clicked));
 
 	Gtk::Label* tagging_help_label1 = manage (new Label(
-		_( "Enter space-separated, one-word Tags for selected plugin."), Gtk::ALIGN_LEFT));
+		_( "Enter space-separated, one-word Tags for the selected plugin."), Gtk::ALIGN_LEFT));
 
 	Gtk::Label* tagging_help_label2 = manage (new Label(
-		_( "You can use dashes or underscores."), Gtk::ALIGN_LEFT));
+		_( "You can include dashes, colons or underscores in a Tag."), Gtk::ALIGN_LEFT));
 
 	Gtk::Label* tagging_help_label3 = manage (new Label(
 		_("Ex: \"dynamic de-esser vocal\" applies 3 Tags." ), Gtk::ALIGN_LEFT));
@@ -290,48 +289,43 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	tag_frame->add (*tagging_table);
 	tag_frame->show_all ();
 
+//------------------------Add & remove buttons
+
+	HBox* add_remove = manage (new HBox);
+	add_remove->pack_start (*btn_add, true, true);
+	add_remove->pack_start (*btn_remove, true, true);
+
+	btn_add->signal_clicked().connect(sigc::mem_fun(*this, &PluginSelector::btn_add_clicked));
+	btn_remove->signal_clicked().connect(sigc::mem_fun(*this, &PluginSelector::btn_remove_clicked));
+	added_list.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginSelector::added_list_selection_changed));
+	added_list.signal_button_press_event().connect_notify (mem_fun(*this, &PluginSelector::added_row_clicked));
+
+	added_list.set_name("PluginSelectorList");
+
 //-----------------------Top-level Layout
 	
-
-	HBox* side_by_side = manage (new HBox);
 	VBox* to_be_inserted_vbox = manage (new VBox);
+	to_be_inserted_vbox->pack_start (ascroller);
+	to_be_inserted_vbox->pack_start (*add_remove, false, false);
+	to_be_inserted_vbox->set_size_request (200, -1);
 
+	Gtk::Table* table = manage(new Gtk::Table(3, 3));
+	table->set_size_request(-1, 600);
 	table->attach (scroller,               0, 3, 0, 5); //this is the main plugin list
 	table->attach (*search_frame,          0, 1, 6, 7, FILL, FILL, 5, 5);
 	table->attach (*tag_frame,             0, 1, 7, 8, FILL, FILL, 5, 5);
 	table->attach (*filter_frame,          1, 2, 6, 8, FILL, FILL, 5, 5);
 	table->attach (*to_be_inserted_vbox,   2, 3, 6, 8, FILL|EXPAND, FILL, 5, 5);  //to be inserted...
 
-	to_be_inserted_vbox->pack_start (ascroller);
-
-	HBox* add_remove = manage (new HBox);
-	add_remove->pack_start (*btn_add, true, true);
-	add_remove->pack_start (*btn_remove, true, true);
-
-	to_be_inserted_vbox->pack_start (*add_remove, false, false);
-	to_be_inserted_vbox->set_size_request (200, -1);
-
-	side_by_side->pack_start (*table);
-
 	add_button (Stock::CLOSE, RESPONSE_CLOSE);
 	add_button (_("Insert Plugin(s)"), RESPONSE_APPLY);
 	set_default_response (RESPONSE_APPLY);
 	set_response_sensitive (RESPONSE_APPLY, false);
-	get_vbox()->pack_start (*side_by_side);
+	get_vbox()->pack_start (*table);
 
 	table->set_name("PluginSelectorTable");
-	plugin_display.set_name("PluginSelectorDisplay");
-	//plugin_display.set_name("PluginSelectorList");
-	added_list.set_name("PluginSelectorList");
 
-	plugin_display.signal_row_activated().connect_notify (sigc::mem_fun(*this, &PluginSelector::row_activated));
-	plugin_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginSelector::display_selection_changed));
 	plugin_display.grab_focus();
-
-	btn_add->signal_clicked().connect(sigc::mem_fun(*this, &PluginSelector::btn_add_clicked));
-	btn_remove->signal_clicked().connect(sigc::mem_fun(*this, &PluginSelector::btn_remove_clicked));
-	added_list.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginSelector::added_list_selection_changed));
-	added_list.signal_button_press_event().connect_notify (mem_fun(*this, &PluginSelector::added_row_clicked));
 
 	build_plugin_menu ();
 }
