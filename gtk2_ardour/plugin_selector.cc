@@ -215,12 +215,12 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	//note: _fil_creator_combo menu gets filled in build_plugin_menu
 	
 	_fil_channel_combo = manage (new ComboBoxText);
-	_fil_channel_combo->append_text( _("Audio I/O only") );
-	_fil_channel_combo->append_text( _("Mono Audio only") );
-	_fil_channel_combo->append_text( _("Stereo Audio only") );
-	_fil_channel_combo->append_text( _("MIDI I/O only") );
+	_fil_channel_combo->append_text( _("Audio I/O") );
+	_fil_channel_combo->append_text( _("Mono Audio I/O") );
+	_fil_channel_combo->append_text( _("Stereo Audio I/O") );
+	_fil_channel_combo->append_text( _("MIDI I/O (only)") );
 	_fil_channel_combo->append_text( _("Show All I/O") );
-	_fil_channel_combo->set_active_text( _("Audio I/O only") );
+	_fil_channel_combo->set_active_text( _("Audio I/O") );
 	
 
 	int p = 0;
@@ -453,41 +453,30 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 //			return true;  //who knows.... ?
 //		}
 
-		if ( _fil_channel_combo->get_active_text() == _("Audio I/O only") ) {
-			if ( info->n_inputs.n_audio() == 0 ||
-			   info->n_outputs.n_audio()  == 0 ||
-			   info->n_outputs.n_midi()   != 0 ||
-			   info->n_outputs.n_midi()   != 0
-			   ) {
+		if ( _fil_channel_combo->get_active_text() == _("Audio I/O") ) {
+			if (  (info->n_inputs.n_audio() == 0 || info->n_outputs.n_audio() == 0 ) ) {
 				return false;
 			}	
 		}
 	
-		if ( _fil_channel_combo->get_active_text() == _("Mono Audio only") ) {
+		if ( _fil_channel_combo->get_active_text() == _("Mono Audio I/O") ) {
 			if ( info->n_inputs.n_audio() != 1 ||
-			   info->n_outputs.n_audio()  != 1 ||
-			   info->n_outputs.n_midi()   != 0 ||
-			   info->n_outputs.n_midi()   != 0
+			   info->n_outputs.n_audio()  != 1
 			   ) {
 				return false;
 			}	
 		}
 	
-		if ( _fil_channel_combo->get_active_text() == _("Stereo Audio only") ) {
+		if ( _fil_channel_combo->get_active_text() == _("Stereo Audio I/O") ) {
 			if ( info->n_inputs.n_audio() != 2 ||
-			   info->n_outputs.n_audio()  != 2 ||
-			   info->n_outputs.n_midi()   != 0 ||
-			   info->n_outputs.n_midi()   != 0
+			   info->n_outputs.n_audio()  != 2
 			   ) {
 				return false;
 			}	
 		}
 	
-		if ( _fil_channel_combo->get_active_text() == _("MIDI I/O only") ) {
-			if ( info->n_inputs.n_audio()   != 0 ||
-			     info->n_outputs.n_audio()  != 0 ||
-			     (info->n_inputs.n_midi()  	== 0 && info->n_outputs.n_midi() == 0)
-			 	) {
+		if ( _fil_channel_combo->get_active_text() == _("MIDI I/O (only)") ) {
+			if (  (info->n_inputs.n_audio() != 0 || info->n_outputs.n_audio() == 0 ) ) {
 				return false;
 			}	
 		}
