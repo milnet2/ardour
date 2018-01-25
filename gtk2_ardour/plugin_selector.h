@@ -106,12 +106,12 @@ private:
 			add (favorite);
 			add (hidden);
 			add (name);
-			add (type_name);
-			add (category);
-			add (creator);
 			add (tags);
+			add (creator);
+			add (type_name);
 			add (audio_io);
 			add (midi_io);
+			add (category);
 			add (plugin);
 		}
 		Gtk::TreeModelColumn<bool> favorite;

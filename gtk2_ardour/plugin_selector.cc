@@ -53,6 +53,8 @@ using namespace Gtk;
 using namespace std;
 using namespace ArdourWidgets;
 
+static const uint32_t MAX_CREATOR_LEN = 24;
+
 PluginSelector::PluginSelector (PluginManager& mgr)
 	: ArdourDialog (_("Plugin Manager"), true, false)
 	, search_clear_button (Stock::CLEAR)
@@ -82,12 +84,12 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	plugin_display.append_column (_("Fav"), plugin_columns.favorite);
 	plugin_display.append_column (_("Hide"), plugin_columns.hidden);
 	plugin_display.append_column (_("Name"), plugin_columns.name);
-	plugin_display.append_column (_("Category"), plugin_columns.category);
 	plugin_display.append_column (_("Tags"), plugin_columns.tags);
 	plugin_display.append_column (_("Creator"), plugin_columns.creator);
 	plugin_display.append_column (_("Type"), plugin_columns.type_name);
 	plugin_display.append_column (_("Audio I/O"),plugin_columns.audio_io);
 	plugin_display.append_column (_("MIDI I/O"), plugin_columns.midi_io);
+//	plugin_display.append_column (_("Category"), plugin_columns.category);
 	plugin_display.set_headers_visible (true);
 	plugin_display.set_headers_clickable (true);
 	plugin_display.set_reorderable (false);
@@ -122,7 +124,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	added_list.set_headers_visible (true);
 	added_list.set_reorderable (false);
 
-	for (int i = 0; i <=7; i++) {
+	for (int i = 2; i <=7; i++) {
 		Gtk::TreeView::Column* column = plugin_display.get_column(i);
 		if (column) {
 			column->set_sort_column(i);
@@ -440,7 +442,12 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 //================== Filter "creator" combobox
 
 	if ( _fil_creator_combo->get_active_text() != _("Show All Creators") ) {
-		if ( _fil_creator_combo->get_active_text() != info->creator ) {
+		string cmp =  info->creator;
+		if (cmp.length() > MAX_CREATOR_LEN ) {
+			cmp = cmp.substr (0, MAX_CREATOR_LEN);
+			cmp.append("...");
+		}
+		if ( _fil_creator_combo->get_active_text() != cmp ) {
 			return false;
 		}
 	}
@@ -589,8 +596,8 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& searc
 				creator = creator.substr (0, pos);
 			}
 
-			if ( creator.length() > 32 ) {
-				creator = creator.substr (0, 32);
+			if ( creator.length() > MAX_CREATOR_LEN ) {
+				creator = creator.substr (0, MAX_CREATOR_LEN);
 				creator.append("...");
 			}
 			newrow[plugin_columns.creator] = creator;
@@ -1109,6 +1116,12 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 			creator = "Unknown";
 		} else{
 			creator = creator.substr (0, pos);
+		}
+
+		//trim the creator length so we don't make a giant pulldown menu
+		if ( creator.length() > MAX_CREATOR_LEN ) {
+			creator = creator.substr (0, MAX_CREATOR_LEN);
+			creator.append("...");
 		}
 
 		SubmenuMap::iterator x;
