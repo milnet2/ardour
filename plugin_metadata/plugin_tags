@@ -1,0 +1,6 @@
+LV2 urn:ardour:a-reverb reverb
+LV2 urn:ardour:a-fluidsynth sampler,piano,organ,drum,synth,bass,trumpet,horn,rhodes,guitar
+LV2 urn:ardour:a-eq eq:parametric
+LV2 urn:ardour:a-delay delay
+LV2 urn:ardour:a-comp#stereo compressor,dynamic
+LV2 urn:ardour:a-comp compressor,dynamic
