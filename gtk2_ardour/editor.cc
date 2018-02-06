@@ -161,26 +161,24 @@ using Gtkmm2ext::Keyboard;
 double Editor::timebar_height = 15.0;
 
 static const gchar *_grid_type_strings[] = {
-	N_("Grid: Beats/128"),
-	N_("Grid: Beats/64"),
-	N_("Grid: Beats/32"),
-	N_("Grid: Beats/28"),
-	N_("Grid: Beats/24"),
-	N_("Grid: Beats/20"),
-	N_("Grid: Beats/16"),
-	N_("Grid: Beats/14"),
-	N_("Grid: Beats/12"),
-	N_("Grid: Beats/10"),
-	N_("Grid: Beats/8"),
-	N_("Grid: Beats/7"),
-	N_("Grid: Beats/6"),
-	N_("Grid: Beats/5"),
-	N_("Grid: Beats/4"),
-	N_("Grid: Beats/3"),
-	N_("Grid: Beats/2"),
-	N_("Grid: Beats"),
-	N_("Grid: Bars"),
 	N_("Grid: None"),
+	N_("Grid: Bars"),
+	N_("Grid: Beats"),
+	N_("Grid: Beats/2"),
+	N_("Grid: Beats/4"),
+	N_("Grid: Beats/8"),
+	N_("Grid: Beats/16"),
+	N_("Grid: Beats/32"),
+	N_("Grid: Beats/3"),
+	N_("Grid: Beats/6"),
+	N_("Grid: Beats/12"),
+	N_("Grid: Beats/24"),
+	N_("Grid: Beats/5"),
+	N_("Grid: Beats/10"),
+	N_("Grid: Beats/20"),
+	N_("Grid: Beats/7"),
+	N_("Grid: Beats/14"),
+	N_("Grid: Beats/28"),
 	0
 };
 
@@ -2118,7 +2116,7 @@ Editor::grid_type() const
 bool
 Editor::snap_musical() const
 {
-	if (_grid_type == QuantizeToNone) {
+	if (_grid_type != QuantizeToNone) {
 		return true;
 	}
 	
@@ -2157,34 +2155,8 @@ Editor::set_grid_to (SnapType st)
 
 	instant_save ();
 
-	switch (_grid_type) {
-	case QuantizeToNone:
-	case QuantizeToBeatDiv128:
-	case QuantizeToBeatDiv64:
-	case QuantizeToBeatDiv32:
-	case QuantizeToBeatDiv28:
-	case QuantizeToBeatDiv24:
-	case QuantizeToBeatDiv20:
-	case QuantizeToBeatDiv16:
-	case QuantizeToBeatDiv14:
-	case QuantizeToBeatDiv12:
-	case QuantizeToBeatDiv10:
-	case QuantizeToBeatDiv8:
-	case QuantizeToBeatDiv7:
-	case QuantizeToBeatDiv6:
-	case QuantizeToBeatDiv5:
-	case QuantizeToBeatDiv4:
-	case QuantizeToBeatDiv3:
-	case QuantizeToBeatDiv2: {
-		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
-		update_tempo_based_rulers ();
-		break;
-	}
-
-	default:
-		/* relax */
-		break;
-	}
+	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
+	update_tempo_based_rulers ();
 
 	mark_region_boundary_cache_dirty ();
 
@@ -2873,12 +2845,6 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 		case QuantizeToBeat:
 			tst = _session->tempo_map().round_to_beat (presnap, direction);
 			break;
-		case QuantizeToBeatDiv128:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 128, direction);
-			break;
-		case QuantizeToBeatDiv64:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 64, direction);
-			break;
 		case QuantizeToBeatDiv32:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 32, direction);
 			break;
@@ -3196,29 +3162,52 @@ Editor::build_grid_type_menu ()
 {
 	using namespace Menu_Helpers;
 
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv128)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv64], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv64)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv32], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv32)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv28], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv28)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv24], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv24)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv20], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv20)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv16], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv16)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv14], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv14)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv12], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv12)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv10], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv10)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv8], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv8)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv7], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv7)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv6], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv6)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv5], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv5)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv4], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv4)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv3], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv3)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv2], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv2)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeat], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeat)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBar], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBar)));
+	//main grid: bars, quarter-notes, etc
 	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToNone], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToNone)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBar], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBar)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeat], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeat)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv2], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv2)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv4], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv4)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv8], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv8)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv16], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv16)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv32], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv32)));
+
+	//triplet grid
+	grid_type_selector.AddMenuElem(SeparatorElem());
+	Gtk::Menu *_triplet_menu = manage (new Menu);
+	MenuList& triplet_items (_triplet_menu->items());
+	{
+		//triplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBarDiv3], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBarDiv3) ));
+		triplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv3], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv3) ));
+		triplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv6], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv6) ));
+		triplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv12], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv12) ));
+		triplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv24], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv24) ));
+	}
+	grid_type_selector.AddMenuElem (Menu_Helpers::MenuElem (_("Triplets"), *_triplet_menu));
+
+	//quintuplet grid
+	Gtk::Menu *_quintuplet_menu = manage (new Menu);
+	MenuList& quintuplet_items (_quintuplet_menu->items());
+	{
+		//quintuplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBarDiv5], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBarDiv5) ));
+		quintuplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv5], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv5) ));
+		quintuplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv10], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv10) ));
+		quintuplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv20], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv20) ));
+	}
+	grid_type_selector.AddMenuElem (Menu_Helpers::MenuElem (_("Quintuplets"), *_quintuplet_menu));
+
+	//septuplet grid
+	Gtk::Menu *_septuplet_menu = manage (new Menu);
+	MenuList& septuplet_items (_septuplet_menu->items());
+	{
+		//septuplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBarDiv7], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBarDiv7) ));
+		septuplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv7], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv7) ));
+		septuplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv14], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv14) ));
+		septuplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv28], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv28) ));
+	}
+	grid_type_selector.AddMenuElem (Menu_Helpers::MenuElem (_("Septuplets"), *_septuplet_menu));
 
 	set_size_request_to_display_given_text (grid_type_selector, grid_type_strings, COMBO_TRIANGLE_WIDTH, 2);
-
 }
 
 void
@@ -3996,8 +3985,6 @@ unsigned
 Editor::get_grid_beat_divisions(samplepos_t position)
 {
 	switch (_grid_type) {
-	case QuantizeToBeatDiv128: return 128;
-	case QuantizeToBeatDiv64:  return 64;
 	case QuantizeToBeatDiv32:  return 32;
 	case QuantizeToBeatDiv28:  return 28;
 	case QuantizeToBeatDiv24:  return 24;
@@ -4035,8 +4022,6 @@ Editor::get_grid_music_divisions (uint32_t event_state)
 	}
 
 	switch (_grid_type) {
-	case QuantizeToBeatDiv128: return 128;
-	case QuantizeToBeatDiv64:  return 64;
 	case QuantizeToBeatDiv32:  return 32;
 	case QuantizeToBeatDiv28:  return 28;
 	case QuantizeToBeatDiv24:  return 24;

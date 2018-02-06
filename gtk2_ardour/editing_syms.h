@@ -18,26 +18,25 @@
 */
 
 /* Changing this order will break the menu */
-SNAPTYPE(QuantizeToBeatDiv128)
-SNAPTYPE(QuantizeToBeatDiv64)
-SNAPTYPE(QuantizeToBeatDiv32)
-SNAPTYPE(QuantizeToBeatDiv28)
-SNAPTYPE(QuantizeToBeatDiv24)
-SNAPTYPE(QuantizeToBeatDiv20)
-SNAPTYPE(QuantizeToBeatDiv16)
-SNAPTYPE(QuantizeToBeatDiv14)
-SNAPTYPE(QuantizeToBeatDiv12)
-SNAPTYPE(QuantizeToBeatDiv10)
-SNAPTYPE(QuantizeToBeatDiv8)
-SNAPTYPE(QuantizeToBeatDiv7)
-SNAPTYPE(QuantizeToBeatDiv6)
-SNAPTYPE(QuantizeToBeatDiv5)
-SNAPTYPE(QuantizeToBeatDiv4)
-SNAPTYPE(QuantizeToBeatDiv3)
-SNAPTYPE(QuantizeToBeatDiv2)
-SNAPTYPE(QuantizeToBeat)
-SNAPTYPE(QuantizeToBar)
 SNAPTYPE(QuantizeToNone)
+SNAPTYPE(QuantizeToBar)
+SNAPTYPE(QuantizeToBeat)
+SNAPTYPE(QuantizeToBeatDiv2)
+SNAPTYPE(QuantizeToBeatDiv4)
+SNAPTYPE(QuantizeToBeatDiv8)
+SNAPTYPE(QuantizeToBeatDiv16)
+SNAPTYPE(QuantizeToBeatDiv32)
+SNAPTYPE(QuantizeToBeatDiv3)  //Triplet eighths
+SNAPTYPE(QuantizeToBeatDiv6)
+SNAPTYPE(QuantizeToBeatDiv12)
+SNAPTYPE(QuantizeToBeatDiv24)
+SNAPTYPE(QuantizeToBeatDiv5)  //Quintuplet eighths
+SNAPTYPE(QuantizeToBeatDiv10)
+SNAPTYPE(QuantizeToBeatDiv20)
+SNAPTYPE(QuantizeToBeatDiv7)  //Septuplet eighths
+SNAPTYPE(QuantizeToBeatDiv14)
+SNAPTYPE(QuantizeToBeatDiv28)
+
 
 /* Changing this order will break the menu */
 SNAPMODE(SnapOff)

@@ -562,8 +562,6 @@ Editor::register_actions ()
 	Glib::RefPtr<ActionGroup> snap_actions = myactions.create_action_group (X_("Snap"));
 	RadioAction::Group grid_choice_group;
 
-	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-onetwentyeighths"), _("Snap to One Twenty Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv128)));
-	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-sixtyfourths"), _("Snap to Sixty Fourths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv64)));
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-thirtyseconds"), _("Snap to Thirty Seconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv32)));
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-twentyeighths"), _("Snap to Twenty Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv28)));
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("snap-to-twentyfourths"), _("Snap to Twenty Fourths"), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::QuantizeToBeatDiv24)));
@@ -1049,12 +1047,6 @@ Editor::grid_type_action (SnapType type)
 	RefPtr<Action> act;
 
 	switch (type) {
-	case Editing::QuantizeToBeatDiv128:
-		action = "snap-to-onetwentyeighths";
-		break;
-	case Editing::QuantizeToBeatDiv64:
-		action = "snap-to-sixtyfourths";
-		break;
 	case Editing::QuantizeToBeatDiv32:
 		action = "snap-to-thirtyseconds";
 		break;
@@ -1130,65 +1122,66 @@ void
 Editor::next_grid_choice ()
 {
 	switch (_grid_type) {
-	case Editing::QuantizeToBeatDiv128:
-		set_grid_to (Editing::QuantizeToBeatDiv64);
-		break;
-	case Editing::QuantizeToBeatDiv64:
-		set_grid_to (Editing::QuantizeToBeatDiv32);
-		break;
+		
 	case Editing::QuantizeToBeatDiv32:
-		set_grid_to (Editing::QuantizeToBeatDiv28);
-		break;
-	case Editing::QuantizeToBeatDiv28:
-		set_grid_to (Editing::QuantizeToBeatDiv24);
-		break;
-	case Editing::QuantizeToBeatDiv24:
-		set_grid_to (Editing::QuantizeToBeatDiv20);
-		break;
-	case Editing::QuantizeToBeatDiv20:
-		set_grid_to (Editing::QuantizeToBeatDiv16);
-		break;
-	case Editing::QuantizeToBeatDiv16:
-		set_grid_to (Editing::QuantizeToBeatDiv14);
-		break;
-	case Editing::QuantizeToBeatDiv14:
-		set_grid_to (Editing::QuantizeToBeatDiv12);
-		break;
-	case Editing::QuantizeToBeatDiv12:
-		set_grid_to (Editing::QuantizeToBeatDiv10);
-		break;
-	case Editing::QuantizeToBeatDiv10:
-		set_grid_to (Editing::QuantizeToBeatDiv8);
-		break;
-	case Editing::QuantizeToBeatDiv8:
-		set_grid_to (Editing::QuantizeToBeatDiv7);
-		break;
-	case Editing::QuantizeToBeatDiv7:
-		set_grid_to (Editing::QuantizeToBeatDiv6);
-		break;
-	case Editing::QuantizeToBeatDiv6:
-		set_grid_to (Editing::QuantizeToBeatDiv5);
-		break;
-	case Editing::QuantizeToBeatDiv5:
-		set_grid_to (Editing::QuantizeToBeatDiv4);
-		break;
-	case Editing::QuantizeToBeatDiv4:
-		set_grid_to (Editing::QuantizeToBeatDiv3);
-		break;
-	case Editing::QuantizeToBeatDiv3:
-		set_grid_to (Editing::QuantizeToBeatDiv2);
-		break;
-	case Editing::QuantizeToBeatDiv2:
-		set_grid_to (Editing::QuantizeToBeat);
-		break;
-	case Editing::QuantizeToBeat:
-		set_grid_to (Editing::QuantizeToBar);
-		break;
-	case Editing::QuantizeToBar:
 		set_grid_to (Editing::QuantizeToNone);
 		break;
+	case Editing::QuantizeToBeatDiv16:
+		set_grid_to (Editing::QuantizeToBeatDiv32);
+		break;
+	case Editing::QuantizeToBeatDiv8:
+		set_grid_to (Editing::QuantizeToBeatDiv16);
+		break;
+	case Editing::QuantizeToBeatDiv4:
+		set_grid_to (Editing::QuantizeToBeatDiv8);
+		break;
+	case Editing::QuantizeToBeatDiv2:
+		set_grid_to (Editing::QuantizeToBeatDiv4);
+		break;
+	case Editing::QuantizeToBeat:
+		set_grid_to (Editing::QuantizeToBeatDiv2);
+		break;
+
+
+	case Editing::QuantizeToBeatDiv24:
+		set_grid_to (Editing::QuantizeToBeatDiv3);
+		break;
+	case Editing::QuantizeToBeatDiv12:
+		set_grid_to (Editing::QuantizeToBeatDiv24);
+		break;
+	case Editing::QuantizeToBeatDiv6:
+		set_grid_to (Editing::QuantizeToBeatDiv12);
+		break;
+	case Editing::QuantizeToBeatDiv3:
+		set_grid_to (Editing::QuantizeToBeatDiv6);
+		break;
+
+	case Editing::QuantizeToBeatDiv28:
+		set_grid_to (Editing::QuantizeToBeatDiv7);
+		break;
+	case Editing::QuantizeToBeatDiv14:
+		set_grid_to (Editing::QuantizeToBeatDiv24);
+		break;
+	case Editing::QuantizeToBeatDiv7:
+		set_grid_to (Editing::QuantizeToBeatDiv12);
+		break;
+
+	case Editing::QuantizeToBeatDiv20:
+		set_grid_to (Editing::QuantizeToBeatDiv5);
+		break;
+	case Editing::QuantizeToBeatDiv10:
+		set_grid_to (Editing::QuantizeToBeatDiv20);
+		break;
+	case Editing::QuantizeToBeatDiv5:
+		set_grid_to (Editing::QuantizeToBeatDiv10);
+		break;
+
+	case Editing::QuantizeToBar:
+		set_grid_to (Editing::QuantizeToBeat);
+		break;
+		
 	case Editing::QuantizeToNone:
-		set_grid_to (Editing::QuantizeToBeatDiv128);
+		set_grid_to (Editing::QuantizeToBar);
 		break;
 	}
 }
@@ -1197,65 +1190,66 @@ void
 Editor::prev_grid_choice ()
 {
 	switch (_grid_type) {
-	case Editing::QuantizeToBeatDiv128:
-		set_grid_to (Editing::QuantizeToNone);
-		break;
-	case Editing::QuantizeToBeatDiv64:
-		set_grid_to (Editing::QuantizeToBeatDiv128);
-		break;
+		
 	case Editing::QuantizeToBeatDiv32:
-		set_grid_to (Editing::QuantizeToBeatDiv64);
-		break;
-	case Editing::QuantizeToBeatDiv28:
-		set_grid_to (Editing::QuantizeToBeatDiv32);
-		break;
-	case Editing::QuantizeToBeatDiv24:
-		set_grid_to (Editing::QuantizeToBeatDiv28);
-		break;
-	case Editing::QuantizeToBeatDiv20:
-		set_grid_to (Editing::QuantizeToBeatDiv24);
-		break;
-	case Editing::QuantizeToBeatDiv16:
-		set_grid_to (Editing::QuantizeToBeatDiv20);
-		break;
-	case Editing::QuantizeToBeatDiv14:
 		set_grid_to (Editing::QuantizeToBeatDiv16);
 		break;
-	case Editing::QuantizeToBeatDiv12:
-		set_grid_to (Editing::QuantizeToBeatDiv14);
-		break;
-	case Editing::QuantizeToBeatDiv10:
-		set_grid_to (Editing::QuantizeToBeatDiv12);
-		break;
-	case Editing::QuantizeToBeatDiv8:
-		set_grid_to (Editing::QuantizeToBeatDiv10);
-		break;
-	case Editing::QuantizeToBeatDiv7:
+	case Editing::QuantizeToBeatDiv16:
 		set_grid_to (Editing::QuantizeToBeatDiv8);
 		break;
-	case Editing::QuantizeToBeatDiv6:
-		set_grid_to (Editing::QuantizeToBeatDiv7);
-		break;
-	case Editing::QuantizeToBeatDiv5:
-		set_grid_to (Editing::QuantizeToBeatDiv6);
-		break;
-	case Editing::QuantizeToBeatDiv4:
-		set_grid_to (Editing::QuantizeToBeatDiv5);
-		break;
-	case Editing::QuantizeToBeatDiv3:
+	case Editing::QuantizeToBeatDiv8:
 		set_grid_to (Editing::QuantizeToBeatDiv4);
 		break;
-	case Editing::QuantizeToBeatDiv2:
-		set_grid_to (Editing::QuantizeToBeatDiv3);
-		break;
-	case Editing::QuantizeToBeat:
+	case Editing::QuantizeToBeatDiv4:
 		set_grid_to (Editing::QuantizeToBeatDiv2);
 		break;
+	case Editing::QuantizeToBeatDiv2:
+		set_grid_to (Editing::QuantizeToBeat);
+		break;
+	case Editing::QuantizeToBeat:
+		set_grid_to (Editing::QuantizeToBar);
+		break;
+
+
+	case Editing::QuantizeToBeatDiv24:
+		set_grid_to (Editing::QuantizeToBeatDiv12);
+		break;
+	case Editing::QuantizeToBeatDiv12:
+		set_grid_to (Editing::QuantizeToBeatDiv6);
+		break;
+	case Editing::QuantizeToBeatDiv6:
+		set_grid_to (Editing::QuantizeToBeatDiv3);
+		break;
+	case Editing::QuantizeToBeatDiv3:
+		set_grid_to (Editing::QuantizeToBeatDiv24);
+		break;
+
+	case Editing::QuantizeToBeatDiv28:
+		set_grid_to (Editing::QuantizeToBeatDiv14);
+		break;
+	case Editing::QuantizeToBeatDiv14:
+		set_grid_to (Editing::QuantizeToBeatDiv7);
+		break;
+	case Editing::QuantizeToBeatDiv7:
+		set_grid_to (Editing::QuantizeToBeatDiv28);
+		break;
+
+	case Editing::QuantizeToBeatDiv20:
+		set_grid_to (Editing::QuantizeToBeatDiv10);
+		break;
+	case Editing::QuantizeToBeatDiv10:
+		set_grid_to (Editing::QuantizeToBeatDiv5);
+		break;
+	case Editing::QuantizeToBeatDiv5:
+		set_grid_to (Editing::QuantizeToBeatDiv20);
+		break;
+
 	case Editing::QuantizeToBar:
 		set_grid_to (Editing::QuantizeToNone);
 		break;
+		
 	case Editing::QuantizeToNone:
-		set_grid_to (Editing::QuantizeToBeatDiv128);
+		set_grid_to (Editing::QuantizeToBeatDiv32);
 		break;
 	}
 }

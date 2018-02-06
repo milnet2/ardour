@@ -1047,14 +1047,6 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		bbt_beat_subdivision = 32;
 		bbt_accent_modulo = 8;
 		break;
-	case QuantizeToBeatDiv64:
-		bbt_beat_subdivision = 64;
-		bbt_accent_modulo = 8;
-		break;
-	case QuantizeToBeatDiv128:
-		bbt_beat_subdivision = 128;
-		bbt_accent_modulo = 8;
-		break;
 	default:
 		bbt_beat_subdivision = 4;
 		break;

@@ -94,25 +94,24 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (ByTimestamp);
 	REGISTER (region_list_sort_type);
 
-	REGISTER_ENUM (QuantizeToBeatDiv128);
-	REGISTER_ENUM (QuantizeToBeatDiv64);
-	REGISTER_ENUM (QuantizeToBeatDiv32);
-	REGISTER_ENUM (QuantizeToBeatDiv28);
-	REGISTER_ENUM (QuantizeToBeatDiv24);
-	REGISTER_ENUM (QuantizeToBeatDiv20);
-	REGISTER_ENUM (QuantizeToBeatDiv16);
-	REGISTER_ENUM (QuantizeToBeatDiv14);
-	REGISTER_ENUM (QuantizeToBeatDiv12);
-	REGISTER_ENUM (QuantizeToBeatDiv10);
-	REGISTER_ENUM (QuantizeToBeatDiv8);
-	REGISTER_ENUM (QuantizeToBeatDiv7);
-	REGISTER_ENUM (QuantizeToBeatDiv6);
-	REGISTER_ENUM (QuantizeToBeatDiv5);
-	REGISTER_ENUM (QuantizeToBeatDiv4);
-	REGISTER_ENUM (QuantizeToBeatDiv3);
-	REGISTER_ENUM (QuantizeToBeatDiv2);
-	REGISTER_ENUM (QuantizeToBeat);
+	REGISTER_ENUM (QuantizeToNone);
 	REGISTER_ENUM (QuantizeToBar);
+	REGISTER_ENUM (QuantizeToBeat);
+	REGISTER_ENUM (QuantizeToBeatDiv2);
+	REGISTER_ENUM (QuantizeToBeatDiv3);
+	REGISTER_ENUM (QuantizeToBeatDiv4);
+	REGISTER_ENUM (QuantizeToBeatDiv5);
+	REGISTER_ENUM (QuantizeToBeatDiv6);
+	REGISTER_ENUM (QuantizeToBeatDiv7);
+	REGISTER_ENUM (QuantizeToBeatDiv8);
+	REGISTER_ENUM (QuantizeToBeatDiv10);
+	REGISTER_ENUM (QuantizeToBeatDiv12);
+	REGISTER_ENUM (QuantizeToBeatDiv14);
+	REGISTER_ENUM (QuantizeToBeatDiv16);
+	REGISTER_ENUM (QuantizeToBeatDiv20);
+	REGISTER_ENUM (QuantizeToBeatDiv24);
+	REGISTER_ENUM (QuantizeToBeatDiv28);
+	REGISTER_ENUM (QuantizeToBeatDiv32);
 	REGISTER (grid_type);  //ToDo:  quantize_type?
 
 	REGISTER_ENUM (SnapOff);
