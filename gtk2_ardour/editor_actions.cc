@@ -543,19 +543,18 @@ Editor::register_actions ()
 	myactions.register_action (editor_actions, "set-edit-lock", S_("EditMode|Lock"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Lock));
 	myactions.register_action (editor_actions, "cycle-edit-mode", _("Cycle Edit Mode"), sigc::mem_fun (*this, &Editor::cycle_edit_mode));
 
-	myactions.register_action (editor_actions, X_("QuantizeTo"), _("Snap to"));
-	myactions.register_action (editor_actions, X_("SnapMode"), _("Snap Mode"));
+	myactions.register_action (editor_actions, X_("QuantizeTo"), _("Grid"));
 
 	RadioAction::Group snap_mode_group;
-	myactions.register_radio_action (editor_actions, snap_mode_group, X_("snap-off"), _("No Grid"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapOff)));
+	/* deprecated */  myactions.register_radio_action (editor_actions, snap_mode_group, X_("snap-off"), _("No Grid"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapOff)));
 	/* deprecated */  myactions.register_radio_action (editor_actions, snap_mode_group, X_("snap-normal"), _("Grid"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapNormal)));  //deprecated
-	myactions.register_radio_action (editor_actions, snap_mode_group, X_("snap-magnetic"), _("Magnetic"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapMagnetic)));
+	/* deprecated */  myactions.register_radio_action (editor_actions, snap_mode_group, X_("snap-magnetic"), _("Magnetic"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapMagnetic)));
 
 	snap_mode_button.set_text (_("Snap"));
 	snap_mode_button.set_name ("mouse mode button");
 	snap_mode_button.signal_button_press_event().connect (sigc::mem_fun (*this, &Editor::snap_mode_button_clicked), false);
 
-	myactions.register_action (editor_actions, X_("cycle-snap-mode"), _("Next Snap Mode"), sigc::mem_fun (*this, &Editor::cycle_snap_mode));
+	myactions.register_action (editor_actions, X_("cycle-snap-mode"), _("Toggle Snap"), sigc::mem_fun (*this, &Editor::cycle_snap_mode));
 	myactions.register_action (editor_actions, X_("next-grid-choice"), _("Next Quantize Grid Choice"), sigc::mem_fun (*this, &Editor::next_grid_choice));
 	myactions.register_action (editor_actions, X_("prev-grid-choice"), _("Previous Quantize Grid Choice"), sigc::mem_fun (*this, &Editor::prev_grid_choice));
 

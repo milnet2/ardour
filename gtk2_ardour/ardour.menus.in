@@ -232,35 +232,29 @@
         <menuitem action='cycle-edit-point'/>
         <menuitem action='cycle-edit-point-with-marker'/>
       </menu>
-      <menu name='SnapMode' action='SnapMode'>
-        <menuitem action='snap-off'/>
-        <menuitem action='snap-magnetic'/>
-        <separator/>
-        <menuitem action='cycle-snap-mode'/>
-        <menuitem action='next-grid-choice'/>
+      <menuitem action='cycle-snap-mode'/>
+      <menu name='QuantizeTo' action='QuantizeTo'>
         <menuitem action='prev-grid-choice'/>
-      </menu>
-      <menu name='SnapTo' action='SnapTo'>
-        <menuitem action='snap-to-onetwentyeighths'/>
-        <menuitem action='snap-to-sixtyfourths'/>
-        <menuitem action='snap-to-thirtyseconds'/>
-        <menuitem action='snap-to-twentyeighths'/>
-        <menuitem action='snap-to-twentyfourths'/>
-        <menuitem action='snap-to-twentieths'/>
-        <menuitem action='snap-to-asixteenthbeat'/>
-        <menuitem action='snap-to-fourteenths'/>
-        <menuitem action='snap-to-twelfths'/>
-        <menuitem action='snap-to-tenths'/>
-        <menuitem action='snap-to-eighths'/>
-        <menuitem action='snap-to-sevenths'/>
-        <menuitem action='snap-to-sixths'/>
-        <menuitem action='snap-to-fifths'/>
-        <menuitem action='snap-to-quarters'/>
-        <menuitem action='snap-to-thirds'/>
-        <menuitem action='snap-to-halves'/>
-        <menuitem action='snap-to-beat'/>
-        <menuitem action='snap-to-bar'/>
+        <menuitem action='next-grid-choice'/>
+        <separator/>
         <menuitem action='snap-to-none'/>
+        <menuitem action='snap-to-bar'/>
+        <menuitem action='snap-to-beat'/>
+        <menuitem action='snap-to-halves'/>
+        <menuitem action='snap-to-quarters'/>
+        <menuitem action='snap-to-eighths'/>
+        <menuitem action='snap-to-asixteenthbeat'/>
+        <menuitem action='snap-to-thirtyseconds'/>
+        <menuitem action='snap-to-thirds'/>
+        <menuitem action='snap-to-sixths'/>
+        <menuitem action='snap-to-twelfths'/>
+        <menuitem action='snap-to-twentyfourths'/>
+        <menuitem action='snap-to-fifths'/>
+        <menuitem action='snap-to-tenths'/>
+        <menuitem action='snap-to-twentieths'/>
+        <menuitem action='snap-to-sevenths'/>
+        <menuitem action='snap-to-fourteenths'/>
+        <menuitem action='snap-to-twentyeighths'/>
       </menu>
       <separator/>
       <menu action="TempoMenu">
