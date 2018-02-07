@@ -389,7 +389,7 @@ Editor::hide_tempo_lines ()
 void
 Editor::maybe_draw_tempo_lines (std::vector<ARDOUR::TempoMap::BBTPoint>& grid)
 {
-	if (_session == 0 || _show_grid == false || distance (grid.begin(), grid.end()) == 0) {
+	if (_session == 0 || _show_grid == false || !snap_musical() || distance (grid.begin(), grid.end()) == 0) {
 		return;
 	}
 
@@ -399,6 +399,7 @@ Editor::maybe_draw_tempo_lines (std::vector<ARDOUR::TempoMap::BBTPoint>& grid)
 
 	const unsigned divisions = get_grid_beat_divisions(_leftmost_sample);
 	tempo_lines->draw (grid, divisions, _leftmost_sample, _session->sample_rate());
+	tempo_lines->show();
 }
 
 void

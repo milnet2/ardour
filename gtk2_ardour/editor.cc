@@ -2155,7 +2155,7 @@ Editor::set_grid_to (SnapType st)
 
 	instant_save ();
 	
-	if ( st != QuantizeToNone ) {
+	if ( snap_musical() ) {
 		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 		update_tempo_based_rulers ();
 	}
@@ -3878,19 +3878,19 @@ Editor::cycle_zoom_focus ()
 }
 
 void
-Editor::set_show_grid (bool yn)
+Editor::set_show_grid (bool show)
 {
-	if (_show_grid != yn) {
-		hide_tempo_lines ();
-
-		if ((_show_grid = yn) == true) {
-			if (tempo_lines) {
-				tempo_lines->show();
+	if (_show_grid != show) {
+		_show_grid = show;
+		
+		if (show) {
+			if ( snap_musical() ) {
+				std::vector<TempoMap::BBTPoint> grid;
+				compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
+				maybe_draw_tempo_lines (grid);
 			}
-
-			std::vector<TempoMap::BBTPoint> grid;
-			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
-			maybe_draw_tempo_lines (grid);
+		} else {
+			hide_tempo_lines ();
 		}
 
 		instant_save ();
@@ -4459,10 +4459,12 @@ Editor::set_samples_per_pixel (samplecnt_t spp)
 void
 Editor::on_samples_per_pixel_changed ()
 {
-	if (tempo_lines) {
-		tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
+	if ( _show_grid ) {
+		if ( snap_musical() && tempo_lines) {
+			tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
+		}
 	}
-
+	
 	bool const showing_time_selection = selection->time.length() > 0;
 
 	if (showing_time_selection && selection->time.start () != selection->time.end_sample ()) {
