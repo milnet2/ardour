@@ -990,60 +990,60 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	bbt_ruler_scale =  bbt_show_many;
 
 	switch (_grid_type) {
-	case QuantizeToBeatDiv2:
+	case GridTypeBeatDiv2:
 		bbt_beat_subdivision = 2;
 		break;
-	case QuantizeToBeatDiv3:
+	case GridTypeBeatDiv3:
 		bbt_beat_subdivision = 3;
 		break;
-	case QuantizeToBeatDiv4:
+	case GridTypeBeatDiv4:
 		bbt_beat_subdivision = 4;
 		break;
-	case QuantizeToBeatDiv5:
+	case GridTypeBeatDiv5:
 		bbt_beat_subdivision = 5;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
-	case QuantizeToBeatDiv6:
+	case GridTypeBeatDiv6:
 		bbt_beat_subdivision = 6;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
-	case QuantizeToBeatDiv7:
+	case GridTypeBeatDiv7:
 		bbt_beat_subdivision = 7;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
-	case QuantizeToBeatDiv8:
+	case GridTypeBeatDiv8:
 		bbt_beat_subdivision = 8;
 		bbt_accent_modulo = 2;
 		break;
-	case QuantizeToBeatDiv10:
+	case GridTypeBeatDiv10:
 		bbt_beat_subdivision = 10;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
-	case QuantizeToBeatDiv12:
+	case GridTypeBeatDiv12:
 		bbt_beat_subdivision = 12;
 		bbt_accent_modulo = 3;
 		break;
-	case QuantizeToBeatDiv14:
+	case GridTypeBeatDiv14:
 		bbt_beat_subdivision = 14;
 		bbt_accent_modulo = 3; // XXX YIKES!
 		break;
-	case QuantizeToBeatDiv16:
+	case GridTypeBeatDiv16:
 		bbt_beat_subdivision = 16;
 		bbt_accent_modulo = 4;
 		break;
-	case QuantizeToBeatDiv20:
+	case GridTypeBeatDiv20:
 		bbt_beat_subdivision = 20;
 		bbt_accent_modulo = 5;
 		break;
-	case QuantizeToBeatDiv24:
+	case GridTypeBeatDiv24:
 		bbt_beat_subdivision = 24;
 		bbt_accent_modulo = 6;
 		break;
-	case QuantizeToBeatDiv28:
+	case GridTypeBeatDiv28:
 		bbt_beat_subdivision = 28;
 		bbt_accent_modulo = 7;
 		break;
-	case QuantizeToBeatDiv32:
+	case GridTypeBeatDiv32:
 		bbt_beat_subdivision = 32;
 		bbt_accent_modulo = 8;
 		break;

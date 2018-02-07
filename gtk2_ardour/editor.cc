@@ -233,9 +233,9 @@ Editor::Editor ()
 	, samples_per_pixel (2048)
 	, zoom_focus (ZoomFocusPlayhead)
 	, mouse_mode (MouseObject)
-	, pre_internal_grid_type (QuantizeToBeat)
+	, pre_internal_grid_type (GridTypeBeat)
 	, pre_internal_snap_mode (SnapOff)
-	, internal_grid_type (QuantizeToBeat)
+	, internal_grid_type (GridTypeBeat)
 	, internal_snap_mode (SnapOff)
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
 	, _notebook_shrunk (false)
@@ -348,7 +348,7 @@ Editor::Editor ()
 	, scrub_reverse_distance (0)
 	, have_pending_keyboard_selection (false)
 	, pending_keyboard_selection_start (0)
-	, _grid_type (QuantizeToBeat)
+	, _grid_type (GridTypeBeat)
 	, _snap_mode (SnapOff)
 	, snap_threshold (25.0)
 	, ignore_gui_changes (false)
@@ -2107,16 +2107,16 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Nudge"), *nudge_menu));
 }
 
-SnapType
+GridType
 Editor::grid_type() const
 {
 	return _grid_type;
 }
 
 bool
-Editor::snap_musical() const
+Editor::grid_musical() const
 {
-	if (_grid_type != QuantizeToNone) {
+	if (_grid_type != GridTypeNone) {
 		return true;
 	}
 	
@@ -2130,24 +2130,24 @@ Editor::snap_mode() const
 }
 
 void
-Editor::set_grid_to (SnapType st)
+Editor::set_grid_to (GridType gt)
 {
-	unsigned int snap_ind = (unsigned int)st;
+	unsigned int grid_ind = (unsigned int)gt;
 
 	if (internal_editing()) {
-		internal_grid_type = st;
+		internal_grid_type = gt;
 	} else {
-		pre_internal_grid_type = st;
+		pre_internal_grid_type = gt;
 	}
 
-	_grid_type = st;
+	_grid_type = gt;
 
-	if (snap_ind > grid_type_strings.size() - 1) {
-		snap_ind = 0;
-		_grid_type = (SnapType)snap_ind;
+	if (grid_ind > grid_type_strings.size() - 1) {
+		grid_ind = 0;
+		_grid_type = (GridType)grid_ind;
 	}
 
-	string str = grid_type_strings[snap_ind];
+	string str = grid_type_strings[grid_ind];
 
 	if (str != grid_type_selector.get_text()) {
 		grid_type_selector.set_text (str);
@@ -2155,12 +2155,10 @@ Editor::set_grid_to (SnapType st)
 
 	instant_save ();
 	
-	if ( snap_musical() ) {
-		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
-		update_tempo_based_rulers ();
-	}
+	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
+	update_tempo_based_rulers ();
 	
-	set_show_grid ( st != QuantizeToNone );
+	set_show_grid ( gt != GridTypeNone );
 
 	mark_region_boundary_cache_dirty ();
 
@@ -2281,8 +2279,8 @@ Editor::set_state (const XMLNode& node, int version)
 		set_visible_track_count (cnt);
 	}
 
-	SnapType grid_type;
-	if (!node.get_property ("quantize-to", grid_type)) {
+	GridType grid_type;
+	if (!node.get_property ("grid-type", grid_type)) {
 		grid_type = _grid_type;
 	}
 	set_grid_to (grid_type);
@@ -2299,9 +2297,9 @@ Editor::set_state (const XMLNode& node, int version)
 		set_snap_mode (_snap_mode);
 	}
 
-	node.get_property ("internal-quantize-to", internal_grid_type);
+	node.get_property ("internal-grid-type", internal_grid_type);
 	node.get_property ("internal-snap-mode", internal_snap_mode);
-	node.get_property ("pre-internal-quantize-to", pre_internal_grid_type);
+	node.get_property ("pre-internal-grid-type", pre_internal_grid_type);
 	node.get_property ("pre-internal-snap-mode", pre_internal_snap_mode);
 
 	std::string mm_str;
@@ -2467,11 +2465,11 @@ Editor::get_state ()
 	node->set_property ("zoom-focus", zoom_focus);
 
 	node->set_property ("zoom", samples_per_pixel);
-	node->set_property ("snap-to", _grid_type);
+	node->set_property ("grid-type", _grid_type);
 	node->set_property ("snap-mode", _snap_mode);
-	node->set_property ("internal-quantize-to", internal_grid_type);
+	node->set_property ("internal-grid-type", internal_grid_type);
 	node->set_property ("internal-snap-mode", internal_snap_mode);
-	node->set_property ("pre-internal-quantize-to", pre_internal_grid_type);
+	node->set_property ("pre-internal-grid-type", pre_internal_grid_type);
 	node->set_property ("pre-internal-snap-mode", pre_internal_snap_mode);
 	node->set_property ("edit-point", _edit_point);
 	node->set_property ("visible-track-count", _visible_track_count);
@@ -2831,59 +2829,59 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 	MusicSample tst(max_samplepos,0);
 	switch (_grid_type) {
 
-		case QuantizeToBar:
+		case GridTypeBar:
 			tst = _session->tempo_map().round_to_bar (presnap, direction);
 			break;
-		case QuantizeToBeat:
+		case GridTypeBeat:
 			tst = _session->tempo_map().round_to_beat (presnap, direction);
 			break;
-		case QuantizeToBeatDiv32:
+		case GridTypeBeatDiv32:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 32, direction);
 			break;
-		case QuantizeToBeatDiv28:
+		case GridTypeBeatDiv28:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 28, direction);
 			break;
-		case QuantizeToBeatDiv24:
+		case GridTypeBeatDiv24:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 24, direction);
 			break;
-		case QuantizeToBeatDiv20:
+		case GridTypeBeatDiv20:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 20, direction);
 			break;
-		case QuantizeToBeatDiv16:
+		case GridTypeBeatDiv16:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 16, direction);
 			break;
-		case QuantizeToBeatDiv14:
+		case GridTypeBeatDiv14:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 14, direction);
 			break;
-		case QuantizeToBeatDiv12:
+		case GridTypeBeatDiv12:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 12, direction);
 			break;
-		case QuantizeToBeatDiv10:
+		case GridTypeBeatDiv10:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 10, direction);
 			break;
-		case QuantizeToBeatDiv8:
+		case GridTypeBeatDiv8:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 8, direction);
 			break;
-		case QuantizeToBeatDiv7:
+		case GridTypeBeatDiv7:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 7, direction);
 			break;
-		case QuantizeToBeatDiv6:
+		case GridTypeBeatDiv6:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 6, direction);
 			break;
-		case QuantizeToBeatDiv5:
+		case GridTypeBeatDiv5:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 5, direction);
 			break;
-		case QuantizeToBeatDiv4:
+		case GridTypeBeatDiv4:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 4, direction);
 			break;
-		case QuantizeToBeatDiv3:
+		case GridTypeBeatDiv3:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 3, direction);
 			break;
-		case QuantizeToBeatDiv2:
+		case GridTypeBeatDiv2:
 			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 2, direction);
 			break;
 	}
-	if (_grid_type != QuantizeToNone) {
+	if (_grid_type != GridTypeNone) {
 		check_best_snap(presnap, tst.sample, dist, best);
 	}
 	
@@ -3155,24 +3153,24 @@ Editor::build_grid_type_menu ()
 	using namespace Menu_Helpers;
 
 	//main grid: bars, quarter-notes, etc
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToNone],      sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToNone)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBar],       sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBar)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeat],      sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeat)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv2],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv2)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv4],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv4)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv8],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv8)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv16], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv16)));
-	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)QuantizeToBeatDiv32], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv32)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeNone],      sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeNone)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeBar],       sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBar)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeBeat],      sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeat)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeBeatDiv2],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv2)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeBeatDiv4],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv4)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeBeatDiv8],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv8)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeBeatDiv16], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv16)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeBeatDiv32], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv32)));
 
 	//triplet grid
 	grid_type_selector.AddMenuElem(SeparatorElem());
 	Gtk::Menu *_triplet_menu = manage (new Menu);
 	MenuList& triplet_items (_triplet_menu->items());
 	{
-		triplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv3],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv3) ));
-		triplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv6],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv6) ));
-		triplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv12], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv12) ));
-		triplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv24], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv24) ));
+		triplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv3],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv3) ));
+		triplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv6],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv6) ));
+		triplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv12], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv12) ));
+		triplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv24], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv24) ));
 	}
 	grid_type_selector.AddMenuElem (Menu_Helpers::MenuElem (_("Triplets"), *_triplet_menu));
 
@@ -3180,9 +3178,9 @@ Editor::build_grid_type_menu ()
 	Gtk::Menu *_quintuplet_menu = manage (new Menu);
 	MenuList& quintuplet_items (_quintuplet_menu->items());
 	{
-		quintuplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv5],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv5) ));
-		quintuplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv10], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv10) ));
-		quintuplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv20], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv20) ));
+		quintuplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv5],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv5) ));
+		quintuplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv10], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv10) ));
+		quintuplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv20], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv20) ));
 	}
 	grid_type_selector.AddMenuElem (Menu_Helpers::MenuElem (_("Quintuplets"), *_quintuplet_menu));
 
@@ -3190,9 +3188,9 @@ Editor::build_grid_type_menu ()
 	Gtk::Menu *_septuplet_menu = manage (new Menu);
 	MenuList& septuplet_items (_septuplet_menu->items());
 	{
-		septuplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv7],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv7) ));
-		septuplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv14], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv14) ));
-		septuplet_items.push_back( MenuElem( grid_type_strings[(int)QuantizeToBeatDiv28], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (SnapType) QuantizeToBeatDiv28) ));
+		septuplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv7],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv7) ));
+		septuplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv14], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv14) ));
+		septuplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv28], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv28) ));
 	}
 	grid_type_selector.AddMenuElem (Menu_Helpers::MenuElem (_("Septuplets"), *_septuplet_menu));
 
@@ -3617,9 +3615,9 @@ Editor::edit_mode_selection_done ( EditMode m )
 }
 
 void
-Editor::grid_type_selection_done (SnapType snaptype)
+Editor::grid_type_selection_done (GridType gridtype)
 {
-	RefPtr<RadioAction> ract = grid_type_action (snaptype);
+	RefPtr<RadioAction> ract = grid_type_action (gridtype);
 	if (ract) {
 		ract->set_active ();
 	}
@@ -3884,7 +3882,7 @@ Editor::set_show_grid (bool show)
 		_show_grid = show;
 		
 		if (show) {
-			if ( snap_musical() ) {
+			if ( grid_musical() ) {
 				std::vector<TempoMap::BBTPoint> grid;
 				compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
 				maybe_draw_tempo_lines (grid);
@@ -3974,21 +3972,21 @@ unsigned
 Editor::get_grid_beat_divisions(samplepos_t position)
 {
 	switch (_grid_type) {
-	case QuantizeToBeatDiv32:  return 32;
-	case QuantizeToBeatDiv28:  return 28;
-	case QuantizeToBeatDiv24:  return 24;
-	case QuantizeToBeatDiv20:  return 20;
-	case QuantizeToBeatDiv16:  return 16;
-	case QuantizeToBeatDiv14:  return 14;
-	case QuantizeToBeatDiv12:  return 12;
-	case QuantizeToBeatDiv10:  return 10;
-	case QuantizeToBeatDiv8:   return 8;
-	case QuantizeToBeatDiv7:   return 7;
-	case QuantizeToBeatDiv6:   return 6;
-	case QuantizeToBeatDiv5:   return 5;
-	case QuantizeToBeatDiv4:   return 4;
-	case QuantizeToBeatDiv3:   return 3;
-	case QuantizeToBeatDiv2:   return 2;
+	case GridTypeBeatDiv32:  return 32;
+	case GridTypeBeatDiv28:  return 28;
+	case GridTypeBeatDiv24:  return 24;
+	case GridTypeBeatDiv20:  return 20;
+	case GridTypeBeatDiv16:  return 16;
+	case GridTypeBeatDiv14:  return 14;
+	case GridTypeBeatDiv12:  return 12;
+	case GridTypeBeatDiv10:  return 10;
+	case GridTypeBeatDiv8:   return 8;
+	case GridTypeBeatDiv7:   return 7;
+	case GridTypeBeatDiv6:   return 6;
+	case GridTypeBeatDiv5:   return 5;
+	case GridTypeBeatDiv4:   return 4;
+	case GridTypeBeatDiv3:   return 3;
+	case GridTypeBeatDiv2:   return 2;
 	default:               return 0;
 	}
 	return 0;
@@ -4011,23 +4009,23 @@ Editor::get_grid_music_divisions (uint32_t event_state)
 	}
 
 	switch (_grid_type) {
-	case QuantizeToBeatDiv32:  return 32;
-	case QuantizeToBeatDiv28:  return 28;
-	case QuantizeToBeatDiv24:  return 24;
-	case QuantizeToBeatDiv20:  return 20;
-	case QuantizeToBeatDiv16:  return 16;
-	case QuantizeToBeatDiv14:  return 14;
-	case QuantizeToBeatDiv12:  return 12;
-	case QuantizeToBeatDiv10:  return 10;
-	case QuantizeToBeatDiv8:   return 8;
-	case QuantizeToBeatDiv7:   return 7;
-	case QuantizeToBeatDiv6:   return 6;
-	case QuantizeToBeatDiv5:   return 5;
-	case QuantizeToBeatDiv4:   return 4;
-	case QuantizeToBeatDiv3:   return 3;
-	case QuantizeToBeatDiv2:   return 2;
-	case QuantizeToBeat:       return 1;
-	case QuantizeToBar :       return -1;
+	case GridTypeBeatDiv32:  return 32;
+	case GridTypeBeatDiv28:  return 28;
+	case GridTypeBeatDiv24:  return 24;
+	case GridTypeBeatDiv20:  return 20;
+	case GridTypeBeatDiv16:  return 16;
+	case GridTypeBeatDiv14:  return 14;
+	case GridTypeBeatDiv12:  return 12;
+	case GridTypeBeatDiv10:  return 10;
+	case GridTypeBeatDiv8:   return 8;
+	case GridTypeBeatDiv7:   return 7;
+	case GridTypeBeatDiv6:   return 6;
+	case GridTypeBeatDiv5:   return 5;
+	case GridTypeBeatDiv4:   return 4;
+	case GridTypeBeatDiv3:   return 3;
+	case GridTypeBeatDiv2:   return 2;
+	case GridTypeBeat:       return 1;
+	case GridTypeBar :       return -1;
 	default:               return 0;
 	}
 	return 0;
@@ -4044,9 +4042,9 @@ Editor::get_grid_type_as_beats (bool& success, samplepos_t position)
 	}
 
 	switch (_grid_type) {
-	case QuantizeToBeat:
+	case GridTypeBeat:
 		return Temporal::Beats(4.0 / _session->tempo_map().meter_at_sample (position).note_divisor());
-	case QuantizeToBar:
+	case GridTypeBar:
 		if (_session) {
 			const Meter& m = _session->tempo_map().meter_at_sample (position);
 			return Temporal::Beats((4.0 * m.divisions_per_bar()) / m.note_divisor());
@@ -4460,7 +4458,7 @@ void
 Editor::on_samples_per_pixel_changed ()
 {
 	if ( _show_grid ) {
-		if ( snap_musical() && tempo_lines) {
+		if ( grid_musical() && tempo_lines) {
 			tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
 		}
 	}

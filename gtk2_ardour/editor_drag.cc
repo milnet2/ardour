@@ -3297,14 +3297,14 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		}
 		/* only snap to bars. leave snap mode alone for audio locked meters.*/
 		if (_real_section->position_lock_style() != AudioTime) {
-			_editor->set_grid_to (QuantizeToBar);
+			_editor->set_grid_to (GridTypeBar);
 			_editor->set_snap_mode (SnapMagnetic);
 		}
 	}
 
 	samplepos_t pf = adjusted_current_sample (event);
 
-	if (_real_section->position_lock_style() == AudioTime && _editor->snap_musical()) {
+	if (_real_section->position_lock_style() == AudioTime && _editor->grid_musical()) {
 		/* never snap to music for audio locked */
 		pf = adjusted_current_sample (event, false);
 	}
@@ -3466,7 +3466,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	} else if (_movable && !_real_section->locked_to_meter()) {
 		samplepos_t pf;
 
-		if (_editor->snap_musical()) {
+		if (_editor->grid_musical()) {
 			/* we can't snap to a grid that we are about to move.
 			 * gui_move_tempo() will sort out snap using the supplied beat divisions.
 			*/
@@ -3600,7 +3600,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 	TempoMap& map (_editor->session()->tempo_map());
 	samplepos_t pf;
 
-	if (_editor->snap_musical()) {
+	if (_editor->grid_musical()) {
 		pf = adjusted_current_sample (event, false);
 	} else {
 		pf = adjusted_current_sample (event);
@@ -3748,7 +3748,7 @@ TempoTwistDrag::motion (GdkEvent* event, bool first_move)
 
 	samplepos_t pf;
 
-	if (_editor->snap_musical()) {
+	if (_editor->grid_musical()) {
 		pf = adjusted_current_sample (event, false);
 	} else {
 		pf = adjusted_current_sample (event);

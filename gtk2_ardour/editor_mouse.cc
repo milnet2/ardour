@@ -2398,7 +2398,7 @@ void
 Editor::mouse_brush_insert_region (RegionView* rv, samplepos_t pos)
 {
 	/* no brushing without a useful quantize setting */
-	if (_grid_type == QuantizeToNone)
+	if (_grid_type == GridTypeNone)
 		return;
 
 	/* don't brush a copy over the original */

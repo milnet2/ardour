@@ -163,13 +163,13 @@ public:
 	void cycle_snap_mode ();
 	void next_grid_choice ();
 	void prev_grid_choice ();
-	void set_grid_to (Editing::SnapType);
+	void set_grid_to (Editing::GridType);
 	void set_snap_mode (Editing::SnapMode);
 	void set_snap_threshold (double pixel_distance) {snap_threshold = pixel_distance;}
 
 	Editing::SnapMode  snap_mode () const;
-	Editing::SnapType  grid_type () const;
-	bool  snap_musical () const;
+	Editing::GridType  grid_type () const;
+	bool  grid_musical () const;
 
 	void undo (uint32_t n = 1);
 	void redo (uint32_t n = 1);
@@ -607,9 +607,9 @@ private:
 	void on_samples_per_pixel_changed ();
 
 	Editing::MouseMode mouse_mode;
-	Editing::SnapType  pre_internal_grid_type;
+	Editing::GridType  pre_internal_grid_type;
 	Editing::SnapMode  pre_internal_snap_mode;
-	Editing::SnapType  internal_grid_type;
+	Editing::GridType  internal_grid_type;
 	Editing::SnapMode  internal_snap_mode;
 	Editing::MouseMode effective_mouse_mode () const;
 
@@ -1524,7 +1524,7 @@ private:
 
 	void move_range_selection_start_or_end_to_region_boundary (bool, bool);
 
-	Editing::SnapType _grid_type;
+	Editing::GridType _grid_type;
 	Editing::SnapMode _snap_mode;
 
 	/// Snap threshold in pixels
@@ -1831,12 +1831,12 @@ private:
 	std::vector<std::string> grid_type_strings;
 	std::vector<std::string> snap_mode_strings;
 
-	void grid_type_selection_done (Editing::SnapType);
+	void grid_type_selection_done (Editing::GridType);
 	void snap_mode_selection_done (Editing::SnapMode);
 	void snap_mode_chosen (Editing::SnapMode);
-	void grid_type_chosen (Editing::SnapType);
+	void grid_type_chosen (Editing::GridType);
 
-	Glib::RefPtr<Gtk::RadioAction> grid_type_action (Editing::SnapType);
+	Glib::RefPtr<Gtk::RadioAction> grid_type_action (Editing::GridType);
 	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
 
 	//zoom focus meu stuff

@@ -233,28 +233,28 @@
         <menuitem action='cycle-edit-point-with-marker'/>
       </menu>
       <menuitem action='cycle-snap-mode'/>
-      <menu name='QuantizeTo' action='QuantizeTo'>
+      <menu name='GridChoice' action='GridChoice'>
         <menuitem action='prev-grid-choice'/>
         <menuitem action='next-grid-choice'/>
         <separator/>
-        <menuitem action='snap-to-none'/>
-        <menuitem action='snap-to-bar'/>
-        <menuitem action='snap-to-beat'/>
-        <menuitem action='snap-to-halves'/>
-        <menuitem action='snap-to-quarters'/>
-        <menuitem action='snap-to-eighths'/>
-        <menuitem action='snap-to-asixteenthbeat'/>
-        <menuitem action='snap-to-thirtyseconds'/>
-        <menuitem action='snap-to-thirds'/>
-        <menuitem action='snap-to-sixths'/>
-        <menuitem action='snap-to-twelfths'/>
-        <menuitem action='snap-to-twentyfourths'/>
-        <menuitem action='snap-to-fifths'/>
-        <menuitem action='snap-to-tenths'/>
-        <menuitem action='snap-to-twentieths'/>
-        <menuitem action='snap-to-sevenths'/>
-        <menuitem action='snap-to-fourteenths'/>
-        <menuitem action='snap-to-twentyeighths'/>
+        <menuitem action='grid-type-none'/>
+        <menuitem action='grid-type-bar'/>
+        <menuitem action='grid-type-beat'/>
+        <menuitem action='grid-type-halves'/>
+        <menuitem action='grid-type-quarters'/>
+        <menuitem action='grid-type-eighths'/>
+        <menuitem action='grid-type-asixteenthbeat'/>
+        <menuitem action='grid-type-thirtyseconds'/>
+        <menuitem action='grid-type-thirds'/>
+        <menuitem action='grid-type-sixths'/>
+        <menuitem action='grid-type-twelfths'/>
+        <menuitem action='grid-type-twentyfourths'/>
+        <menuitem action='grid-type-fifths'/>
+        <menuitem action='grid-type-tenths'/>
+        <menuitem action='grid-type-twentieths'/>
+        <menuitem action='grid-type-sevenths'/>
+        <menuitem action='grid-type-fourteenths'/>
+        <menuitem action='grid-type-twentyeighths'/>
       </menu>
       <separator/>
       <menu action="TempoMenu">

@@ -18,24 +18,24 @@
 */
 
 /* Changing this order will break the menu */
-SNAPTYPE(QuantizeToNone)
-SNAPTYPE(QuantizeToBar)
-SNAPTYPE(QuantizeToBeat)
-SNAPTYPE(QuantizeToBeatDiv2)
-SNAPTYPE(QuantizeToBeatDiv4)
-SNAPTYPE(QuantizeToBeatDiv8)
-SNAPTYPE(QuantizeToBeatDiv16)
-SNAPTYPE(QuantizeToBeatDiv32)
-SNAPTYPE(QuantizeToBeatDiv3)  //Triplet eighths
-SNAPTYPE(QuantizeToBeatDiv6)
-SNAPTYPE(QuantizeToBeatDiv12)
-SNAPTYPE(QuantizeToBeatDiv24)
-SNAPTYPE(QuantizeToBeatDiv5)  //Quintuplet eighths
-SNAPTYPE(QuantizeToBeatDiv10)
-SNAPTYPE(QuantizeToBeatDiv20)
-SNAPTYPE(QuantizeToBeatDiv7)  //Septuplet eighths
-SNAPTYPE(QuantizeToBeatDiv14)
-SNAPTYPE(QuantizeToBeatDiv28)
+GRIDTYPE(GridTypeNone)
+GRIDTYPE(GridTypeBar)
+GRIDTYPE(GridTypeBeat)
+GRIDTYPE(GridTypeBeatDiv2)
+GRIDTYPE(GridTypeBeatDiv4)
+GRIDTYPE(GridTypeBeatDiv8)
+GRIDTYPE(GridTypeBeatDiv16)
+GRIDTYPE(GridTypeBeatDiv32)
+GRIDTYPE(GridTypeBeatDiv3)  //Triplet eighths
+GRIDTYPE(GridTypeBeatDiv6)
+GRIDTYPE(GridTypeBeatDiv12)
+GRIDTYPE(GridTypeBeatDiv24)
+GRIDTYPE(GridTypeBeatDiv5)  //Quintuplet eighths
+GRIDTYPE(GridTypeBeatDiv10)
+GRIDTYPE(GridTypeBeatDiv20)
+GRIDTYPE(GridTypeBeatDiv7)  //Septuplet eighths
+GRIDTYPE(GridTypeBeatDiv14)
+GRIDTYPE(GridTypeBeatDiv28)
 
 
 /* Changing this order will break the menu */

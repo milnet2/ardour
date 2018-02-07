@@ -389,7 +389,7 @@ Editor::hide_tempo_lines ()
 void
 Editor::maybe_draw_tempo_lines (std::vector<ARDOUR::TempoMap::BBTPoint>& grid)
 {
-	if (_session == 0 || _show_grid == false || !snap_musical() || distance (grid.begin(), grid.end()) == 0) {
+	if (_session == 0 || _show_grid == false || !grid_musical() || distance (grid.begin(), grid.end()) == 0) {
 		return;
 	}
 

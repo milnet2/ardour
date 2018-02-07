@@ -45,7 +45,7 @@ setup_gtk_ardour_enums ()
 	EditPoint edit_point;
 	LayerDisplay layer_display;
 	RegionListSortType region_list_sort_type;
-	SnapType grid_type;
+	GridType grid_type;
 	SnapMode snap_mode;
 	ZoomFocus zoom_focus;
 	ItemType item_type;
@@ -94,24 +94,24 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (ByTimestamp);
 	REGISTER (region_list_sort_type);
 
-	REGISTER_ENUM (QuantizeToNone);
-	REGISTER_ENUM (QuantizeToBar);
-	REGISTER_ENUM (QuantizeToBeat);
-	REGISTER_ENUM (QuantizeToBeatDiv2);
-	REGISTER_ENUM (QuantizeToBeatDiv3);
-	REGISTER_ENUM (QuantizeToBeatDiv4);
-	REGISTER_ENUM (QuantizeToBeatDiv5);
-	REGISTER_ENUM (QuantizeToBeatDiv6);
-	REGISTER_ENUM (QuantizeToBeatDiv7);
-	REGISTER_ENUM (QuantizeToBeatDiv8);
-	REGISTER_ENUM (QuantizeToBeatDiv10);
-	REGISTER_ENUM (QuantizeToBeatDiv12);
-	REGISTER_ENUM (QuantizeToBeatDiv14);
-	REGISTER_ENUM (QuantizeToBeatDiv16);
-	REGISTER_ENUM (QuantizeToBeatDiv20);
-	REGISTER_ENUM (QuantizeToBeatDiv24);
-	REGISTER_ENUM (QuantizeToBeatDiv28);
-	REGISTER_ENUM (QuantizeToBeatDiv32);
+	REGISTER_ENUM (GridTypeNone);
+	REGISTER_ENUM (GridTypeBar);
+	REGISTER_ENUM (GridTypeBeat);
+	REGISTER_ENUM (GridTypeBeatDiv2);
+	REGISTER_ENUM (GridTypeBeatDiv3);
+	REGISTER_ENUM (GridTypeBeatDiv4);
+	REGISTER_ENUM (GridTypeBeatDiv5);
+	REGISTER_ENUM (GridTypeBeatDiv6);
+	REGISTER_ENUM (GridTypeBeatDiv7);
+	REGISTER_ENUM (GridTypeBeatDiv8);
+	REGISTER_ENUM (GridTypeBeatDiv10);
+	REGISTER_ENUM (GridTypeBeatDiv12);
+	REGISTER_ENUM (GridTypeBeatDiv14);
+	REGISTER_ENUM (GridTypeBeatDiv16);
+	REGISTER_ENUM (GridTypeBeatDiv20);
+	REGISTER_ENUM (GridTypeBeatDiv24);
+	REGISTER_ENUM (GridTypeBeatDiv28);
+	REGISTER_ENUM (GridTypeBeatDiv32);
 	REGISTER (grid_type);  //ToDo:  quantize_type?
 
 	REGISTER_ENUM (SnapOff);

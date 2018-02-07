@@ -1029,7 +1029,7 @@ LuaInstance::register_classes (lua_State* L)
 	// Editing Symbols
 
 #undef ZOOMFOCUS
-#undef SNAPTYPE
+#undef GRIDTYPE
 #undef SNAPMODE
 #undef MOUSEMODE
 #undef DISPLAYCONTROL
@@ -1038,7 +1038,7 @@ LuaInstance::register_classes (lua_State* L)
 #undef IMPORTDISPOSITION
 
 #define ZOOMFOCUS(NAME) .addConst (stringify(NAME), (Editing::ZoomFocus)Editing::NAME)
-#define SNAPTYPE(NAME) .addConst (stringify(NAME), (Editing::SnapType)Editing::NAME)
+#define GRIDTYPE(NAME) .addConst (stringify(NAME), (Editing::GridType)Editing::NAME)
 #define SNAPMODE(NAME) .addConst (stringify(NAME), (Editing::SnapMode)Editing::NAME)
 #define MOUSEMODE(NAME) .addConst (stringify(NAME), (Editing::MouseMode)Editing::NAME)
 #define DISPLAYCONTROL(NAME) .addConst (stringify(NAME), (Editing::DisplayControl)Editing::NAME)
