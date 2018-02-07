@@ -358,7 +358,6 @@ public:
 	void toggle_zero_line_visibility ();
 	void set_summary ();
 	void set_group_tabs ();
-	void toggle_measure_visibility ();
 
 	/* returns the left-most and right-most time that the gui should allow the user to scroll to */
 	std::pair <samplepos_t,samplepos_t> session_gui_extents (bool use_extra = true) const;

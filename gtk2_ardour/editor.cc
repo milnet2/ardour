@@ -2154,9 +2154,13 @@ Editor::set_grid_to (SnapType st)
 	}
 
 	instant_save ();
-
-	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
-	update_tempo_based_rulers ();
+	
+	if ( st != QuantizeToNone ) {
+		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
+		update_tempo_based_rulers ();
+	}
+	
+	set_show_measures ( st != QuantizeToNone );
 
 	mark_region_boundary_cache_dirty ();
 
@@ -2424,15 +2428,6 @@ Editor::set_state (const XMLNode& node, int version)
 		 * those that are linked to a private variable may need changing
 		 */
 		RefPtr<Action> act;
-
-		act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
-		if (act) {
-			yn = _show_measures;
-			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-			/* do it twice to force the change */
-			tact->set_active (!yn);
-			tact->set_active (yn);
-		}
 
 		act = ActionManager::get_action (X_("Editor"), X_("toggle-follow-playhead"));
 		yn = _follow_playhead;

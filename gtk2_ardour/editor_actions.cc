@@ -727,8 +727,6 @@ Editor::register_actions ()
 
 	myactions.register_toggle_action (editor_actions, X_("ToggleGroupTabs"), _("Show Group Tabs"), sigc::mem_fun (*this, &Editor::set_group_tabs));
 
-	myactions.register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Grid Lines"), sigc::mem_fun (*this, &Editor::toggle_measure_visibility));
-
 	myactions.register_action (editor_actions, X_("toggle-midi-input-active"), _("Toggle MIDI Input Active for Editor-Selected Tracks/Busses"),
 	                           sigc::bind (sigc::mem_fun (*this, &Editor::toggle_midi_input_active), false));
 
@@ -1012,16 +1010,6 @@ Editor::set_xjadeo_viewoption (int what)
 		ARDOUR_UI::instance()->video_timeline->control_video_monitor(what, 1);
 	} else {
 		ARDOUR_UI::instance()->video_timeline->control_video_monitor(what, 0);
-	}
-}
-
-void
-Editor::toggle_measure_visibility ()
-{
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		set_show_measures (tact->get_active());
 	}
 }
 
