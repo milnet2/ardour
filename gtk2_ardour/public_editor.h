@@ -225,8 +225,8 @@ public:
 	virtual void trigger_script (int nth) = 0;
 	virtual void add_location_from_playhead_cursor () = 0;
 	virtual void remove_location_at_playhead_cursor () = 0;
-	virtual void set_show_measures (bool yn) = 0;
-	virtual bool show_measures () const = 0;
+	virtual void set_show_grid (bool yn) = 0;
+	virtual bool show_grid () const = 0;
 	virtual void remove_tracks () = 0;
 	virtual void set_loop_range (samplepos_t start, samplepos_t end, std::string cmd) = 0;
 	virtual void set_punch_range (samplepos_t start, samplepos_t end, std::string cmd) = 0;

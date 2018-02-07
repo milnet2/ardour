@@ -357,7 +357,7 @@ Editor::Editor ()
 	  /* , last_event_time { 0, 0 } */ /* this initialization style requires C++11 */
 	, _dragging_playhead (false)
 	, _dragging_edit_point (false)
-	, _show_measures (true)
+	, _show_grid (true)
 	, _follow_playhead (true)
 	, _stationary_playhead (false)
 	, _maximised (false)
@@ -2160,7 +2160,7 @@ Editor::set_grid_to (SnapType st)
 		update_tempo_based_rulers ();
 	}
 	
-	set_show_measures ( st != QuantizeToNone );
+	set_show_grid ( st != QuantizeToNone );
 
 	mark_region_boundary_cache_dirty ();
 
@@ -2342,8 +2342,6 @@ Editor::set_state (const XMLNode& node, int version)
 		set_edit_point_preference (_edit_point);
 	}
 
-	node.get_property ("show-measures", _show_measures);
-
 	if (node.get_property ("follow-playhead", yn)) {
 		set_follow_playhead (yn);
 	}
@@ -2482,7 +2480,6 @@ Editor::get_state ()
 	node->set_property ("left-frame", _leftmost_sample);
 	node->set_property ("y-origin", vertical_adjustment.get_value ());
 
-	node->set_property ("show-measures", _show_measures);
 	node->set_property ("maximised", _maximised);
 	node->set_property ("follow-playhead", _follow_playhead);
 	node->set_property ("stationary-playhead", _stationary_playhead);
@@ -3881,19 +3878,19 @@ Editor::cycle_zoom_focus ()
 }
 
 void
-Editor::set_show_measures (bool yn)
+Editor::set_show_grid (bool yn)
 {
-	if (_show_measures != yn) {
-		hide_measures ();
+	if (_show_grid != yn) {
+		hide_tempo_lines ();
 
-		if ((_show_measures = yn) == true) {
+		if ((_show_grid = yn) == true) {
 			if (tempo_lines) {
 				tempo_lines->show();
 			}
 
 			std::vector<TempoMap::BBTPoint> grid;
 			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
-			draw_measures (grid);
+			maybe_draw_tempo_lines (grid);
 		}
 
 		instant_save ();
@@ -5919,7 +5916,7 @@ Editor::session_going_away ()
 
 	/* clear tempo/meter rulers */
 	remove_metric_marks ();
-	hide_measures ();
+	hide_tempo_lines ();
 	clear_marker_display ();
 
 	delete tempo_lines;

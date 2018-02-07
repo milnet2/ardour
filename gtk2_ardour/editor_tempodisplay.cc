@@ -190,7 +190,7 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 		compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
 	}
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
-	draw_measures (grid);
+	maybe_draw_tempo_lines (grid);
 	update_tempo_based_rulers ();
 }
 
@@ -287,7 +287,7 @@ Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 		compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
 	}
 
-	draw_measures (grid);
+	maybe_draw_tempo_lines (grid);
 	update_tempo_based_rulers ();
 }
 
@@ -309,7 +309,7 @@ Editor::redisplay_tempo (bool immediate_redraw)
 			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
 		}
 
-		draw_measures (grid);
+		maybe_draw_tempo_lines (grid);
 		update_tempo_based_rulers (); // redraw rulers and measure lines
 
 	} else {
@@ -379,7 +379,7 @@ Editor::compute_current_bbt_points (std::vector<TempoMap::BBTPoint>& grid, sampl
 }
 
 void
-Editor::hide_measures ()
+Editor::hide_tempo_lines ()
 {
 	if (tempo_lines) {
 		tempo_lines->hide();
@@ -387,9 +387,9 @@ Editor::hide_measures ()
 }
 
 void
-Editor::draw_measures (std::vector<ARDOUR::TempoMap::BBTPoint>& grid)
+Editor::maybe_draw_tempo_lines (std::vector<ARDOUR::TempoMap::BBTPoint>& grid)
 {
-	if (_session == 0 || _show_measures == false || distance (grid.begin(), grid.end()) == 0) {
+	if (_session == 0 || _show_grid == false || distance (grid.begin(), grid.end()) == 0) {
 		return;
 	}
 

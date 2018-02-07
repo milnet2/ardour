@@ -866,8 +866,8 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("add_location_from_playhead_cursor", &PublicEditor::add_location_from_playhead_cursor)
 		.addFunction ("remove_location_at_playhead_cursor", &PublicEditor::remove_location_at_playhead_cursor)
 
-		.addFunction ("set_show_measures", &PublicEditor::set_show_measures)
-		.addFunction ("show_measures", &PublicEditor::show_measures)
+		.addFunction ("set_show_grid", &PublicEditor::set_show_grid)
+		.addFunction ("show_grid", &PublicEditor::show_grid)
 		.addFunction ("remove_tracks", &PublicEditor::remove_tracks)
 
 		.addFunction ("set_loop_range", &PublicEditor::set_loop_range)

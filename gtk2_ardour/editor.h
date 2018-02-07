@@ -270,8 +270,8 @@ public:
 
 	/* tempo */
 
-	void set_show_measures (bool yn);
-	bool show_measures () const { return _show_measures; }
+	void set_show_grid (bool yn);
+	bool show_grid () const { return _show_grid; }
 
 	/* analysis window */
 
@@ -1665,7 +1665,7 @@ private:
 
 	/* display control */
 
-	bool _show_measures;
+	bool _show_grid;
 	/// true if the editor should follow the playhead, otherwise false
 	bool _follow_playhead;
 	/// true if we scroll the tracks rather than the playhead
@@ -1678,8 +1678,8 @@ private:
 	ArdourCanvas::Container* global_rect_group;
 	ArdourCanvas::Container* time_line_group;
 
-	void hide_measures ();
-	void draw_measures (std::vector<ARDOUR::TempoMap::BBTPoint>&);
+	void hide_tempo_lines ();
+	void maybe_draw_tempo_lines (std::vector<ARDOUR::TempoMap::BBTPoint>&);
 
 	void new_tempo_section ();
 
