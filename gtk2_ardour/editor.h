@@ -270,8 +270,7 @@ public:
 
 	/* tempo */
 
-	void set_show_grid (bool yn);
-	bool show_grid () const { return _show_grid; }
+	void update_grid (bool show);
 
 	/* analysis window */
 
@@ -1665,7 +1664,6 @@ private:
 
 	/* display control */
 
-	bool _show_grid;
 	/// true if the editor should follow the playhead, otherwise false
 	bool _follow_playhead;
 	/// true if we scroll the tracks rather than the playhead

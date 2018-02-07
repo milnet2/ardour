@@ -357,7 +357,6 @@ Editor::Editor ()
 	  /* , last_event_time { 0, 0 } */ /* this initialization style requires C++11 */
 	, _dragging_playhead (false)
 	, _dragging_edit_point (false)
-	, _show_grid (true)
 	, _follow_playhead (true)
 	, _stationary_playhead (false)
 	, _maximised (false)
@@ -835,6 +834,8 @@ Editor::Editor ()
 	UIConfiguration::instance().map_parameters (pc);
 
 	setup_fade_images ();
+	
+	set_grid_to (Editing::GridTypeNone);
 
 	instant_save ();
 }
@@ -2116,11 +2117,30 @@ Editor::grid_type() const
 bool
 Editor::grid_musical() const
 {
-	if (_grid_type != GridTypeNone) {
+	switch (_grid_type) {
+	case GridTypeBeatDiv32:
+	case GridTypeBeatDiv28:
+	case GridTypeBeatDiv24:
+	case GridTypeBeatDiv20:
+	case GridTypeBeatDiv16:
+	case GridTypeBeatDiv14:
+	case GridTypeBeatDiv12:
+	case GridTypeBeatDiv10:
+	case GridTypeBeatDiv8:
+	case GridTypeBeatDiv7:
+	case GridTypeBeatDiv6:
+	case GridTypeBeatDiv5:
+	case GridTypeBeatDiv4:
+	case GridTypeBeatDiv3:
+	case GridTypeBeatDiv2:
+	case GridTypeBeat:
+	case GridTypeBar:
 		return true;
+	case GridTypeNone:
+		return false;
+	default:
+		return false;
 	}
-	
-	return false;
 }
 
 SnapMode
@@ -2132,6 +2152,10 @@ Editor::snap_mode() const
 void
 Editor::set_grid_to (GridType gt)
 {
+	if (_grid_type == gt) {  //already set
+		return;
+	}
+
 	unsigned int grid_ind = (unsigned int)gt;
 
 	if (internal_editing()) {
@@ -2158,7 +2182,7 @@ Editor::set_grid_to (GridType gt)
 	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 	update_tempo_based_rulers ();
 	
-	set_show_grid ( gt != GridTypeNone );
+	update_grid ( gt != GridTypeNone );
 
 	mark_region_boundary_cache_dirty ();
 
@@ -3876,22 +3900,16 @@ Editor::cycle_zoom_focus ()
 }
 
 void
-Editor::set_show_grid (bool show)
+Editor::update_grid (bool show)
 {
-	if (_show_grid != show) {
-		_show_grid = show;
-		
-		if (show) {
-			if ( grid_musical() ) {
-				std::vector<TempoMap::BBTPoint> grid;
-				compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
-				maybe_draw_tempo_lines (grid);
-			}
-		} else {
-			hide_tempo_lines ();
+	if (show) {
+		if ( grid_musical() ) {
+			std::vector<TempoMap::BBTPoint> grid;
+			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
+			maybe_draw_tempo_lines (grid);
 		}
-
-		instant_save ();
+	} else {
+		hide_tempo_lines ();
 	}
 }
 
@@ -4457,10 +4475,8 @@ Editor::set_samples_per_pixel (samplecnt_t spp)
 void
 Editor::on_samples_per_pixel_changed ()
 {
-	if ( _show_grid ) {
-		if ( grid_musical() && tempo_lines) {
-			tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
-		}
+	if ( grid_musical() && tempo_lines) {
+		tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
 	}
 	
 	bool const showing_time_selection = selection->time.length() > 0;

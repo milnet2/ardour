@@ -112,7 +112,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (GridTypeBeatDiv24);
 	REGISTER_ENUM (GridTypeBeatDiv28);
 	REGISTER_ENUM (GridTypeBeatDiv32);
-	REGISTER (grid_type);  //ToDo:  quantize_type?
+	REGISTER (grid_type);
 
 	REGISTER_ENUM (SnapOff);
 	REGISTER_ENUM (SnapNormal);
