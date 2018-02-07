@@ -128,6 +128,7 @@ class RulerDialog;
 class Selection;
 class SoundFileOmega;
 class StreamView;
+class SmpteLines;
 class TempoLines;
 class TimeAxisView;
 class TimeInfoBox;
@@ -170,6 +171,7 @@ public:
 	Editing::SnapMode  snap_mode () const;
 	Editing::GridType  grid_type () const;
 	bool  grid_musical () const;
+	bool  grid_nonmusical () const;
 
 	void undo (uint32_t n = 1);
 	void redo (uint32_t n = 1);
@@ -1671,10 +1673,16 @@ private:
 	/// true if we are in fullscreen mode
 	bool _maximised;
 
+	std::vector<ArdourCanvas::Ruler::Mark> smpte_marks;
+	SmpteLines* smpte_lines;
+
 	TempoLines* tempo_lines;
 
 	ArdourCanvas::Container* global_rect_group;
 	ArdourCanvas::Container* time_line_group;
+
+	void hide_smpte_lines ();
+	void maybe_draw_smpte_lines ();
 
 	void hide_tempo_lines ();
 	void maybe_draw_tempo_lines (std::vector<ARDOUR::TempoMap::BBTPoint>&);
@@ -1756,7 +1764,8 @@ private:
 
 	void tempo_map_changed (const PBD::PropertyChange&);
 	void tempometric_position_changed (const PBD::PropertyChange&);
-	void redisplay_tempo (bool immediate_redraw);
+
+	void redisplay_grid (bool immediate_redraw);
 
 	uint32_t bbt_beat_subdivision;
 
@@ -2184,6 +2193,9 @@ private:
 
 	void select_next_stripable (bool routes_only = true);
 	void select_prev_stripable (bool routes_only = true);
+
+	samplepos_t snap_to_smpte_grid (samplepos_t           presnap,
+                                    ARDOUR::RoundMode     direction = ARDOUR::RoundNearest);
 
 	void snap_to_internal (ARDOUR::MusicSample& first,
 	                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,

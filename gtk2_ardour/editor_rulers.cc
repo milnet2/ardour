@@ -585,7 +585,7 @@ Editor::update_ruler_visibility ()
 
 	compute_fixed_ruler_scale ();
 	update_fixed_rulers();
-	redisplay_tempo (false);
+	redisplay_grid (false);
 
 	/* Changing ruler visibility means that any lines on markers might need updating */
 	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {

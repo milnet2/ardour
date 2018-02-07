@@ -306,7 +306,7 @@ Editor::track_canvas_viewport_size_allocated ()
 	}
 
 	update_fixed_rulers();
-	redisplay_tempo (false);
+	redisplay_grid (false);
 	_summary->set_overlays_dirty ();
 }
 
@@ -1044,7 +1044,7 @@ Editor::color_handler()
 	_track_canvas->queue_draw ();
 
 /*
-	redisplay_tempo (true);
+	redisplay_grid (true);
 
 	if (_session)
 	      _session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers

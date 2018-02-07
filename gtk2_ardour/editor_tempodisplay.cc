@@ -48,6 +48,7 @@
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "time_axis_view.h"
+#include "smpte_lines.h"
 #include "tempo_lines.h"
 #include "ui_config.h"
 
@@ -292,7 +293,7 @@ Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 }
 
 void
-Editor::redisplay_tempo (bool immediate_redraw)
+Editor::redisplay_grid (bool immediate_redraw)
 {
 	if (!_session) {
 		return;
@@ -310,10 +311,12 @@ Editor::redisplay_tempo (bool immediate_redraw)
 		}
 
 		maybe_draw_tempo_lines (grid);
-		update_tempo_based_rulers (); // redraw rulers and measure lines
+		maybe_draw_smpte_lines ();
+		
+		update_tempo_based_rulers ();
 
 	} else {
-		Glib::signal_idle().connect (sigc::bind_return (sigc::bind (sigc::mem_fun (*this, &Editor::redisplay_tempo), true), false));
+		Glib::signal_idle().connect (sigc::bind_return (sigc::bind (sigc::mem_fun (*this, &Editor::redisplay_grid), true), false));
 	}
 }
 void
@@ -400,6 +403,33 @@ Editor::maybe_draw_tempo_lines (std::vector<ARDOUR::TempoMap::BBTPoint>& grid)
 	const unsigned divisions = get_grid_beat_divisions(_leftmost_sample);
 	tempo_lines->draw (grid, divisions, _leftmost_sample, _session->sample_rate());
 	tempo_lines->show();
+}
+
+void
+Editor::hide_smpte_lines ()
+{
+	if (smpte_lines) {
+		smpte_lines->hide();
+	}
+}
+
+void
+Editor::maybe_draw_smpte_lines ()
+{
+	if (_session == 0 || (_grid_type != GridTypeSmpte) ) {
+		return;
+	}
+
+	if (smpte_lines == 0) {
+		smpte_lines = new SmpteLines (time_line_group, ArdourCanvas::LineSet::Vertical);
+	}
+
+	smpte_marks.clear();
+	samplepos_t rightmost_sample = _leftmost_sample + current_page_samples();
+	metric_get_timecode( smpte_marks, _leftmost_sample, rightmost_sample, 12 );
+
+	smpte_lines->draw ( smpte_marks );
+	smpte_lines->show();
 }
 
 void

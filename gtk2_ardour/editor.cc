@@ -133,6 +133,7 @@
 #include "selection.h"
 #include "simple_progress_dialog.h"
 #include "sfdb_ui.h"
+#include "smpte_lines.h"
 #include "tempo_lines.h"
 #include "time_axis_view.h"
 #include "time_info_box.h"
@@ -179,6 +180,7 @@ static const gchar *_grid_type_strings[] = {
 	N_("1/7 (8th septuplet)"),
 	N_("1/14 (16th septuplet)"),
 	N_("1/28 (32nd septuplet)"),
+	N_("TC Secs"),
 	0
 };
 
@@ -360,6 +362,7 @@ Editor::Editor ()
 	, _follow_playhead (true)
 	, _stationary_playhead (false)
 	, _maximised (false)
+	, smpte_lines (0)
 	, tempo_lines (0)
 	, global_rect_group (0)
 	, time_line_group (0)
@@ -2136,13 +2139,21 @@ Editor::grid_musical() const
 	case GridTypeBeat:
 	case GridTypeBar:
 		return true;
-	case GridTypeNone:
-		return false;
 	default:
 		return false;
 	}
 }
 
+bool
+Editor::grid_nonmusical() const
+{
+	switch (_grid_type) {
+	case GridTypeSmpte:
+		return true;
+	default:
+		return false;
+	}
+}
 SnapMode
 Editor::snap_mode() const
 {
@@ -2186,7 +2197,7 @@ Editor::set_grid_to (GridType gt)
 
 	mark_region_boundary_cache_dirty ();
 
-	redisplay_tempo (false);
+	redisplay_grid (false);
 
 	SnapChanged (); /* EMIT SIGNAL */
 }
@@ -2744,6 +2755,57 @@ Editor::marker_snap_to_internal (samplepos_t presnap, RoundMode direction)
 	return test;
 }
 
+samplepos_t
+Editor::snap_to_smpte_grid (samplepos_t presnap, RoundMode direction)
+{
+	samplepos_t before;
+	samplepos_t after;
+	samplepos_t test;
+
+	before = after = max_samplepos;
+
+	//get marks to either side of presnap
+	vector<ArdourCanvas::Ruler::Mark>::const_iterator m = smpte_marks.begin();
+	while ( m != smpte_marks.end() && (m->position < presnap) ) {
+		++m;
+	}
+	
+	if (m == smpte_marks.end ()) {
+		/* ran out of marks */
+		before = smpte_marks.back().position;
+	}
+
+	after = m->position;
+
+	if (m != smpte_marks.begin ()) {
+		--m;
+		before = m->position;
+	}
+	
+	if (before == max_samplepos && after == max_samplepos) {
+		/* No smpte to snap to, so just don't snap */
+		return presnap;
+	} else if (before == max_samplepos) {
+		test = after;
+	} else if (after == max_samplepos) {
+		test = before;
+	} else  {
+		if ((direction == RoundUpMaybe || direction == RoundUpAlways))
+			test = after;
+		else if ((direction == RoundDownMaybe || direction == RoundDownAlways))
+			test = before;
+		else if (direction ==  0 ) {
+			if ((presnap - before) < (after - presnap)) {
+				test = before;
+			} else {
+				test = after;
+			}
+		}
+	}
+	
+	return test;
+}
+
 void
 Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref, bool for_mark, bool ensure_snap)
 {
@@ -2755,9 +2817,9 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 	samplepos_t dist = max_samplepos;  //this records the distance of the best snap result we've found so far
 	samplepos_t best = max_samplepos;  //this records the best snap-result we've found so far
 	
-	//check snap-to-tc
-	if ( UIConfiguration::instance().get_snap_to_tc_frames() || UIConfiguration::instance().get_snap_to_tc_seconds() || UIConfiguration::instance().get_snap_to_tc_minutes() ) {
-		test = timecode_snap_to_internal (presnap, direction);
+	//check SMPTE Grid
+	if ( _grid_type == GridTypeSmpte ) {
+		test = snap_to_smpte_grid (presnap, direction);
 		check_best_snap(presnap, test, dist, best);
 	}
 	
@@ -3217,6 +3279,9 @@ Editor::build_grid_type_menu ()
 		septuplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv28], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv28) ));
 	}
 	grid_type_selector.AddMenuElem (Menu_Helpers::MenuElem (_("Septuplets"), *_septuplet_menu));
+
+	grid_type_selector.AddMenuElem(SeparatorElem());
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeSmpte], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeSmpte)));
 
 	set_size_request_to_display_given_text (grid_type_selector, "No Grid", COMBO_TRIANGLE_WIDTH, 2);
 }
@@ -3900,16 +3965,19 @@ Editor::cycle_zoom_focus ()
 }
 
 void
-Editor::update_grid (bool show)
+Editor::update_grid ()
 {
-	if (show) {
-		if ( grid_musical() ) {
-			std::vector<TempoMap::BBTPoint> grid;
-			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
-			maybe_draw_tempo_lines (grid);
-		}
+	if ( grid_musical() ) {
+		hide_smpte_lines ();
+		std::vector<TempoMap::BBTPoint> grid;
+		compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
+		maybe_draw_tempo_lines (grid);
+	} else if ( grid_nonmusical() ) {
+		hide_tempo_lines ();
+		maybe_draw_smpte_lines ();
 	} else {
 		hide_tempo_lines ();
+		hide_smpte_lines ();
 	}
 }
 
@@ -4477,6 +4545,8 @@ Editor::on_samples_per_pixel_changed ()
 {
 	if ( grid_musical() && tempo_lines) {
 		tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
+	} else if ( _grid_type == GridTypeSmpte ) {
+		maybe_draw_smpte_lines ();
 	}
 	
 	bool const showing_time_selection = selection->time.length() > 0;
@@ -4632,7 +4702,7 @@ Editor::visual_changer (const VisualChange& vc)
 	// If we are only scrolling vertically there is no need to update these
 	if (vc.pending != VisualChange::YOrigin) {
 		update_fixed_rulers ();
-		redisplay_tempo (true);
+		redisplay_grid (true);
 
 		/* video frames & position need to be updated for zoom, horiz-scroll
 		 * and (explicitly) VisualChange::VideoTimeline.
@@ -5932,11 +6002,15 @@ Editor::session_going_away ()
 
 	/* clear tempo/meter rulers */
 	remove_metric_marks ();
-	hide_tempo_lines ();
 	clear_marker_display ();
 
+	hide_tempo_lines ();
 	delete tempo_lines;
 	tempo_lines = 0;
+
+	hide_smpte_lines ();
+	delete smpte_lines;
+	smpte_lines = 0;
 
 	stop_step_editing ();
 
