@@ -2819,7 +2819,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 	}
 	
 	//check Grid
-	if (UIConfiguration::instance().get_snap_to_grid()) {
+	if (UIConfiguration::instance().get_snap_to_grid() && (_grid_type != GridTypeNone) ) {
 
 		//if SnapToGrid is selected, the user wants to prioritize the music grid
 		//in this case we should reset the best distance, so Grid will prevail
