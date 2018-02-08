@@ -128,7 +128,7 @@ class RulerDialog;
 class Selection;
 class SoundFileOmega;
 class StreamView;
-class SmpteLines;
+class GridLines;
 class TempoLines;
 class TimeAxisView;
 class TimeInfoBox;
@@ -1673,16 +1673,16 @@ private:
 	/// true if we are in fullscreen mode
 	bool _maximised;
 
-	std::vector<ArdourCanvas::Ruler::Mark> smpte_marks;
-	SmpteLines* smpte_lines;
+	std::vector<ArdourCanvas::Ruler::Mark> grid_marks;
+	GridLines* grid_lines;
 
 	TempoLines* tempo_lines;
 
 	ArdourCanvas::Container* global_rect_group;
 	ArdourCanvas::Container* time_line_group;
 
-	void hide_smpte_lines ();
-	void maybe_draw_smpte_lines ();
+	void hide_grid_lines ();
+	void maybe_draw_grid_lines ();
 
 	void hide_tempo_lines ();
 	void maybe_draw_tempo_lines (std::vector<ARDOUR::TempoMap::BBTPoint>&);

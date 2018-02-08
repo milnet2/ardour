@@ -2518,42 +2518,18 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
+		     "snap-to-grid",
+		     _("Grid"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_grid),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_grid)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
 		     "snap-to-tc-frames",
 		     _("TC Frames"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_tc_frames),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_tc_frames)
-		     ));
-
-	add_option (_("Editor/Snap"),
-	     new BoolOption (
-		     "snap-to-tc-seconds",
-		     _("TC Seconds"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_tc_seconds),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_tc_seconds)
-		     ));
-
-	add_option (_("Editor/Snap"),
-	     new BoolOption (
-		     "snap-to-tc-minutes",
-		     _("TC Minutes"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_tc_minutes),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_tc_minutes)
-		     ));
-
-	add_option (_("Editor/Snap"),
-	     new BoolOption (
-		     "snap-to-seconds",
-		     _("Seconds"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_seconds),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_seconds)
-		     ));
-
-	add_option (_("Editor/Snap"),
-	     new BoolOption (
-		     "snap-to-minutes",
-		     _("Minutes"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_minutes),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_minutes)
 		     ));
 
 	add_option (_("Editor/Snap"),

@@ -133,7 +133,7 @@
 #include "selection.h"
 #include "simple_progress_dialog.h"
 #include "sfdb_ui.h"
-#include "smpte_lines.h"
+#include "grid_lines.h"
 #include "tempo_lines.h"
 #include "time_axis_view.h"
 #include "time_info_box.h"
@@ -364,7 +364,7 @@ Editor::Editor ()
 	, _follow_playhead (true)
 	, _stationary_playhead (false)
 	, _maximised (false)
-	, smpte_lines (0)
+	, grid_lines (0)
 	, tempo_lines (0)
 	, global_rect_group (0)
 	, time_line_group (0)
@@ -2703,7 +2703,7 @@ Editor::snap_to_smpte_grid (vector<ArdourCanvas::Ruler::Mark> marks, samplepos_t
 	
 	if (m == marks.end ()) {
 		/* ran out of marks */
-		before = smpte_marks.back().position;
+		before = grid_marks.back().position;
 	}
 
 	after = m->position;
@@ -2779,25 +2779,20 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 	samplepos_t dist = max_samplepos;  //this records the distance of the best snap result we've found so far
 	samplepos_t best = max_samplepos;  //this records the best snap-result we've found so far
 	
-/*	smpte_marks.clear();
+/*	grid_marks.clear();
 	samplepos_t rightmost_sample = _leftmost_sample + current_page_samples();
 	switch (_grid_type) { //instead maybe we can use the marks of the ruler(s)  ToDo
 	case GridTypeSmpte:
-		 metric_get_timecode (smpte_marks, _leftmost_sample, rightmost_sample, 12);
+		 metric_get_timecode (grid_marks, _leftmost_sample, rightmost_sample, 12);
 	break;
 	case GridTypeSamples:
-		metric_get_samples (smpte_marks, _leftmost_sample, rightmost_sample, 12);
+		metric_get_samples (grid_marks, _leftmost_sample, rightmost_sample, 12);
 	break;
 	case GridTypeMinSec:
-		metric_get_minsec (smpte_marks, _leftmost_sample, rightmost_sample, 12);
+		metric_get_minsec (grid_marks, _leftmost_sample, rightmost_sample, 12);
 	break;
 	}
 */
-	//check SMPTE Grid
-	if ( _grid_type == GridTypeSmpte ) {
-		test = snap_to_smpte_grid (smpte_marks, presnap, direction);
-		check_best_snap(presnap, test, dist, best);
-	}
 	
 	//check snap-to-marker
 	if ( UIConfiguration::instance().get_snap_to_marks() ) {
@@ -2840,70 +2835,15 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 		check_best_snap(presnap, test, dist, best);
 	}
 	
-	//if SnapToGrid is selected, the user wants to prioritize the music grid
-	//in this case we should reset the best distance, so Grid will prevail
-	if ( pref == SnapToGrid ) {
+	//check Grid
+	if ( UIConfiguration::instance().get_snap_to_grid() ) {
+
+		//if SnapToGrid is selected, the user wants to prioritize the music grid
+		//in this case we should reset the best distance, so Grid will prevail
 		dist = max_samplepos;
-	}
 
-	//now check snap-to-music (quantized) 
-	MusicSample tst(max_samplepos,0);
-	switch (_grid_type) {
-
-		case GridTypeBar:
-			tst = _session->tempo_map().round_to_bar (presnap, direction);
-			break;
-		case GridTypeBeat:
-			tst = _session->tempo_map().round_to_beat (presnap, direction);
-			break;
-		case GridTypeBeatDiv32:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 32, direction);
-			break;
-		case GridTypeBeatDiv28:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 28, direction);
-			break;
-		case GridTypeBeatDiv24:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 24, direction);
-			break;
-		case GridTypeBeatDiv20:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 20, direction);
-			break;
-		case GridTypeBeatDiv16:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 16, direction);
-			break;
-		case GridTypeBeatDiv14:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 14, direction);
-			break;
-		case GridTypeBeatDiv12:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 12, direction);
-			break;
-		case GridTypeBeatDiv10:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 10, direction);
-			break;
-		case GridTypeBeatDiv8:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 8, direction);
-			break;
-		case GridTypeBeatDiv7:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 7, direction);
-			break;
-		case GridTypeBeatDiv6:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 6, direction);
-			break;
-		case GridTypeBeatDiv5:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 5, direction);
-			break;
-		case GridTypeBeatDiv4:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 4, direction);
-			break;
-		case GridTypeBeatDiv3:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 3, direction);
-			break;
-		case GridTypeBeatDiv2:
-			tst = _session->tempo_map().round_to_quarter_note_subdivision (presnap, 2, direction);
-			break;
-	}
-	if (_grid_type != GridTypeNone) {
-		check_best_snap(presnap, tst.sample, dist, best);
+		test = snap_to_smpte_grid (grid_marks, presnap, direction);
+		check_best_snap(presnap, test, dist, best);
 	}
 	
 	//now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
@@ -3905,7 +3845,7 @@ void
 Editor::update_grid ()
 {
 	if ( grid_musical() ) {
-		hide_smpte_lines ();
+		hide_grid_lines ();
 		std::vector<TempoMap::BBTPoint> grid;
 		if (bbt_ruler_scale != bbt_show_many) {
 			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
@@ -3913,10 +3853,10 @@ Editor::update_grid ()
 		maybe_draw_tempo_lines (grid);
 	} else if ( grid_nonmusical() ) {
 		hide_tempo_lines ();
-		maybe_draw_smpte_lines ();
+		maybe_draw_grid_lines ();
 	} else {
 		hide_tempo_lines ();
-		hide_smpte_lines ();
+		hide_grid_lines ();
 	}
 }
 
@@ -4485,7 +4425,7 @@ Editor::on_samples_per_pixel_changed ()
 	if ( grid_musical() && tempo_lines) {
 		tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
 	} else if ( _grid_type == GridTypeSmpte ) {
-		maybe_draw_smpte_lines ();
+		maybe_draw_grid_lines ();
 	}
 	
 	bool const showing_time_selection = selection->time.length() > 0;
@@ -5947,9 +5887,9 @@ Editor::session_going_away ()
 	delete tempo_lines;
 	tempo_lines = 0;
 
-	hide_smpte_lines ();
-	delete smpte_lines;
-	smpte_lines = 0;
+	hide_grid_lines ();
+	delete grid_lines;
+	grid_lines = 0;
 
 	stop_step_editing ();
 

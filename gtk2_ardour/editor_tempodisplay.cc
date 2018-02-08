@@ -48,7 +48,7 @@
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "time_axis_view.h"
-#include "smpte_lines.h"
+#include "grid_lines.h"
 #include "tempo_lines.h"
 #include "ui_config.h"
 
@@ -395,42 +395,42 @@ Editor::maybe_draw_tempo_lines (std::vector<ARDOUR::TempoMap::BBTPoint>& grid)
 }
 
 void
-Editor::hide_smpte_lines ()
+Editor::hide_grid_lines ()
 {
-	if (smpte_lines) {
-		smpte_lines->hide();
+	if (grid_lines) {
+		grid_lines->hide();
 	}
 }
 
 void
-Editor::maybe_draw_smpte_lines ()
+Editor::maybe_draw_grid_lines ()
 {
 	if (_session == 0 || ( !grid_nonmusical() )) {
 		return;
 	}
 
-	if (smpte_lines == 0) {
-		smpte_lines = new SmpteLines (time_line_group, ArdourCanvas::LineSet::Vertical);
+	if (grid_lines == 0) {
+		grid_lines = new GridLines (time_line_group, ArdourCanvas::LineSet::Vertical);
 	}
 
-	smpte_marks.clear();
+	grid_marks.clear();
 	samplepos_t rightmost_sample = _leftmost_sample + current_page_samples();
 
 	switch (_grid_type) {
 	case GridTypeSmpte:
-		 metric_get_timecode (smpte_marks, _leftmost_sample, rightmost_sample, 12);
+		 metric_get_timecode (grid_marks, _leftmost_sample, rightmost_sample, 12);
 	break;
 	case GridTypeSamples:
-		metric_get_samples (smpte_marks, _leftmost_sample, rightmost_sample, 12);
+		metric_get_samples (grid_marks, _leftmost_sample, rightmost_sample, 12);
 	break;
 	case GridTypeMinSec:
-		metric_get_minsec (smpte_marks, _leftmost_sample, rightmost_sample, 12);
+		metric_get_minsec (grid_marks, _leftmost_sample, rightmost_sample, 12);
 	break;
 	}
 	//ToDo:  maybe ditch complicated tempo_lines and treat bbt the same way????		_editor->metric_get_bbt (marks, lower, upper, maxchars);
 
-	smpte_lines->draw ( smpte_marks );
-	smpte_lines->show();
+	grid_lines->draw ( grid_marks );
+	grid_lines->show();
 }
 
 void
