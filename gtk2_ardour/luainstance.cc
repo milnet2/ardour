@@ -837,7 +837,6 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("grid_type", &PublicEditor::grid_type)
 		.addFunction ("snap_mode", &PublicEditor::snap_mode)
 		.addFunction ("set_snap_mode", &PublicEditor::set_snap_mode)
-		.addFunction ("set_snap_threshold", &PublicEditor::set_snap_threshold)
 
 		.addFunction ("undo", &PublicEditor::undo)
 		.addFunction ("redo", &PublicEditor::redo)

@@ -49,7 +49,6 @@
 #include "gui_thread.h"
 #include "time_axis_view.h"
 #include "grid_lines.h"
-#include "tempo_lines.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
@@ -181,10 +180,6 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 
 	ENSURE_GUI_THREAD (*this, &Editor::tempo_map_changed, ignored);
 
-//	if (tempo_lines) {
-//		tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
-//	}
-
 	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
@@ -201,10 +196,6 @@ Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 	}
 
 	ENSURE_GUI_THREAD (*this, &Editor::tempo_map_changed);
-
-//	if (tempo_lines) {
-//		tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
-//	}
 
 	TempoSection* prev_ts = 0;
 	double max_tempo = 0.0;
@@ -363,30 +354,6 @@ Editor::compute_current_bbt_points (std::vector<TempoMap::BBTPoint>& grid, sampl
 		_session->tempo_map().get_grid (grid, max (_session->tempo_map().sample_at_beat (lower_beat), (samplepos_t) 0), rightmost, 128);
 		break;
 	}
-}
-
-void
-Editor::hide_tempo_lines ()
-{
-	if (tempo_lines) {
-		tempo_lines->hide();
-	}
-}
-
-void
-Editor::maybe_draw_tempo_lines (std::vector<ARDOUR::TempoMap::BBTPoint>& grid)
-{
-	if (_session == 0 || !grid_musical() || distance (grid.begin(), grid.end()) == 0) {
-		return;
-	}
-
-	if (tempo_lines == 0) {
-		tempo_lines = new TempoLines (time_line_group, ArdourCanvas::LineSet::Vertical, new BeatsSamplesConverter (_session->tempo_map(), _session->tempo_map().music_origin()));
-	}
-
-//	const unsigned divisions = get_grid_beat_divisions(_leftmost_sample);
-//	tempo_lines->draw (grid, divisions, _leftmost_sample, _session->sample_rate());  //deprecated
-//	tempo_lines->show();
 }
 
 void

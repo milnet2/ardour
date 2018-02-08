@@ -143,11 +143,6 @@ public:
 	 */
 	virtual void set_snap_mode (Editing::SnapMode m) = 0;
 
-	/** Set the snap threshold.
-	 * @param t Snap threshold in `units'.
-	 */
-	virtual void set_snap_threshold (double t) = 0;
-
 	/**
 	 * Snap a value according to the current snap setting.
 	 * ensure_snap overrides SnapOff and magnetic snap

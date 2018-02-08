@@ -134,7 +134,6 @@
 #include "simple_progress_dialog.h"
 #include "sfdb_ui.h"
 #include "grid_lines.h"
-#include "tempo_lines.h"
 #include "time_axis_view.h"
 #include "time_info_box.h"
 #include "timers.h"
@@ -354,7 +353,6 @@ Editor::Editor ()
 	, pending_keyboard_selection_start (0)
 	, _grid_type (GridTypeBeat)
 	, _snap_mode (SnapOff)
-	, snap_threshold (25.0)
 	, ignore_gui_changes (false)
 	, _drags (new DragManager (this))
 	, lock_dialog (0)
@@ -365,7 +363,6 @@ Editor::Editor ()
 	, _stationary_playhead (false)
 	, _maximised (false)
 	, grid_lines (0)
-	, tempo_lines (0)
 	, global_rect_group (0)
 	, time_line_group (0)
 	, tempo_marker_menu (0)
@@ -2837,7 +2834,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 	}
 	
 	//check Grid
-	if ( UIConfiguration::instance().get_snap_to_grid() ) {
+	if (UIConfiguration::instance().get_snap_to_grid()) {
 
 		//if SnapToGrid is selected, the user wants to prioritize the music grid
 		//in this case we should reset the best distance, so Grid will prevail
@@ -2850,15 +2847,16 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 	//now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
 	//this also helps to avoid snapping to somewhere the user can't see.  ( i.e.:  I clicked on a region and it disappeared!! )
 	//ToDo:  perhaps this should only occur if EditPointMouse?
+	int snap_threshold_s = pixel_to_sample(UIConfiguration::instance().get_snap_threshold());
 	if (ensure_snap) {
 		start.set (best, 0);
 		return;
 	} else if (presnap > best) {
-		if (presnap > (best+ pixel_to_sample(snap_threshold))) {
+		if (presnap > (best+ snap_threshold_s)) {
 			best = presnap;
 		}
 	} else if (presnap < best) {
-		if (presnap < (best - pixel_to_sample(snap_threshold))) {
+		if (presnap < (best - snap_threshold_s)) {
 			 best = presnap;
 		}
 	}
@@ -3845,6 +3843,7 @@ Editor::cycle_zoom_focus ()
 void
 Editor::update_grid ()
 {
+cout << "update_grid" << endl;
 	if ( grid_musical() ) {
 		std::vector<TempoMap::BBTPoint> grid;
 		if (bbt_ruler_scale != bbt_show_many) {
@@ -3852,10 +3851,8 @@ Editor::update_grid ()
 		}
 		maybe_draw_grid_lines ();
 	} else if ( grid_nonmusical() ) {
-//		hide_tempo_lines ();
 		maybe_draw_grid_lines ();
 	} else {
-//		hide_tempo_lines ();
 		hide_grid_lines ();
 	}
 }
@@ -4422,12 +4419,6 @@ Editor::set_samples_per_pixel (samplecnt_t spp)
 void
 Editor::on_samples_per_pixel_changed ()
 {
-	if ( grid_musical() && tempo_lines) {
-		tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
-	} else if ( _grid_type == GridTypeSmpte ) {
-		maybe_draw_grid_lines ();
-	}
-	
 	bool const showing_time_selection = selection->time.length() > 0;
 
 	if (showing_time_selection && selection->time.start () != selection->time.end_sample ()) {
@@ -5751,7 +5742,9 @@ Editor::super_rapid_screen_update ()
 	//snapped cursor stuff ( the snapped_cursor shows where an operation is going to occur )
 	bool ignored;
 	MusicSample where (sample, 0);
-	if ( _edit_point == EditAtPlayhead && !_dragging_playhead) {
+	if ( !UIConfiguration::instance().get_show_snapped_cursor() ) {
+		snapped_cursor->hide ();
+	} else if ( _edit_point == EditAtPlayhead && !_dragging_playhead) {
 		snap_to (where);  // can't use snap_to_with_modifier?
 		snapped_cursor->set_position (where.sample);
 		snapped_cursor->show ();
@@ -5882,10 +5875,6 @@ Editor::session_going_away ()
 	/* clear tempo/meter rulers */
 	remove_metric_marks ();
 	clear_marker_display ();
-
-	hide_tempo_lines ();
-	delete tempo_lines;
-	tempo_lines = 0;
 
 	hide_grid_lines ();
 	delete grid_lines;

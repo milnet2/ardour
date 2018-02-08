@@ -166,7 +166,6 @@ public:
 	void prev_grid_choice ();
 	void set_grid_to (Editing::GridType);
 	void set_snap_mode (Editing::SnapMode);
-	void set_snap_threshold (double pixel_distance) {snap_threshold = pixel_distance;}
 
 	Editing::SnapMode  snap_mode () const;
 	Editing::GridType  grid_type () const;
@@ -1528,9 +1527,6 @@ private:
 	Editing::GridType _grid_type;
 	Editing::SnapMode _snap_mode;
 
-	/// Snap threshold in pixels
-	double snap_threshold;
-
 	bool ignore_gui_changes;
 
 	DragManager* _drags;
@@ -1676,19 +1672,13 @@ private:
 	std::vector<ArdourCanvas::Ruler::Mark> grid_marks;
 	GridLines* grid_lines;
 
-	TempoLines* tempo_lines;
-
 	ArdourCanvas::Container* global_rect_group;
 	ArdourCanvas::Container* time_line_group;
 
 	void hide_grid_lines ();
 	void maybe_draw_grid_lines ();
 
-	void hide_tempo_lines ();
-	void maybe_draw_tempo_lines (std::vector<ARDOUR::TempoMap::BBTPoint>&);
-
 	void new_tempo_section ();
-
 
 	void remove_tempo_marker (ArdourCanvas::Item*);
 	void remove_meter_marker (ArdourCanvas::Item*);
