@@ -37,6 +37,8 @@ GRIDTYPE(GridTypeBeatDiv7)  //Septuplet eighths
 GRIDTYPE(GridTypeBeatDiv14)
 GRIDTYPE(GridTypeBeatDiv28)
 GRIDTYPE(GridTypeSmpte)
+GRIDTYPE(GridTypeMinSec)
+GRIDTYPE(GridTypeSamples)
 
 
 /* Changing this order will break the menu */

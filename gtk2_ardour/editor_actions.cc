@@ -577,7 +577,9 @@ Editor::register_actions ()
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-thirds"),         grid_type_strings[(int)GridTypeBeatDiv3].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv3)));
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-halves"),         grid_type_strings[(int)GridTypeBeatDiv2].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv2)));
 
-	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-smpte"),         grid_type_strings[(int)GridTypeSmpte].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeSmpte)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-smpte"),         grid_type_strings[(int)GridTypeSmpte].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeSmpte)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-minsec"),         grid_type_strings[(int)GridTypeMinSec].c_str(),    (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeMinSec)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-samples"),         grid_type_strings[(int)GridTypeSamples].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeSamples)));
 
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeat)));
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBar)));
@@ -1084,14 +1086,20 @@ Editor::grid_type_action (GridType type)
 	case Editing::GridTypeBeat:
 		action = "grid-type-beat";
 		break;
-	case Editing::GridTypeSmpte:
-		action = "grid-type-smpte";
-		break;
 	case Editing::GridTypeBar:
 		action = "grid-type-bar";
 		break;
 	case Editing::GridTypeNone:
 		action = "grid-type-none";
+		break;
+	case Editing::GridTypeSmpte:
+		action = "grid-type-smpte";
+		break;
+	case Editing::GridTypeSamples:
+		action = "grid-type-samples";
+		break;
+	case Editing::GridTypeMinSec:
+		action = "grid-type-minsec";
 		break;
 	default:
 		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible snap-to type", (int) type) << endmsg;

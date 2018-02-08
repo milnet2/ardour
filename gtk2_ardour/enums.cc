@@ -113,6 +113,8 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (GridTypeBeatDiv14);
 	REGISTER_ENUM (GridTypeBeatDiv28);
 	REGISTER_ENUM (GridTypeSmpte);
+	REGISTER_ENUM (GridTypeMinSec);
+	REGISTER_ENUM (GridTypeSamples);
 	REGISTER (grid_type);
 
 	REGISTER_ENUM (SnapOff);

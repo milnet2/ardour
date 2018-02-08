@@ -190,8 +190,8 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 	if (bbt_ruler_scale != bbt_show_many) {
 		compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
 	}
-	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 	maybe_draw_tempo_lines (grid);
+	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 	update_tempo_based_rulers ();
 }
 
@@ -281,15 +281,14 @@ Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 		}
 	}
 
+	update_tempo_based_rulers ();
+
 	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 	std::vector<TempoMap::BBTPoint> grid;
-
 	if (bbt_ruler_scale != bbt_show_many) {
 		compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
 	}
-
 	maybe_draw_tempo_lines (grid);
-	update_tempo_based_rulers ();
 }
 
 void
@@ -301,20 +300,10 @@ Editor::redisplay_grid (bool immediate_redraw)
 
 	if (immediate_redraw) {
 
-//only recalculate bbt_ruler_scale on a zoom or snap-change; not every redraw; if a case is found where this is necessary, uncomment this line.
-//		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
-
-		std::vector<TempoMap::BBTPoint> grid;
-
-		if (bbt_ruler_scale != bbt_show_many) {
-			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
-		}
-
-		maybe_draw_tempo_lines (grid);
-		maybe_draw_smpte_lines ();
-		
 		update_tempo_based_rulers ();
 
+		update_grid();
+		
 	} else {
 		Glib::signal_idle().connect (sigc::bind_return (sigc::bind (sigc::mem_fun (*this, &Editor::redisplay_grid), true), false));
 	}
@@ -416,7 +405,7 @@ Editor::hide_smpte_lines ()
 void
 Editor::maybe_draw_smpte_lines ()
 {
-	if (_session == 0 || (_grid_type != GridTypeSmpte) ) {
+	if (_session == 0 || ( !grid_nonmusical() )) {
 		return;
 	}
 
@@ -426,7 +415,19 @@ Editor::maybe_draw_smpte_lines ()
 
 	smpte_marks.clear();
 	samplepos_t rightmost_sample = _leftmost_sample + current_page_samples();
-	metric_get_timecode( smpte_marks, _leftmost_sample, rightmost_sample, 12 );
+
+	switch (_grid_type) {
+	case GridTypeSmpte:
+		 metric_get_timecode (smpte_marks, _leftmost_sample, rightmost_sample, 12);
+	break;
+	case GridTypeSamples:
+		metric_get_samples (smpte_marks, _leftmost_sample, rightmost_sample, 12);
+	break;
+	case GridTypeMinSec:
+		metric_get_minsec (smpte_marks, _leftmost_sample, rightmost_sample, 12);
+	break;
+	}
+	//ToDo:  maybe ditch complicated tempo_lines and treat bbt the same way????		_editor->metric_get_bbt (marks, lower, upper, maxchars);
 
 	smpte_lines->draw ( smpte_marks );
 	smpte_lines->show();

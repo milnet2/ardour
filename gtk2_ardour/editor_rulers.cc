@@ -1705,6 +1705,10 @@ Editor::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdoubl
 		lower = 0;
 	}
 
+	if ( minsec_mark_interval== 0) {  //we got here too early; divide-by-zero imminent
+		return;
+	}
+	
 	pos = (((1000 * (samplepos_t) floor(lower)) + (minsec_mark_interval/2))/minsec_mark_interval) * minsec_mark_interval;
 
 	switch (minsec_ruler_scale) {

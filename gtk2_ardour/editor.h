@@ -272,7 +272,7 @@ public:
 
 	/* tempo */
 
-	void update_grid (bool show);
+	void update_grid ();
 
 	/* analysis window */
 
@@ -2194,17 +2194,15 @@ private:
 	void select_next_stripable (bool routes_only = true);
 	void select_prev_stripable (bool routes_only = true);
 
-	samplepos_t snap_to_smpte_grid (samplepos_t           presnap,
-                                    ARDOUR::RoundMode     direction = ARDOUR::RoundNearest);
+	samplepos_t snap_to_smpte_grid (std::vector<ArdourCanvas::Ruler::Mark>  marks, 
+									samplepos_t                             presnap,
+                                    ARDOUR::RoundMode                       direction = ARDOUR::RoundNearest);
 
 	void snap_to_internal (ARDOUR::MusicSample& first,
 	                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
 	                       ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny,
 	                       bool                for_mark  = false,
 	                       bool                ensure_snap = false);
-
-	samplepos_t timecode_snap_to_internal (samplepos_t        presnap,
-	                                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest);
 
 	samplepos_t marker_snap_to_internal (samplepos_t        presnap,
 	                                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest);

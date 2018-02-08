@@ -180,7 +180,9 @@ static const gchar *_grid_type_strings[] = {
 	N_("1/7 (8th septuplet)"),
 	N_("1/14 (16th septuplet)"),
 	N_("1/28 (32nd septuplet)"),
-	N_("TC Secs"),
+	N_("Smpte"),
+	N_("MinSec"),
+	N_("Samples"),
 	0
 };
 
@@ -2149,6 +2151,8 @@ Editor::grid_nonmusical() const
 {
 	switch (_grid_type) {
 	case GridTypeSmpte:
+	case GridTypeSamples:
+	case GridTypeMinSec:
 		return true;
 	default:
 		return false;
@@ -2187,16 +2191,51 @@ Editor::set_grid_to (GridType gt)
 	if (str != grid_type_selector.get_text()) {
 		grid_type_selector.set_text (str);
 	}
+	
+	//show appropriate rulers for this grid setting.  (ToDo:  perhaps make this optional)
+	if ( grid_musical() ) {
+		ruler_tempo_action->set_active(true);
+		ruler_meter_action->set_active(true);
+
+		ruler_bbt_action->set_active(true);
+		ruler_timecode_action->set_active(false);
+		ruler_minsec_action->set_active(false);
+		ruler_samples_action->set_active(false);
+	} else if (_grid_type == GridTypeSmpte ) {
+		ruler_tempo_action->set_active(false);
+		ruler_meter_action->set_active(false);
+
+		ruler_bbt_action->set_active(false);
+		ruler_timecode_action->set_active(true);
+		ruler_minsec_action->set_active(false);
+		ruler_samples_action->set_active(false);
+	} else if (_grid_type == GridTypeMinSec ) {
+		ruler_tempo_action->set_active(false);
+		ruler_meter_action->set_active(false);
+
+		ruler_bbt_action->set_active(false);
+		ruler_timecode_action->set_active(false);
+		ruler_minsec_action->set_active(true);
+		ruler_samples_action->set_active(false);
+	} else if (_grid_type == GridTypeSamples ) {
+		ruler_tempo_action->set_active(false);
+		ruler_meter_action->set_active(false);
+
+		ruler_bbt_action->set_active(false);
+		ruler_timecode_action->set_active(false);
+		ruler_minsec_action->set_active(false);
+		ruler_samples_action->set_active(true);
+	}
 
 	instant_save ();
 	
-	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
-	update_tempo_based_rulers ();
+	if ( grid_musical() ) {
+		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
+		update_tempo_based_rulers ();
+	}
 	
-	update_grid ( gt != GridTypeNone );
-
 	mark_region_boundary_cache_dirty ();
-
+	
 	redisplay_grid (false);
 
 	SnapChanged (); /* EMIT SIGNAL */
@@ -2647,116 +2686,8 @@ check_best_snap ( samplepos_t presnap, samplepos_t &test, samplepos_t &dist, sam
 	test = max_samplepos; //reset this so it doesn't get accidentally reused
 }
 
-
 samplepos_t
-Editor::timecode_snap_to_internal ( samplepos_t presnap, RoundMode direction )
-{
-	samplepos_t start = presnap;
-	const samplepos_t one_timecode_second = (samplepos_t)(rint(_session->timecode_frames_per_second()) * _session->samples_per_timecode_frame());
-	samplepos_t one_timecode_minute = (samplepos_t)(rint(_session->timecode_frames_per_second()) * _session->samples_per_timecode_frame() * 60);
-
-	samplepos_t test = max_samplepos;  //for each snap, we'll use this value
-	samplepos_t dist = max_samplepos;  //this records the distance of the best snap result we've found so far
-	samplepos_t best = max_samplepos;  //this records the best snap-result we've found so far
-
-	if (UIConfiguration::instance().get_snap_to_tc_frames()) {
-		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    fmod((double)start, (double)_session->samples_per_timecode_frame()) == 0) {
-			/* start is already on a whole timecode frame, do nothing */
-		} else if (((direction == 0) && (fmod((double)start, (double)_session->samples_per_timecode_frame()) > (_session->samples_per_timecode_frame() / 2))) || (direction > 0)) {
-			test = (samplepos_t) (ceil ((double) start / _session->samples_per_timecode_frame()) * _session->samples_per_timecode_frame());
-			check_best_snap(presnap, test, dist, best);
-		} else {
-			test = (samplepos_t) (floor ((double) start / _session->samples_per_timecode_frame()) *  _session->samples_per_timecode_frame());
-			check_best_snap(presnap, test, dist, best);
-		}
-	}
-
-	if (UIConfiguration::instance().get_snap_to_tc_seconds()) {
-		if (_session->config.get_timecode_offset_negative()) {
-			start += _session->config.get_timecode_offset ();
-		} else {
-			start -= _session->config.get_timecode_offset ();
-		}
-		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    (start % one_timecode_second == 0)) {
-			/* start is already on a whole second, do nothing */
-		} else if (((direction == 0) && (start % one_timecode_second > one_timecode_second / 2)) || direction > 0) {
-			test = (samplepos_t) ceil ((double) start / one_timecode_second) * one_timecode_second;
-			check_best_snap(presnap, test, dist, best);
-		} else {
-			test = (samplepos_t) floor ((double) start / one_timecode_second) * one_timecode_second;
-			check_best_snap(presnap, test, dist, best);
-		}
-		if (_session->config.get_timecode_offset_negative()) {
-			best -= _session->config.get_timecode_offset ();
-		} else {
-			best += _session->config.get_timecode_offset ();
-		}
-	}
-
-	if ( UIConfiguration::instance().get_snap_to_tc_minutes() ) {
-		if (_session->config.get_timecode_offset_negative()) {
-			start += _session->config.get_timecode_offset ();
-		} else {
-			start -= _session->config.get_timecode_offset ();
-		}
-		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    (start % one_timecode_minute == 0)) {
-			/* start is already on a whole minute, do nothing */
-		} else if (((direction == 0) && (start % one_timecode_minute > one_timecode_minute / 2)) || direction > 0) {
-			test = (samplepos_t) ceil ((double) start / one_timecode_minute) * one_timecode_minute;
-			check_best_snap(presnap, test, dist, best);
-		} else {
-			test = (samplepos_t) floor ((double) start / one_timecode_minute) * one_timecode_minute;
-			check_best_snap(presnap, test, dist, best);
-		}
-		if (_session->config.get_timecode_offset_negative()) {
-			best -= _session->config.get_timecode_offset ();
-		} else {
-			best += _session->config.get_timecode_offset ();
-		}
-	}
-
-
-	return best;
-}
-
-samplepos_t
-Editor::marker_snap_to_internal (samplepos_t presnap, RoundMode direction)
-{
-	samplepos_t before;
-	samplepos_t after;
-	samplepos_t test;
-
-	_session->locations()->marks_either_side (presnap, before, after);
-
-	if (before == max_samplepos && after == max_samplepos) {
-		/* No marks to snap to, so just don't snap */
-		return presnap;
-	} else if (before == max_samplepos) {
-		test = after;
-	} else if (after == max_samplepos) {
-		test = before;
-	} else  {
-		if ((direction == RoundUpMaybe || direction == RoundUpAlways))
-			test = after;
-		else if ((direction == RoundDownMaybe || direction == RoundDownAlways))
-			test = before;
-		else if (direction ==  0 ) {
-			if ((presnap - before) < (after - presnap)) {
-				test = before;
-			} else {
-				test = after;
-			}
-		}
-	}
-	
-	return test;
-}
-
-samplepos_t
-Editor::snap_to_smpte_grid (samplepos_t presnap, RoundMode direction)
+Editor::snap_to_smpte_grid (vector<ArdourCanvas::Ruler::Mark> marks, samplepos_t presnap, RoundMode direction)
 {
 	samplepos_t before;
 	samplepos_t after;
@@ -2765,19 +2696,19 @@ Editor::snap_to_smpte_grid (samplepos_t presnap, RoundMode direction)
 	before = after = max_samplepos;
 
 	//get marks to either side of presnap
-	vector<ArdourCanvas::Ruler::Mark>::const_iterator m = smpte_marks.begin();
-	while ( m != smpte_marks.end() && (m->position < presnap) ) {
+	vector<ArdourCanvas::Ruler::Mark>::const_iterator m = marks.begin();
+	while ( m != marks.end() && (m->position < presnap) ) {
 		++m;
 	}
 	
-	if (m == smpte_marks.end ()) {
+	if (m == marks.end ()) {
 		/* ran out of marks */
 		before = smpte_marks.back().position;
 	}
 
 	after = m->position;
 
-	if (m != smpte_marks.begin ()) {
+	if (m != marks.begin ()) {
 		--m;
 		before = m->position;
 	}
@@ -2806,20 +2737,65 @@ Editor::snap_to_smpte_grid (samplepos_t presnap, RoundMode direction)
 	return test;
 }
 
+samplepos_t
+Editor::marker_snap_to_internal (samplepos_t presnap, RoundMode direction)
+{
+	samplepos_t before;
+	samplepos_t after;
+	samplepos_t test;
+
+	_session->locations()->marks_either_side (presnap, before, after);
+
+	if (before == max_samplepos && after == max_samplepos) {
+		/* No marks to snap to, so just don't snap */
+		return presnap;
+	} else if (before == max_samplepos) {
+		test = after;
+	} else if (after == max_samplepos) {
+		test = before;
+	} else  {
+		if ((direction == RoundUpMaybe || direction == RoundUpAlways)) {
+			test = after;
+		} else if ((direction == RoundDownMaybe || direction == RoundDownAlways)) {
+			test = before;
+		} else if (direction ==  0 ) {
+			if ((presnap - before) < (after - presnap)) {
+				test = before;
+			} else {
+				test = after;
+			}
+		}
+	}
+
+	return test;
+}
+
 void
 Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref, bool for_mark, bool ensure_snap)
 {
-	const samplepos_t one_second = _session->sample_rate();
-	const samplepos_t one_minute = _session->sample_rate() * 60;
 	const samplepos_t presnap = start.sample;
 
 	samplepos_t test = max_samplepos;  //for each snap, we'll use this value
 	samplepos_t dist = max_samplepos;  //this records the distance of the best snap result we've found so far
 	samplepos_t best = max_samplepos;  //this records the best snap-result we've found so far
 	
+/*	smpte_marks.clear();
+	samplepos_t rightmost_sample = _leftmost_sample + current_page_samples();
+	switch (_grid_type) { //instead maybe we can use the marks of the ruler(s)  ToDo
+	case GridTypeSmpte:
+		 metric_get_timecode (smpte_marks, _leftmost_sample, rightmost_sample, 12);
+	break;
+	case GridTypeSamples:
+		metric_get_samples (smpte_marks, _leftmost_sample, rightmost_sample, 12);
+	break;
+	case GridTypeMinSec:
+		metric_get_minsec (smpte_marks, _leftmost_sample, rightmost_sample, 12);
+	break;
+	}
+*/
 	//check SMPTE Grid
 	if ( _grid_type == GridTypeSmpte ) {
-		test = snap_to_smpte_grid (presnap, direction);
+		test = snap_to_smpte_grid (smpte_marks, presnap, direction);
 		check_best_snap(presnap, test, dist, best);
 	}
 	
@@ -2831,47 +2807,6 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 
 		test = marker_snap_to_internal ( presnap, direction );
 		check_best_snap(presnap, test, dist, best);
-	}
-
-	//check snap-to-cd
-	if ( UIConfiguration::instance().get_snap_to_cd_frames() ) {
-		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    test % (one_second/75) == 0) {
-			/* start is already on a whole CD sample, do nothing */
-		} else if (((direction == 0) && (presnap % (one_second/75) > (one_second/75) / 2)) || (direction > 0)) {
-			test = (samplepos_t) ceil ((double) presnap/ (one_second / 75)) * (one_second / 75);
-		} else {
-			test = (samplepos_t) floor ((double) presnap / (one_second / 75)) * (one_second / 75);
-		}
-		check_best_snap(presnap, test, dist, best);
-	}
-
-	//check snap-to-seconds
-	if ( UIConfiguration::instance().get_snap_to_seconds() ) {
-		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    presnap % one_second == 0) {
-			/* start is already on a whole second, do nothing */
-		} else if (((direction == 0) && (presnap % one_second > one_second / 2)) || (direction > 0)) {
-			test = (samplepos_t) ceil ((double) presnap / one_second) * one_second;
-			check_best_snap(presnap, test, dist, best);
-		} else {
-			test = (samplepos_t) floor ((double)presnap / one_second) * one_second;
-			check_best_snap(presnap, test, dist, best);
-		}
-	}
-
-	//check snap-to-minutes
-	if ( UIConfiguration::instance().get_snap_to_minutes() ) {
-		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    start.sample % one_minute == 0) {
-			/* start is already on a whole minute, do nothing */
-		} else if (((direction == 0) && (presnap % one_minute > one_minute / 2)) || (direction > 0)) {
-			test = (samplepos_t) ceil ((double) presnap / one_minute) * one_minute;
-			check_best_snap(presnap, test, dist, best);
-		} else {
-			test = (samplepos_t) floor ((double) presnap / one_minute) * one_minute;
-			check_best_snap(presnap, test, dist, best);
-		}
 	}
 
 	//check snap-to-region-{start/end/sync}
@@ -3282,6 +3217,8 @@ Editor::build_grid_type_menu ()
 
 	grid_type_selector.AddMenuElem(SeparatorElem());
 	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeSmpte], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeSmpte)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeMinSec], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeMinSec)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeSamples], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeSamples)));
 
 	set_size_request_to_display_given_text (grid_type_selector, "No Grid", COMBO_TRIANGLE_WIDTH, 2);
 }
@@ -3970,7 +3907,9 @@ Editor::update_grid ()
 	if ( grid_musical() ) {
 		hide_smpte_lines ();
 		std::vector<TempoMap::BBTPoint> grid;
-		compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
+		if (bbt_ruler_scale != bbt_show_many) {
+			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
+		}
 		maybe_draw_tempo_lines (grid);
 	} else if ( grid_nonmusical() ) {
 		hide_tempo_lines ();
