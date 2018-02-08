@@ -231,7 +231,7 @@ Editor::snap_mode_button_clicked (GdkEventButton* ev)
 		ARDOUR_UI::instance()->show_tabbable (rc_option_editor);
 		rc_option_editor->set_current_page (_("Editor/Snap"));
 	}
-	
+
 	return true;
 }
 
@@ -2105,7 +2105,7 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 		snap_to_with_modifier (where, event);
 		set_snapped_cursor_position (where.sample);
 	}
-		
+
 	//drags might also change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor
 	if (_drags->active ()) {
 	 	return _drags->motion_handler (event, from_autoscroll);

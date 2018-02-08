@@ -1122,7 +1122,6 @@ void
 Editor::next_grid_choice ()
 {
 	switch (_grid_type) {
-		
 	case Editing::GridTypeBeatDiv32:
 		set_grid_to (Editing::GridTypeNone);
 		break;
@@ -1141,45 +1140,9 @@ Editor::next_grid_choice ()
 	case Editing::GridTypeBeat:
 		set_grid_to (Editing::GridTypeBeatDiv2);
 		break;
-
-
-	case Editing::GridTypeBeatDiv24:
-		set_grid_to (Editing::GridTypeBeatDiv3);
-		break;
-	case Editing::GridTypeBeatDiv12:
-		set_grid_to (Editing::GridTypeBeatDiv24);
-		break;
-	case Editing::GridTypeBeatDiv6:
-		set_grid_to (Editing::GridTypeBeatDiv12);
-		break;
-	case Editing::GridTypeBeatDiv3:
-		set_grid_to (Editing::GridTypeBeatDiv6);
-		break;
-
-	case Editing::GridTypeBeatDiv28:
-		set_grid_to (Editing::GridTypeBeatDiv7);
-		break;
-	case Editing::GridTypeBeatDiv14:
-		set_grid_to (Editing::GridTypeBeatDiv24);
-		break;
-	case Editing::GridTypeBeatDiv7:
-		set_grid_to (Editing::GridTypeBeatDiv12);
-		break;
-
-	case Editing::GridTypeBeatDiv20:
-		set_grid_to (Editing::GridTypeBeatDiv5);
-		break;
-	case Editing::GridTypeBeatDiv10:
-		set_grid_to (Editing::GridTypeBeatDiv20);
-		break;
-	case Editing::GridTypeBeatDiv5:
-		set_grid_to (Editing::GridTypeBeatDiv10);
-		break;
-
 	case Editing::GridTypeBar:
 		set_grid_to (Editing::GridTypeBeat);
 		break;
-		
 	case Editing::GridTypeNone:
 		set_grid_to (Editing::GridTypeBar);
 		break;
@@ -1190,7 +1153,6 @@ void
 Editor::prev_grid_choice ()
 {
 	switch (_grid_type) {
-		
 	case Editing::GridTypeBeatDiv32:
 		set_grid_to (Editing::GridTypeBeatDiv16);
 		break;
@@ -1209,45 +1171,9 @@ Editor::prev_grid_choice ()
 	case Editing::GridTypeBeat:
 		set_grid_to (Editing::GridTypeBar);
 		break;
-
-
-	case Editing::GridTypeBeatDiv24:
-		set_grid_to (Editing::GridTypeBeatDiv12);
-		break;
-	case Editing::GridTypeBeatDiv12:
-		set_grid_to (Editing::GridTypeBeatDiv6);
-		break;
-	case Editing::GridTypeBeatDiv6:
-		set_grid_to (Editing::GridTypeBeatDiv3);
-		break;
-	case Editing::GridTypeBeatDiv3:
-		set_grid_to (Editing::GridTypeBeatDiv24);
-		break;
-
-	case Editing::GridTypeBeatDiv28:
-		set_grid_to (Editing::GridTypeBeatDiv14);
-		break;
-	case Editing::GridTypeBeatDiv14:
-		set_grid_to (Editing::GridTypeBeatDiv7);
-		break;
-	case Editing::GridTypeBeatDiv7:
-		set_grid_to (Editing::GridTypeBeatDiv28);
-		break;
-
-	case Editing::GridTypeBeatDiv20:
-		set_grid_to (Editing::GridTypeBeatDiv10);
-		break;
-	case Editing::GridTypeBeatDiv10:
-		set_grid_to (Editing::GridTypeBeatDiv5);
-		break;
-	case Editing::GridTypeBeatDiv5:
-		set_grid_to (Editing::GridTypeBeatDiv20);
-		break;
-
 	case Editing::GridTypeBar:
 		set_grid_to (Editing::GridTypeNone);
 		break;
-		
 	case Editing::GridTypeNone:
 		set_grid_to (Editing::GridTypeBeatDiv32);
 		break;
