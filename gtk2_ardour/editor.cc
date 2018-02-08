@@ -836,7 +836,7 @@ Editor::Editor ()
 	UIConfiguration::instance().map_parameters (pc);
 
 	setup_fade_images ();
-	
+
 	set_grid_to (Editing::GridTypeNone);
 
 	instant_save ();
@@ -2188,7 +2188,7 @@ Editor::set_grid_to (GridType gt)
 	if (str != grid_type_selector.get_text()) {
 		grid_type_selector.set_text (str);
 	}
-	
+
 	//show appropriate rulers for this grid setting.  (ToDo:  perhaps make this optional)
 	//Currently this is 'required' because the RULER calculates the grid_marks which will be used by grid_lines 
 	if ( grid_musical() ) {
@@ -2226,14 +2226,14 @@ Editor::set_grid_to (GridType gt)
 	}
 
 	instant_save ();
-	
+
 	if ( grid_musical() ) {
 		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 		update_tempo_based_rulers ();
 	}
-	
+
 	mark_region_boundary_cache_dirty ();
-	
+
 	redisplay_grid (false);
 
 	SnapChanged (); /* EMIT SIGNAL */
@@ -2680,7 +2680,7 @@ check_best_snap ( samplepos_t presnap, samplepos_t &test, samplepos_t &dist, sam
 		dist = diff;
 		best = test;
 	}
-	
+
 	test = max_samplepos; //reset this so it doesn't get accidentally reused
 }
 
@@ -2698,7 +2698,7 @@ Editor::snap_to_grid (vector<ArdourCanvas::Ruler::Mark> marks, samplepos_t presn
 	while ( m != marks.end() && (m->position < presnap) ) {
 		++m;
 	}
-	
+
 	if (m == marks.end ()) {
 		/* ran out of marks */
 		before = grid_marks.back().position;
@@ -2710,7 +2710,7 @@ Editor::snap_to_grid (vector<ArdourCanvas::Ruler::Mark> marks, samplepos_t presn
 		--m;
 		before = m->position;
 	}
-	
+
 	if (before == max_samplepos && after == max_samplepos) {
 		/* No smpte to snap to, so just don't snap */
 		return presnap;
@@ -2731,7 +2731,7 @@ Editor::snap_to_grid (vector<ArdourCanvas::Ruler::Mark> marks, samplepos_t presn
 			}
 		}
 	}
-	
+
 	return test;
 }
 
@@ -2817,7 +2817,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 
 		check_best_snap(presnap, test, dist, best);
 	}
-	
+
 	//check Grid
 	if (UIConfiguration::instance().get_snap_to_grid() && (_grid_type != GridTypeNone) ) {
 
@@ -2828,7 +2828,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 		test = snap_to_grid (grid_marks, presnap, direction);
 		check_best_snap(presnap, test, dist, best);
 	}
-	
+
 	//now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
 	//this also helps to avoid snapping to somewhere the user can't see.  ( i.e.:  I clicked on a region and it disappeared!! )
 	//ToDo:  perhaps this should only occur if EditPointMouse?
@@ -2845,7 +2845,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 			 best = presnap;
 		}
 	}
-	
+
 	start.set (best, 0);
 }
 
@@ -3169,7 +3169,7 @@ Editor::setup_tooltips ()
 	set_tooltip (tav_expand_button, _("Expand Tracks"));
 	set_tooltip (tav_shrink_button, _("Shrink Tracks"));
 	set_tooltip (visible_tracks_selector, _("Number of visible tracks"));
-	set_tooltip (grid_type_selector, _("Musical Grid (Quantize)"));
+	set_tooltip (grid_type_selector, _("Grid Mode"));
 	set_tooltip (snap_mode_button, _("Snap Mode\n\nRight-click to visit Snap preferences."));
 	set_tooltip (edit_point_selector, _("Edit Point"));
 	set_tooltip (edit_mode_selector, _("Edit Mode"));
@@ -3828,7 +3828,6 @@ Editor::cycle_zoom_focus ()
 void
 Editor::update_grid ()
 {
-cout << "update_grid" << endl;
 	if ( grid_musical() ) {
 		std::vector<TempoMap::BBTPoint> grid;
 		if (bbt_ruler_scale != bbt_show_many) {
@@ -5723,7 +5722,7 @@ Editor::super_rapid_screen_update ()
 	} else {
 		_last_update_time = now;
 	}
-	
+
 	//snapped cursor stuff ( the snapped_cursor shows where an operation is going to occur )
 	bool ignored;
 	MusicSample where (sample, 0);
@@ -5745,7 +5744,7 @@ Editor::super_rapid_screen_update ()
 	} else { //mouse is out of the editing canvas.  hide the snapped_cursor
 		snapped_cursor->hide ();
 	}
-	
+
 	/* There are a few reasons why we might not update the playhead / viewport stuff:
 	 *
 	 * 1.  we don't update things when there's a pending locate request, otherwise
