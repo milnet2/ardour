@@ -1067,6 +1067,21 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		bbt_bar_helper_on = true;
 	}
 
+	//set upper limits on the beat_density based on the user's grid selection
+	if ( _grid_type == GridTypeBar ) {
+		beat_density = fmax (beat_density, 16.01);
+	} else if ( _grid_type == GridTypeBeat ) {
+		beat_density = fmax (beat_density, 4.001);
+	}  else if ( _grid_type == GridTypeBeatDiv4) {
+		beat_density = fmax (beat_density, 2.001);
+	} else if ( _grid_type == GridTypeBeatDiv8) {
+		beat_density = fmax (beat_density, 1.001);
+	} else if ( _grid_type == GridTypeBeatDiv16) {
+		beat_density = fmax (beat_density, 0.2501);
+	} else if ( _grid_type == GridTypeBeatDiv32) {
+		beat_density = fmax (beat_density, 0.12501);
+	}
+
 	if (beat_density > 8192) {
 		bbt_ruler_scale = bbt_show_many;
 	} else if (beat_density > 1024) {
@@ -1076,16 +1091,14 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	} else if (beat_density > 128) {
 		bbt_ruler_scale = bbt_show_4;
 	} else if (beat_density > 16) {
-		bbt_ruler_scale =  bbt_show_1;
-	} else if (beat_density > 2) {
+		bbt_ruler_scale = bbt_show_1;
+	} else if (beat_density > 4) {
 		bbt_ruler_scale =  bbt_show_beats;
-	} else  if (beat_density > 0.5) {
+	} else  if (beat_density > 1) {
 		bbt_ruler_scale =  bbt_show_ticks;
-	} else {
+	} else  if (beat_density > 0.25) {
 		bbt_ruler_scale =  bbt_show_ticks_detail;
-	}
-
-	if ((bbt_ruler_scale == bbt_show_ticks_detail) && beats < 3) {
+	} else {
 		bbt_ruler_scale =  bbt_show_ticks_super_detail;
 	}
 }
