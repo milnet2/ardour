@@ -2193,6 +2193,7 @@ Editor::set_grid_to (GridType gt)
 	}
 	
 	//show appropriate rulers for this grid setting.  (ToDo:  perhaps make this optional)
+	//Currently this is 'required' because the RULER calculates the grid_marks which will be used by grid_lines 
 	if ( grid_musical() ) {
 		ruler_tempo_action->set_active(true);
 		ruler_meter_action->set_active(true);
@@ -3845,17 +3846,16 @@ void
 Editor::update_grid ()
 {
 	if ( grid_musical() ) {
-		hide_grid_lines ();
 		std::vector<TempoMap::BBTPoint> grid;
 		if (bbt_ruler_scale != bbt_show_many) {
 			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
 		}
-		maybe_draw_tempo_lines (grid);
+		maybe_draw_grid_lines ();
 	} else if ( grid_nonmusical() ) {
-		hide_tempo_lines ();
+//		hide_tempo_lines ();
 		maybe_draw_grid_lines ();
 	} else {
-		hide_tempo_lines ();
+//		hide_tempo_lines ();
 		hide_grid_lines ();
 	}
 }

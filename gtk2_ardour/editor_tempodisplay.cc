@@ -181,18 +181,16 @@ Editor::tempo_map_changed (const PropertyChange& /*ignored*/)
 
 	ENSURE_GUI_THREAD (*this, &Editor::tempo_map_changed, ignored);
 
-	if (tempo_lines) {
-		tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
-	}
+//	if (tempo_lines) {
+//		tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
+//	}
 
 	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
-	std::vector<TempoMap::BBTPoint> grid;
-	if (bbt_ruler_scale != bbt_show_many) {
-		compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
-	}
-	maybe_draw_tempo_lines (grid);
+
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 	update_tempo_based_rulers ();
+
+	maybe_draw_grid_lines ();
 }
 
 void
@@ -204,9 +202,9 @@ Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 
 	ENSURE_GUI_THREAD (*this, &Editor::tempo_map_changed);
 
-	if (tempo_lines) {
-		tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
-	}
+//	if (tempo_lines) {
+//		tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
+//	}
 
 	TempoSection* prev_ts = 0;
 	double max_tempo = 0.0;
@@ -281,14 +279,11 @@ Editor::tempometric_position_changed (const PropertyChange& /*ignored*/)
 		}
 	}
 
+	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
+
 	update_tempo_based_rulers ();
 
-	compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
-	std::vector<TempoMap::BBTPoint> grid;
-	if (bbt_ruler_scale != bbt_show_many) {
-		compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
-	}
-	maybe_draw_tempo_lines (grid);
+	maybe_draw_grid_lines ();
 }
 
 void
@@ -389,9 +384,9 @@ Editor::maybe_draw_tempo_lines (std::vector<ARDOUR::TempoMap::BBTPoint>& grid)
 		tempo_lines = new TempoLines (time_line_group, ArdourCanvas::LineSet::Vertical, new BeatsSamplesConverter (_session->tempo_map(), _session->tempo_map().music_origin()));
 	}
 
-	const unsigned divisions = get_grid_beat_divisions(_leftmost_sample);
-	tempo_lines->draw (grid, divisions, _leftmost_sample, _session->sample_rate());
-	tempo_lines->show();
+//	const unsigned divisions = get_grid_beat_divisions(_leftmost_sample);
+//	tempo_lines->draw (grid, divisions, _leftmost_sample, _session->sample_rate());  //deprecated
+//	tempo_lines->show();
 }
 
 void
@@ -405,7 +400,7 @@ Editor::hide_grid_lines ()
 void
 Editor::maybe_draw_grid_lines ()
 {
-	if (_session == 0 || ( !grid_nonmusical() )) {
+	if ( _session == 0 ) {
 		return;
 	}
 
@@ -416,18 +411,15 @@ Editor::maybe_draw_grid_lines ()
 	grid_marks.clear();
 	samplepos_t rightmost_sample = _leftmost_sample + current_page_samples();
 
-	switch (_grid_type) {
-	case GridTypeSmpte:
+	if ( grid_musical() ) {
+		 metric_get_bbt (grid_marks, _leftmost_sample, rightmost_sample, 12);
+	} else if (_grid_type== GridTypeSmpte) {
 		 metric_get_timecode (grid_marks, _leftmost_sample, rightmost_sample, 12);
-	break;
-	case GridTypeSamples:
+	} else if (_grid_type == GridTypeSamples) {
 		metric_get_samples (grid_marks, _leftmost_sample, rightmost_sample, 12);
-	break;
-	case GridTypeMinSec:
+	} else if (_grid_type == GridTypeMinSec) {
 		metric_get_minsec (grid_marks, _leftmost_sample, rightmost_sample, 12);
-	break;
 	}
-	//ToDo:  maybe ditch complicated tempo_lines and treat bbt the same way????		_editor->metric_get_bbt (marks, lower, upper, maxchars);
 
 	grid_lines->draw ( grid_marks );
 	grid_lines->show();
