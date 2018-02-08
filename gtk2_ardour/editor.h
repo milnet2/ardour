@@ -2184,8 +2184,8 @@ private:
 	void select_next_stripable (bool routes_only = true);
 	void select_prev_stripable (bool routes_only = true);
 
-	samplepos_t snap_to_smpte_grid (std::vector<ArdourCanvas::Ruler::Mark>  marks, 
-									samplepos_t                             presnap,
+	samplepos_t snap_to_grid (      std::vector<ArdourCanvas::Ruler::Mark>  marks, 
+                                    samplepos_t                             presnap,
                                     ARDOUR::RoundMode                       direction = ARDOUR::RoundNearest);
 
 	void snap_to_internal (ARDOUR::MusicSample& first,

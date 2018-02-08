@@ -2685,7 +2685,7 @@ check_best_snap ( samplepos_t presnap, samplepos_t &test, samplepos_t &dist, sam
 }
 
 samplepos_t
-Editor::snap_to_smpte_grid (vector<ArdourCanvas::Ruler::Mark> marks, samplepos_t presnap, RoundMode direction)
+Editor::snap_to_grid (vector<ArdourCanvas::Ruler::Mark> marks, samplepos_t presnap, RoundMode direction)
 {
 	samplepos_t before;
 	samplepos_t after;
@@ -2776,22 +2776,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 	samplepos_t test = max_samplepos;  //for each snap, we'll use this value
 	samplepos_t dist = max_samplepos;  //this records the distance of the best snap result we've found so far
 	samplepos_t best = max_samplepos;  //this records the best snap-result we've found so far
-	
-/*	grid_marks.clear();
-	samplepos_t rightmost_sample = _leftmost_sample + current_page_samples();
-	switch (_grid_type) { //instead maybe we can use the marks of the ruler(s)  ToDo
-	case GridTypeSmpte:
-		 metric_get_timecode (grid_marks, _leftmost_sample, rightmost_sample, 12);
-	break;
-	case GridTypeSamples:
-		metric_get_samples (grid_marks, _leftmost_sample, rightmost_sample, 12);
-	break;
-	case GridTypeMinSec:
-		metric_get_minsec (grid_marks, _leftmost_sample, rightmost_sample, 12);
-	break;
-	}
-*/
-	
+
 	//check snap-to-marker
 	if ( UIConfiguration::instance().get_snap_to_marks() ) {
 		if (for_mark) {
@@ -2840,7 +2825,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 		//in this case we should reset the best distance, so Grid will prevail
 		dist = max_samplepos;
 
-		test = snap_to_smpte_grid (grid_marks, presnap, direction);
+		test = snap_to_grid (grid_marks, presnap, direction);
 		check_best_snap(presnap, test, dist, best);
 	}
 	
